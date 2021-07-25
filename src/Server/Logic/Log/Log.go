@@ -27,7 +27,7 @@ func init() {
 }
 
 func initLogger() {
-	logPath := "./server.log"
+	logPath := "./log/server.log"
 	if !exists(logPath) {
 		file, err := os.Create(logPath)
 		defer file.Close()

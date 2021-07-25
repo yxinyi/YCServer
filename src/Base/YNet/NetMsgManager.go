@@ -24,6 +24,9 @@ func Register(msg_id_ uint32, fn_ interface{}) {
 }
 
 func Dispatch(s_ *Session,net_msg_ *NetMsgPack) error {
+	if net_msg_ == nil{
+		return nil
+	}
 	_handler, exists := net_msg_list[net_msg_.M_msg_id]
 	if !exists {
 		return fmt.Errorf("[%v] miss call back ", net_msg_.M_msg_id)
