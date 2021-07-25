@@ -20,7 +20,6 @@ func Register(msg_id_ uint32, fn_ interface{}) {
 		m_fn:     reflect.ValueOf(fn_),
 	}
 	_handler.m_msg_data = reflect.TypeOf(fn_).In(0)
-	fmt.Printf(_handler.m_msg_data.String())
 	net_msg_list[msg_id_] = _handler
 }
 
@@ -30,6 +29,7 @@ func Dispatch(s_ *Session,net_msg_ *NetMsgPack) error {
 		return fmt.Errorf("[%v] miss call back ", net_msg_.M_msg_id)
 	}
 
+	//可以传入不同的解析类型,进行解析
 	_json_data := reflect.New(_handler.m_msg_data).Interface()
 	err := json.Unmarshal(net_msg_.M_msg_data, _json_data)
 	if err != nil {

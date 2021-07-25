@@ -1,6 +1,7 @@
 package YNet
 
 import (
+	"fmt"
 	"net"
 	"sync/atomic"
 )
@@ -33,6 +34,15 @@ func (s *Session) Close() {
 	close(s.m_stop)
 }
 
+func (s *Session) SendJson(msg_id_ uint32, json_ interface{}) error {
+	_msg := NewNetMsgPackWithJson(msg_id_,json_)
+	if _msg == nil {
+		return fmt.Errorf("[Session:SendJson] pack error")
+	}
+	s.Send(NewNetMsgPackWithJson(msg_id_,json_))
+	return nil
+}
+
 func (s *Session) Send(msg_ *NetMsgPack) bool {
 	if s.m_send_msg_chan == nil {
 		return false
@@ -45,7 +55,7 @@ func (s *Session) StartLoop() {
 	go func() {
 		for {
 			select {
-			case pack,ok := <-s.m_send_msg_chan:
+			case pack, ok := <-s.m_send_msg_chan:
 				if !ok {
 					s.m_conn.Close()
 					return
@@ -64,7 +74,7 @@ func (s *Session) StartLoop() {
 			case <-s.m_stop:
 				return
 			default:
-				_msg_pack := NewMessagePack()
+				_msg_pack := NewNetMsgPack()
 				if !_msg_pack.InitFromIO(s.m_conn) {
 					connMsg := NewMessage(NET_SESSION_STATE_CLOSE, s, nil)
 					G_net_msg_chan <- connMsg

@@ -50,7 +50,6 @@ func MainLoop() {
 				if _err !=nil{
 					ylog.Erro("SessionID [%v] msg id [%v] [%v]", msg.M_session.GetUID(), msg.M_uid,_err.Error())
 				}
-				//ylog.Info("SessionID [%v] msg id [%v]", msg.M_session.GetUID(), msg.M_uid)
 			case YNet.NET_SESSION_STATE_CLOSE:
 				YEventBus.Send("UserOffline", msg.M_session)
 			}

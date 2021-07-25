@@ -2,6 +2,7 @@ package YNet
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"io"
 	"unsafe"
 )
@@ -22,10 +23,22 @@ const (
 	const_length_size = int(unsafe.Sizeof(uint32(0)))
 )
 
-func NewMessagePack() *NetMsgPack {
+func NewNetMsgPack() *NetMsgPack {
 	return &NetMsgPack{
 	}
 }
+func NewNetMsgPackWithJson(msg_id_ uint32, json_ interface{}) *NetMsgPack{
+	_msg := NewNetMsgPack()
+	_msg.M_msg_id = msg_id_
+	_byte, _err := json.Marshal(json_)
+	if _err != nil {
+		return nil
+	}
+	_msg.M_msg_length = uint32(len(_byte))
+	_msg.M_msg_data = _byte
+	return _msg
+}
+
 
 func (pack *NetMsgPack) ToByteStream() []byte {
 	_total_length := const_type_size + const_length_size + len(pack.M_msg_data)
