@@ -9,7 +9,7 @@ func roundTestHelp(cent_index_ uint32,round_target_ []uint32)map[uint32]struct{}
 		_sure_arr[_it]= struct{}{}
 	}
 	_round_arr := _mgr.getRoundBlock(cent_index_)
-	for _,_it := range _round_arr{
+	for _it := range _round_arr{
 		_,exists := _sure_arr[_it]
 		if !exists{
 			_sure_arr[_it]= struct{}{}

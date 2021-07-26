@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-var user_manager = NewModuleUserLogin()
+var G_user_manager = NewModuleUserLogin()
 
 func init() {
-	module.Register("UserManager", user_manager)
+	module.Register("UserManager", G_user_manager)
 }
 
 type ModuleUserLogin struct {
@@ -26,16 +26,20 @@ func NewModuleUserLogin() *ModuleUserLogin {
 	}
 }
 
+func (mgr *ModuleUserLogin)FindUser(uid_ uint32) *User{
+	return mgr.m_user_list[uid_]
+}
+
 func userLogin(session_ *YNet.Session) {
 	ylog.Info("User Login [%v] ", session_.GetUID())
 	_user := newUserInfo(session_)
-	user_manager.m_user_list[_user.GetUID()] = _user
+	G_user_manager.m_user_list[_user.GetUID()] = _user
 	YEventBus.Send("UserLoginSuccess", _user)
 }
 
 func userOffline(session_ *YNet.Session) {
 	ylog.Info("User Offline [%v] ", session_.GetUID())
-	_u,exists := user_manager.m_user_list[session_.GetUID()]
+	_u,exists := G_user_manager.m_user_list[session_.GetUID()]
 	if !exists{
 		ylog.Erro("miss user")
 	}

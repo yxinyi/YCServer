@@ -27,15 +27,16 @@ func init() {
 }
 
 func initLogger() {
-	logPath := "./log/server.log"
+	logPath := "./server"
 	if !exists(logPath) {
 		file, err := os.Create(logPath)
 		defer file.Close()
 		if err != nil{
-			fmt.Println("mkdir logPath err!")
+			fmt.Println("mkdir logPath err! [%v]",err.Error())
 			return
 		}
 	}
+
 	encoder := initEncoder()
 
 	// 想要将日常文件区分开来，可以实现多个日志等级接口

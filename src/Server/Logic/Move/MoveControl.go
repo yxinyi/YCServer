@@ -11,6 +11,7 @@ type MoveControl struct {
 	M_tar            YMsg.PositionXY
 	M_speed          float64
 	m_last_move_time time.Time
+	M_view_range     float64
 }
 
 func (c *MoveControl) MoveTarget(tar_ YMsg.PositionXY) {
@@ -29,16 +30,14 @@ func (c *MoveControl) Update(time_ time.Time) {
 
 	_distance := c.M_pos.Distance(c.M_tar)
 
-
 	_interval_time := time_.Sub(c.m_last_move_time).Seconds()
-	_this_move_distance := _interval_time*c.M_speed
+	_this_move_distance := _interval_time * c.M_speed
 
-	if _distance < _this_move_distance{
+	if _distance < _this_move_distance {
 		c.M_pos = c.M_tar
 		return
 	}
 	_precent := _this_move_distance / _distance
-
 
 	_distance_pos := c.M_pos.DistancePosition(c.M_tar)
 

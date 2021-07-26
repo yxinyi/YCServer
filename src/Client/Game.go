@@ -13,7 +13,6 @@ func init() {
 	g_map.Init()
 }
 
-
 // Game represents a game state.
 type Game struct {
 }
@@ -37,11 +36,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 // Update updates the current game state.
 func (g *Game) Update() error {
 
-	select {
-	case _net_msg := <-YNet.G_net_msg_chan:
-		YNet.Dispatch(_net_msg.M_session,_net_msg.M_net_msg)
-	default:
+	for g_sync_queue.Len() != 0 {
+		_net_msg := g_sync_queue.Pop().(*YNet.Message)
+		YNet.Dispatch(_net_msg.M_session, _net_msg.M_net_msg)
 	}
+
 	g_map.Update()
 
 	return nil
