@@ -31,10 +31,18 @@ func MainLoop() {
 	}
 	ylog.Info("start main loop ")
 	_time_tick := time.Tick(50 * time.Millisecond)
+	_last_time := time.Now()
+	_tick_cout := 0
 	for {
 		select {
 		case _time := <-_time_tick:
 			module.Update(_time)
+			_tick_cout++
+			if _time.Sub(_last_time).Seconds() >= 1{
+				ylog.Info("[%v] tick count [%v]",_time.String(),_tick_cout)
+				_tick_cout = 0
+				_last_time = _time
+			}
 		case <-YNet.G_close:
 			err = module.Stop()
 			if err != nil {

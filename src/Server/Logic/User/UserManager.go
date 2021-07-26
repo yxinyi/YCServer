@@ -31,10 +31,21 @@ func (mgr *ModuleUserLogin)FindUser(uid_ uint32) *User{
 }
 
 func userLogin(session_ *YNet.Session) {
-	ylog.Info("User Login [%v] ", session_.GetUID())
-	_user := newUserInfo(session_)
-	G_user_manager.m_user_list[_user.GetUID()] = _user
-	YEventBus.Send("UserLoginSuccess", _user)
+	{
+		ylog.Info("User Login [%v] ", session_.GetUID())
+		_user := NewUserInfo(session_)
+		G_user_manager.m_user_list[_user.GetUID()] = _user
+		YEventBus.Send("UserLoginSuccess", _user)
+	}
+
+	for _idx := 0 ;_idx < 100 ; _idx++{
+		_s := YNet.NewSession(nil)
+		_tmp_user := NewUserInfo(_s)
+		_s.M_is_rotbot = true
+		G_user_manager.m_user_list[_tmp_user.GetUID()] = _tmp_user
+		YEventBus.Send("UserLoginSuccess", _tmp_user)
+	}
+
 }
 
 func userOffline(session_ *YNet.Session) {

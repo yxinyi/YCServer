@@ -11,9 +11,10 @@ type User struct {
 	*YNet.Session
 	M_current_map uint64
 	move.MoveControl
+	M_is_root bool
 }
 
-func newUserInfo(s_ *YNet.Session) *User {
+func NewUserInfo(s_ *YNet.Session) *User {
 	_user := &User{
 		Session: s_,
 	}
@@ -33,3 +34,4 @@ func (u *User) ToClientJson() YMsg.UserData {
 	}
 	return _user_msg
 }
+

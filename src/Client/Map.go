@@ -81,6 +81,7 @@ func (m *Map) Update() {
 
 func (m *Map) Draw(screen *ebiten.Image) {
 	for _, it := range m.m_user_list {
+
 		ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
 	}
 	/*

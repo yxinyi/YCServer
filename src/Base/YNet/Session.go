@@ -11,6 +11,7 @@ type Session struct {
 	m_conn          net.Conn
 	m_stop          chan struct{}
 	m_send_msg_chan chan *NetMsgPack
+	M_is_rotbot     bool
 }
 
 var g_uni_id = uint32(0)
@@ -35,15 +36,18 @@ func (s *Session) Close() {
 }
 
 func (s *Session) SendJson(msg_id_ uint32, json_ interface{}) error {
-	_msg := NewNetMsgPackWithJson(msg_id_,json_)
+	_msg := NewNetMsgPackWithJson(msg_id_, json_)
 	if _msg == nil {
 		return fmt.Errorf("[Session:SendJson] pack error")
 	}
-	s.Send(NewNetMsgPackWithJson(msg_id_,json_))
+	s.Send(NewNetMsgPackWithJson(msg_id_, json_))
 	return nil
 }
 
 func (s *Session) Send(msg_ *NetMsgPack) bool {
+	if s.M_is_rotbot {
+		return true
+	}
 	if s.m_send_msg_chan == nil {
 		return false
 	}

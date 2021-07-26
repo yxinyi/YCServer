@@ -43,8 +43,8 @@ func (cell *AoiCell) quitCell(tar_ *user.User) {
 		if _range > _user.M_view_range {
 			_user.SendJson(YMsg.MSG_S2C_MAP_DELETE_USER, YMsg.S2CMapDeleteUser{_delete_user_josn})
 		}
-		delete(cell.m_data_list, tar_.GetUID())
 	}
+	delete(cell.m_data_list, tar_.GetUID())
 }
 
 func (cell *AoiCell) updateCell(tar_ *user.User) {

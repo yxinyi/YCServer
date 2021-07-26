@@ -2,7 +2,6 @@ package aoi
 
 import (
 	"YMsg"
-	ylog "YServer/Logic/Log"
 	user "YServer/Logic/User"
 )
 
@@ -77,9 +76,9 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 
 	_current_index := mgr.calcIndex(tar_.M_pos)
 	_new_round_arr := mgr.getRoundBlock(_current_index)
-	ylog.Info("#######################")
+	/*ylog.Info("#######################")
 	ylog.Info("_old_round_arr[%v]",_old_round_arr)
-	ylog.Info("_new_round_arr[%v]",_new_round_arr)
+	ylog.Info("_new_round_arr[%v]",_new_round_arr)*/
 	_quit_cell := getDiff(_old_round_arr, _new_round_arr)
 	for _it := range _quit_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
@@ -88,7 +87,7 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 		}
 	}
 
-	ylog.Info("_quit_cell    [%v]",_quit_cell)
+	//ylog.Info("_quit_cell    [%v]",_quit_cell)
 	_enter_cell := getDiff(_new_round_arr, _old_round_arr)
 	for _it := range _enter_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
@@ -96,7 +95,7 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 			_cell.enterCell(tar_)
 		}
 	}
-	ylog.Info("_enter_cell   [%v]",_enter_cell)
+	//ylog.Info("_enter_cell   [%v]",_enter_cell)
 
 
 	_update_cell := getDiff(_new_round_arr, _enter_cell)
@@ -106,7 +105,6 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 			_cell.updateCell(tar_)
 		}
 	}
-	ylog.Info("_update_cell  [%v]",_update_cell)
 
 	mgr.M_current_index[tar_.GetUID()] = _current_index
 
