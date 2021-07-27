@@ -50,13 +50,20 @@ func (m *Map) Init() {
 		}
 	})
 	YNet.Register(YMsg.MSG_S2C_MAP_ADD_USER, func(msg_ YMsg.S2CMapAddUser, _ YNet.Session) {
-		m.AddNewUser(msg_.M_user)
+		for _,_it := range msg_.M_user{
+			m.AddNewUser(_it)
+		}
+
 	})
 	YNet.Register(YMsg.MSG_S2C_MAP_UPDATE_USER, func(msg_ YMsg.S2CMapUpdateUser, _ YNet.Session) {
-		m.UpdateUser(msg_.M_user)
+		for _,_it := range msg_.M_user{
+			m.UpdateUser(_it)
+		}
 	})
 	YNet.Register(YMsg.MSG_S2C_MAP_DELETE_USER, func(msg_ YMsg.S2CMapDeleteUser, _ YNet.Session) {
-		m.DeleteUser(msg_.M_user.M_uid)
+		for _,_it := range msg_.M_user{
+			m.DeleteUser(_it.M_uid)
+		}
 	})
 
 }

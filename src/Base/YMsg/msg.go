@@ -66,11 +66,11 @@ type S2CMapFullSync struct {
 }
 
 type S2CMapAddUser struct {
-	M_user UserData
+	M_user []UserData
 }
 type S2CMapUpdateUser struct {
-	M_user UserData
+	M_user []UserData
 }
 type S2CMapDeleteUser struct {
-	M_user UserData
+	M_user []UserData
 }

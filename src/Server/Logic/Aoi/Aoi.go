@@ -18,6 +18,27 @@ func NewAoiCell() *AoiCell {
 	return _cell
 }
 
+/*func (cell *AoiCell) enterCell(enter_ uint32) {
+	cell.m_watch_list[enter_] = make(map[uint32]struct{})
+	for _it := range cell.m_watch_list {
+		cell.M_enter_callback(_it, enter_)
+	}
+}
+
+func (cell *AoiCell) quitCell(enter_ uint32) {
+	_watch_list := cell.m_watch_list[enter_]
+	for _it := range _watch_list {
+		cell.M_quit_callback(_it, enter_)
+	}
+}
+
+func (cell *AoiCell) updateCell(enter_ uint32) {
+	for _it := range cell.m_watch_list {
+		cell.M_move_callback(enter_, _it)
+	}
+}*/
+
+
 func (cell *AoiCell) enterCell(enter_ uint32) {
 	cell.m_watch_list[enter_] = make(map[uint32]struct{})
 	for _it := range cell.m_watch_list {
