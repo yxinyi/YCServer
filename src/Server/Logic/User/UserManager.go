@@ -38,7 +38,7 @@ func userLogin(session_ *YNet.Session) {
 		YEventBus.Send("UserLoginSuccess", _user)
 	}
 
-	for _idx := 0 ;_idx < 100 ; _idx++{
+	for _idx := 0 ;_idx < 150 ; _idx++{
 		_s := YNet.NewSession(nil)
 		_tmp_user := NewUserInfo(_s)
 		_s.M_is_rotbot = true

@@ -2,8 +2,12 @@ package aoi
 
 import (
 	"YMsg"
-	user "YServer/Logic/User"
 )
+
+type AoiMoveCallBack func(move_, tar_ uint32)
+type AoiEnterCallBack func(move_, tar_ uint32)
+type AoiQuitCallBack func(move_, tar_ uint32)
+type AoiAddWatch func(move_, tar_ uint32) bool
 
 type AoiManager struct {
 	M_height        float64
@@ -17,7 +21,7 @@ type AoiManager struct {
 
 func NewAoiManager(height_, width_, block_size_ float64) *AoiManager {
 	_mgr := &AoiManager{
-		m_aoi_list: make(map[uint32]*AoiCell),
+		m_aoi_list:      make(map[uint32]*AoiCell),
 		M_current_index: make(map[uint32]uint32),
 	}
 	_mgr.M_height = height_
@@ -25,13 +29,20 @@ func NewAoiManager(height_, width_, block_size_ float64) *AoiManager {
 	_mgr.m_block_height = height_ / block_size_
 	_mgr.m_block_width = width_ / block_size_
 	_mgr.m_block_size = block_size_
-	for _row_idx := uint32(0); _row_idx < uint32(block_size_); _row_idx++ {
-		for _col_idx := uint32(0); _col_idx < uint32(block_size_); _col_idx++ {
+	return _mgr
+}
+
+func (mgr *AoiManager) Init(add_watch_call_ AoiAddWatch,move_call_ AoiMoveCallBack, enter_call_ AoiEnterCallBack, quit_call_ AoiQuitCallBack) {
+	for _row_idx := uint32(0); _row_idx < uint32(mgr.m_block_size); _row_idx++ {
+		for _col_idx := uint32(0); _col_idx < uint32(mgr.m_block_size); _col_idx++ {
 			_cell := NewAoiCell()
-			_mgr.m_aoi_list[_mgr.buildIndex(_row_idx, _col_idx)] = _cell
+			_cell.M_move_callback = move_call_
+			_cell.M_enter_callback = enter_call_
+			_cell.M_quit_callback = quit_call_
+			_cell.M_add_watch_callback = add_watch_call_
+			mgr.m_aoi_list[mgr.buildIndex(_row_idx, _col_idx)] = _cell
 		}
 	}
-	return _mgr
 }
 
 func getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
@@ -46,35 +57,35 @@ func getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]stru
 	return _ret
 }
 
-func (mgr *AoiManager) Enter(tar_ *user.User) {
-	_current_index := mgr.calcIndex(tar_.M_pos)
-	mgr.M_current_index[tar_.GetUID()] = _current_index
+func (mgr *AoiManager) Enter(enter_ uint32, pos_ YMsg.PositionXY) {
+	_current_index := mgr.calcIndex(pos_)
 	_round_arr := mgr.getRoundBlock(_current_index)
 	for _it := range _round_arr {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
-			_cell.enterCell(tar_)
+			_cell.enterCell(enter_)
 		}
 	}
+	mgr.M_current_index[enter_] = _current_index
 }
 
-func (mgr *AoiManager) Quit(tar_ *user.User) {
-	_current_index := mgr.calcIndex(tar_.M_pos)
+func (mgr *AoiManager) Quit(quit_ uint32, pos_ YMsg.PositionXY) {
+	_current_index := mgr.calcIndex(pos_)
 	_round_arr := mgr.getRoundBlock(_current_index)
 	for _it := range _round_arr {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
-			_cell.quitCell(tar_)
+			_cell.quitCell(quit_)
 		}
 	}
-	delete(mgr.M_current_index, tar_.GetUID())
+	delete(mgr.M_current_index, quit_)
 }
 
-func (mgr *AoiManager) Move(tar_ *user.User) {
+func (mgr *AoiManager) Move(move_ uint32, pos_ YMsg.PositionXY) {
 
-	_old_round_arr := mgr.getOldRoundBlock(tar_.GetUID())
+	_old_round_arr := mgr.getOldRoundBlock(move_)
 
-	_current_index := mgr.calcIndex(tar_.M_pos)
+	_current_index := mgr.calcIndex(pos_)
 	_new_round_arr := mgr.getRoundBlock(_current_index)
 	/*ylog.Info("#######################")
 	ylog.Info("_old_round_arr[%v]",_old_round_arr)
@@ -83,7 +94,7 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 	for _it := range _quit_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
-			_cell.quitCell(tar_)
+			_cell.quitCell(move_)
 		}
 	}
 
@@ -92,21 +103,20 @@ func (mgr *AoiManager) Move(tar_ *user.User) {
 	for _it := range _enter_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
-			_cell.enterCell(tar_)
+			_cell.enterCell(move_)
 		}
 	}
 	//ylog.Info("_enter_cell   [%v]",_enter_cell)
-
 
 	_update_cell := getDiff(_new_round_arr, _enter_cell)
 	for _it := range _update_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
-			_cell.updateCell(tar_)
+			_cell.updateCell(move_)
 		}
 	}
 
-	mgr.M_current_index[tar_.GetUID()] = _current_index
+	mgr.M_current_index[move_] = _current_index
 
 }
 

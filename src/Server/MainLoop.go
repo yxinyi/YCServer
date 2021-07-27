@@ -30,7 +30,7 @@ func MainLoop() {
 		panic(" ListenTcp4 err")
 	}
 	ylog.Info("start main loop ")
-	_time_tick := time.Tick(50 * time.Millisecond)
+	_time_tick := time.Tick(10 * time.Millisecond)
 	_last_time := time.Now()
 	_tick_cout := 0
 	for {

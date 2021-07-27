@@ -1,61 +1,84 @@
 package aoi
 
-import (
-	"YMsg"
-	user "YServer/Logic/User"
-)
+
 
 type AoiCell struct {
-	m_data_list map[uint32]struct{}
+	m_watch_list         map[uint32]map[uint32]struct{}
+	M_enter_callback     AoiEnterCallBack
+	M_quit_callback      AoiQuitCallBack
+	M_move_callback      AoiMoveCallBack
+	M_add_watch_callback AoiAddWatch
 }
 
 func NewAoiCell() *AoiCell {
 	_cell := &AoiCell{
-		m_data_list: make(map[uint32]struct{}),
+		m_watch_list: make(map[uint32]map[uint32]struct{}),
 	}
 
 	return _cell
 }
 
-func (cell *AoiCell) enterCell(tar_ *user.User) {
-	_new_user_josn := tar_.ToClientJson()
-	cell.m_data_list[tar_.GetUID()] = struct{}{}
-	_full_sync := YMsg.S2CMapFullSync{}
-	for _it := range cell.m_data_list {
-		_user := user.G_user_manager.FindUser(_it)
-		_range := _user.M_pos.Distance(tar_.M_pos)
-		if _range < _user.M_view_range {
-			_user.SendJson(YMsg.MSG_S2C_MAP_ADD_USER, YMsg.S2CMapAddUser{_new_user_josn})
+func (cell *AoiCell) enterCell(enter_ uint32) {
+	cell.m_watch_list[enter_] = make(map[uint32]struct{})
+	for _it := range cell.m_watch_list {
+		if cell.M_add_watch_callback(enter_, _it) {
+			cell.m_watch_list[enter_][_it] = struct{}{}
+			cell.M_enter_callback(enter_, _it)
 		}
-		if _range < tar_.M_view_range {
-			_full_sync.M_user = append(_full_sync.M_user, _user.ToClientJson())
-		}
-		cell.m_data_list[tar_.GetUID()] = struct{}{}
-	}
-	tar_.SendJson(YMsg.MSG_S2C_MAP_FULL_SYNC, _full_sync)
-}
-
-func (cell *AoiCell) quitCell(tar_ *user.User) {
-	_delete_user_josn := tar_.ToClientJson()
-	for _it := range cell.m_data_list {
-		_user := user.G_user_manager.FindUser(_it)
-		_range := _user.M_pos.Distance(tar_.M_pos)
-		if _range > _user.M_view_range {
-			_user.SendJson(YMsg.MSG_S2C_MAP_DELETE_USER, YMsg.S2CMapDeleteUser{_delete_user_josn})
+		if cell.M_add_watch_callback(_it, enter_) {
+			cell.m_watch_list[_it][enter_] = struct{}{}
+			cell.M_enter_callback(_it, enter_)
 		}
 	}
-	delete(cell.m_data_list, tar_.GetUID())
 }
 
-func (cell *AoiCell) updateCell(tar_ *user.User) {
-	_update_user_json := tar_.ToClientJson()
-	for _it := range cell.m_data_list {
-		_user := user.G_user_manager.FindUser(_it)
-		_range := _user.M_pos.Distance(tar_.M_pos)
-		if _range < _user.M_view_range {
-			_user.SendJson(YMsg.MSG_S2C_MAP_UPDATE_USER, YMsg.S2CMapUpdateUser{_update_user_json})
-		}else{
-			_user.SendJson(YMsg.MSG_S2C_MAP_DELETE_USER, YMsg.S2CMapDeleteUser{_update_user_json})
+func (cell *AoiCell) quitCell(enter_ uint32) {
+	_watch_list := cell.m_watch_list[enter_]
+	for _it := range _watch_list {
+		cell.M_quit_callback(enter_, _it)
+		_, exists := cell.m_watch_list[_it][enter_]
+		if exists {
+			cell.M_quit_callback(_it, enter_)
 		}
+		delete(cell.m_watch_list[_it], enter_)
+	}
+	delete(cell.m_watch_list, enter_)
+}
+
+func (cell *AoiCell) updateCell(enter_ uint32) {
+	for _it := range cell.m_watch_list {
+		if cell.M_add_watch_callback(enter_, _it) {
+			_, exists := cell.m_watch_list[enter_][_it]
+			if exists {
+				cell.M_move_callback(enter_, _it)
+			} else {
+				cell.m_watch_list[enter_][_it] = struct{}{}
+				cell.M_enter_callback(enter_, _it)
+			}
+
+		} else {
+			_, exists := cell.m_watch_list[enter_][_it]
+			if exists {
+				cell.M_quit_callback(enter_, _it)
+				delete(cell.m_watch_list[enter_], _it)
+			}
+		}
+
+		if cell.M_add_watch_callback(_it, enter_) {
+			_, exists := cell.m_watch_list[_it][enter_]
+			if exists {
+				cell.M_move_callback(_it, enter_)
+			} else {
+				cell.m_watch_list[_it][enter_] = struct{}{}
+				cell.M_enter_callback(_it, enter_)
+			}
+		} else {
+			_, exists := cell.m_watch_list[_it][enter_]
+			if exists {
+				cell.M_quit_callback(_it, enter_)
+				delete(cell.m_watch_list[_it], enter_)
+			}
+		}
+
 	}
 }
