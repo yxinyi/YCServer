@@ -17,16 +17,16 @@ func init() {
 
 type ModuleUserLogin struct {
 	module.ModuleBase
-	m_user_list map[uint32]*User
+	m_user_list map[uint64]*User
 }
 
 func NewModuleUserLogin() *ModuleUserLogin {
 	return &ModuleUserLogin{
-		m_user_list: make(map[uint32]*User),
+		m_user_list: make(map[uint64]*User),
 	}
 }
 
-func (mgr *ModuleUserLogin)FindUser(uid_ uint32) *User{
+func (mgr *ModuleUserLogin)FindUser(uid_ uint64) *User{
 	return mgr.m_user_list[uid_]
 }
 
@@ -36,16 +36,18 @@ func userLogin(session_ *YNet.Session) {
 		_user := NewUserInfo(session_)
 		G_user_manager.m_user_list[_user.GetUID()] = _user
 		YEventBus.Send("UserLoginSuccess", _user)
+		_user.SendJson(YMsg.MSG_S2C_USER_SUCCESS_LOGIN,YMsg.S2CUserSuccessLogin{_user.GetUID()})
 	}
-
-	for _idx := 0 ;_idx < 150 ; _idx++{
-		_s := YNet.NewSession(nil)
-		_tmp_user := NewUserInfo(_s)
-		_s.M_is_rotbot = true
-		G_user_manager.m_user_list[_tmp_user.GetUID()] = _tmp_user
-		YEventBus.Send("UserLoginSuccess", _tmp_user)
+	
+	if len(G_user_manager.m_user_list) == 1{
+		for _idx := 0 ;_idx < 200 ; _idx++{
+			_s := YNet.NewSession(nil)
+			_tmp_user := NewUserInfo(_s)
+			_s.M_is_rotbot = true
+			G_user_manager.m_user_list[_tmp_user.GetUID()] = _tmp_user
+			YEventBus.Send("UserLoginSuccess", _tmp_user)
+		}
 	}
-
 }
 
 func userOffline(session_ *YNet.Session) {

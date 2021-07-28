@@ -1,18 +1,22 @@
 package ylog
+
 import (
 	"fmt"
+	"github.com/lestrrat/go-file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"io"
 	"os"
-	"github.com/lestrrat/go-file-rotatelogs"
 	"time"
 )
 
 var Logger *zap.SugaredLogger
 
+var Erro func(template string, args ...interface{})
+var Info func(template string, args ...interface{})
+var Warn func(template string, args ...interface{})
 
-func Erro(template string, args ...interface{}){
+/*func Erro(template string, args ...interface{}){
 	Logger.Errorf(template,args...)
 }
 func Info(template string, args ...interface{}){
@@ -20,19 +24,18 @@ func Info(template string, args ...interface{}){
 }
 func Warn(template string, args ...interface{}){
 	Logger.Warnf(template,args...)
-}
-
-func init() {
+}*/
+func init(){
 	initLogger()
-}
 
+}
 func initLogger() {
 	logPath := "./server"
 	if !exists(logPath) {
 		file, err := os.Create(logPath)
 		defer file.Close()
-		if err != nil{
-			fmt.Println("mkdir logPath err! [%v]",err.Error())
+		if err != nil {
+			fmt.Println("mkdir logPath err! [%v]", err.Error())
 			return
 		}
 	}
@@ -57,6 +60,11 @@ func initLogger() {
 	)
 	logger := zap.New(core, zap.AddCaller()) // 需要传入 zap.AddCaller() 才会显示打日志点的文件名和行数
 	Logger = logger.Sugar()
+
+	Erro = Logger.Errorf
+	Info = Logger.Infof
+	Warn = Logger.Warnf
+
 }
 
 //初始化Encoder
@@ -96,8 +104,8 @@ func getWriter(filename string) io.Writer {
 //查看文件/文件夹是否存在
 func exists(path string) bool {
 	_, err := os.Stat(path)
-	if err != nil{
-		if os.IsExist(err){
+	if err != nil {
+		if os.IsExist(err) {
 			return true
 		}
 		return false

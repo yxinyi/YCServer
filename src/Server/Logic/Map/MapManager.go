@@ -5,12 +5,16 @@ import (
 	user "YServer/Logic/User"
 	"fmt"
 	"github.com/yxinyi/YEventBus"
+	"math"
 	"time"
 )
+
 var G_maze_map_manager = NewMazeMapManager()
+
 func init() {
 	module.Register("MazeMapManager", G_maze_map_manager)
 }
+
 type MazeMapManager struct {
 	module.ModuleBase
 	m_map_list map[uint64]*MazeMap
@@ -26,7 +30,7 @@ var g_val_uid = uint64(0)
 
 func (mgr *MazeMapManager) NewMap() {
 	g_val_uid++
-
+	
 	mgr.m_map_list[g_val_uid] = NewMazeMap(g_val_uid)
 }
 
@@ -40,17 +44,19 @@ func (mgr *MazeMapManager) UserLogin(u_ *user.User) error {
 		//重新登陆
 		_enter_map = mgr.FindMap(u_.M_current_map)
 	}
-
+	
 	if _enter_map == nil {
+		_least_count := uint32(math.MaxUint32)
 		for _, _it := range mgr.m_map_list {
-			_enter_map = _it
-			break
+			if _least_count > _it.ObjCount() {
+				_enter_map = _it
+				_least_count = _it.ObjCount()
+			}
 		}
 	}
-
+	
 	mgr.UserEnterWithMap(_enter_map, u_)
-
-
+	
 	return nil
 }
 
@@ -77,12 +83,14 @@ func (mgr *MazeMapManager) UserOut(user_ *user.User) error {
 func (mgr *MazeMapManager) Init() error {
 	YEventBus.Register("UserLoginSuccess", mgr.UserLogin)
 	YEventBus.Register("UserLogout", mgr.UserOut)
-
+	
 	return nil
 }
 
 func (mgr *MazeMapManager) Start() error {
-	mgr.NewMap()
+	for _idx := 0; _idx < 1; _idx++ {
+		mgr.NewMap()
+	}
 	return nil
 }
 func (mgr *MazeMapManager) Stop() error {
@@ -90,6 +98,7 @@ func (mgr *MazeMapManager) Stop() error {
 }
 func (mgr *MazeMapManager) Update(time_ time.Time) {
 	for _, _it := range mgr.m_map_list {
+		//ylog.Info("[%v] count [%v]", _it.m_uid, _it.ObjCount())
 		_it.Update(time_)
 	}
 }

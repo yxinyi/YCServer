@@ -36,9 +36,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 // Update updates the current game state.
 func (g *Game) Update() error {
 
-	for g_sync_queue.Len() != 0 {
-		_net_msg := g_sync_queue.Pop().(*YNet.Message)
+	for _net_msg := range YNet.G_net_msg_chan{
 		YNet.Dispatch(_net_msg.M_session, _net_msg.M_net_msg)
+		if len(YNet.G_net_msg_chan) == 0 {
+			break
+		}
 	}
 
 	g_map.Update()

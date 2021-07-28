@@ -7,17 +7,17 @@ import (
 )
 
 type Session struct {
-	m_uid           uint32
+	m_uid           uint64
 	m_conn          net.Conn
 	m_stop          chan struct{}
 	m_send_msg_chan chan *NetMsgPack
 	M_is_rotbot     bool
 }
 
-var g_uni_id = uint32(0)
+var g_uni_id = uint64(0)
 
 func NewSession(conn_ net.Conn) *Session {
-	atomic.AddUint32(&g_uni_id, 1)
+	atomic.AddUint64(&g_uni_id, 1)
 	return &Session{
 		m_uid:           g_uni_id,
 		m_conn:          conn_,
@@ -26,7 +26,7 @@ func NewSession(conn_ net.Conn) *Session {
 	}
 }
 
-func (s *Session) GetUID() uint32 {
+func (s *Session) GetUID() uint64 {
 	return s.m_uid
 }
 

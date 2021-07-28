@@ -8,7 +8,7 @@ import (
 
 var g_listener net.Listener
 var G_close = make(chan struct{})
-var g_connect_list = make(map[uint32]*Session)
+var g_connect_list = make(map[uint64]*Session)
 
 var G_net_msg_chan = make(chan *Message,100)
 

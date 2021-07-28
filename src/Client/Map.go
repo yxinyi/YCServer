@@ -21,17 +21,17 @@ const (
 var uiFont font.Face
 
 type Map struct {
-	m_user_list map[uint32]YMsg.PositionXY
+	m_user_list map[uint64]YMsg.PositionXY
 }
 
 func NewMap() *Map {
 	return &Map{
-		m_user_list: make(map[uint32]YMsg.PositionXY),
+		m_user_list: make(map[uint64]YMsg.PositionXY),
 	}
 }
 
 var g_map = NewMap()
-
+var g_main_uid uint64
 func (m *Map) Init() {
 	tt, err := opentype.Parse(goregular.TTF)
 	if err != nil {
@@ -65,9 +65,13 @@ func (m *Map) Init() {
 			m.DeleteUser(_it.M_uid)
 		}
 	})
-
+	YNet.Register(YMsg.MSG_S2C_USER_SUCCESS_LOGIN, func(msg_ YMsg.S2CUserSuccessLogin, _ YNet.Session) {
+		
+		g_main_uid = msg_.M_uid
+	})
+	
 }
-func (m *Map) DeleteUser(uid_ uint32) {
+func (m *Map) DeleteUser(uid_ uint64) {
 	delete(m.m_user_list, uid_)
 }
 
@@ -87,9 +91,15 @@ func (m *Map) Update() {
 }
 
 func (m *Map) Draw(screen *ebiten.Image) {
-	for _, it := range m.m_user_list {
-
-		ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
+	for _uid_it, it := range m.m_user_list {
+		if m.m_user_list[_uid_it].Distance(it) > 100 {
+			panic("1")
+		}
+		if g_main_uid== _uid_it{
+			ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0xff, 0xa0, 0x00, 0xff})
+		}else{
+			ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
+		}
 	}
 	/*
 		detailStr := fmt.Sprintf("%d", 10)
