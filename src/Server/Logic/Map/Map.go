@@ -41,16 +41,25 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 	}
 	_maze_map.m_go_ng_aoi.Init(func(tar_ uint64, move_ map[uint64]struct{}) {
 		for _it := range move_{
-			_maze_map.m_msg_notify[tar_].m_update[_it] = struct{}{}
+			_,exists := _maze_map.m_msg_notify[tar_]
+			if exists{
+				_maze_map.m_msg_notify[tar_].m_update[_it] = struct{}{}
+			}
 		}
 
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_{
-			_maze_map.m_msg_notify[tar_].m_add[_it] = struct{}{}
+			_,exists := _maze_map.m_msg_notify[tar_]
+			if exists{
+				_maze_map.m_msg_notify[tar_].m_add[_it] = struct{}{}
+			}
 		}
 	}, func(tar_ uint64, quit_ map[uint64]struct{}) {
 		for _it := range quit_ {
-			_maze_map.m_msg_notify[tar_].m_delete[_it] = struct{}{}
+			_,exists := _maze_map.m_msg_notify[tar_]
+			if exists{
+				_maze_map.m_msg_notify[tar_].m_delete[_it] = struct{}{}
+			}
 		}
 	})
 /*	_maze_map.m_go_aoi.Init(func(tar_, move_ uint64) {

@@ -88,7 +88,7 @@ func (mgr *MazeMapManager) Init() error {
 }
 
 func (mgr *MazeMapManager) Start() error {
-	for _idx := 0; _idx < 1; _idx++ {
+	for _idx := 0; _idx < 1000; _idx++ {
 		mgr.NewMap()
 	}
 	return nil
