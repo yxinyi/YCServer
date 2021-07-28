@@ -277,7 +277,7 @@ func (mgr *GoNineGirdAoiManager) sendOutQuitAction(map_ map[uint64]map[uint64]st
 func (mgr *GoNineGirdAoiManager) quitCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
 	_quit_map_sync := make(map[uint64]map[uint64]struct{})
 	for _it := range cell_set_ {
-		_quit_map_sync = tool.Uint64MapUint64SetMerge(_quit_map_sync, mgr.getObjInViewRangeMap(enter_, _it))
+		_quit_map_sync = tool.Uint64MapUint64SetMerge(_quit_map_sync, mgr.getObjMap(enter_, _it))
 	}
 	mgr.sendOutQuitAction(_quit_map_sync)
 }
@@ -306,7 +306,7 @@ func (mgr *GoNineGirdAoiManager) Move(move_ GoAoiObj) {
 }
 
 func (mgr *GoNineGirdAoiManager) move(move_ GoAoiObj) {
-
+	mgr.m_obj_copy[move_.M_uid] = &move_
 	_old_round_arr := mgr.getOldRoundBlock(move_.M_uid)
 
 	_current_index := mgr.CalcIndex(move_.PositionXY)
