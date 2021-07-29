@@ -87,7 +87,7 @@ func (mgr *GoNineGirdAoiManager) getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint
 	for _it := range rhs_ {
 		delete(_ret, _it)
 	}
-
+	
 	return _ret
 }
 
@@ -121,9 +121,9 @@ func (mgr *GoNineGirdAoiManager) getObjNotInViewRangeMap(obj_ *GoAoiObj, cell_in
 					_enter_sync_list[obj.M_uid] = make(map[uint64]struct{})
 				}
 				_enter_sync_list[obj.M_uid][obj_.M_uid] = struct{}{}
-
+				
 			}
-
+			
 		}
 	}
 	return _enter_sync_list
@@ -151,9 +151,9 @@ func (mgr *GoNineGirdAoiManager) getObjMap(obj_ *GoAoiObj, cell_index_ uint32) m
 					_enter_sync_list[_tmp_obj.M_uid] = make(map[uint64]struct{})
 				}
 				_enter_sync_list[_tmp_obj.M_uid][obj_.M_uid] = struct{}{}
-
+				
 			}
-
+			
 		}
 	}
 	return _enter_sync_list
@@ -181,9 +181,9 @@ func (mgr *GoNineGirdAoiManager) getObjInViewRangeMap(obj_ *GoAoiObj, cell_index
 					_enter_sync_list[_tmp_obj.M_uid] = make(map[uint64]struct{})
 				}
 				_enter_sync_list[_tmp_obj.M_uid][obj_.M_uid] = struct{}{}
-
+				
 			}
-
+			
 		}
 	}
 	return _enter_sync_list
@@ -204,7 +204,7 @@ func (mgr *GoNineGirdAoiManager) Update() {
 			mgr.M_quit_callback(_act.m_notify_obj, _act.m_action_obj)
 		}
 	}
-
+	
 }
 func (mgr *GoNineGirdAoiManager) sendOutUpdateAction(map_ map[uint64]map[uint64]struct{}) {
 	for _key, _set_it := range map_ {
@@ -231,7 +231,7 @@ func (mgr *GoNineGirdAoiManager) updateCell(enter_ *GoAoiObj, cell_set_ map[uint
 		}
 		mgr.sendOutQuitAction(_quit_map_sycn)
 	}
-
+	
 }
 
 func (mgr *GoNineGirdAoiManager) sendOutEnterAction(map_ map[uint64]map[uint64]struct{}) {
@@ -290,7 +290,7 @@ func (mgr *GoNineGirdAoiManager) Quit(quit_ GoAoiObj) {
 }
 func (mgr *GoNineGirdAoiManager) quit(quit_ GoAoiObj) {
 	_current_index := mgr.CalcIndex(quit_.PositionXY)
-
+	
 	_round_arr := mgr.getRoundBlock(_current_index)
 	mgr.quitCell(&quit_, _round_arr)
 	delete(mgr.M_current_index, quit_.M_uid)
@@ -308,37 +308,37 @@ func (mgr *GoNineGirdAoiManager) Move(move_ GoAoiObj) {
 func (mgr *GoNineGirdAoiManager) move(move_ GoAoiObj) {
 	mgr.m_obj_copy[move_.M_uid] = &move_
 	_old_round_arr := mgr.getOldRoundBlock(move_.M_uid)
-
+	
 	_current_index := mgr.CalcIndex(move_.PositionXY)
 	_new_round_arr := mgr.getRoundBlock(_current_index)
-
+	
 	_enter_cell := getDiff(_new_round_arr, _old_round_arr)
 	mgr.enterCell(&move_, _enter_cell)
-
+	
 	if _current_index != mgr.M_current_index[move_.M_uid] {
 		mgr.m_aoi_list[_current_index].Watch(move_.M_uid)
 	}
-
+	
 	_update_cell := getDiff(_new_round_arr, _enter_cell)
 	mgr.updateCell(&move_, _update_cell)
-
+	
 	if _current_index != mgr.M_current_index[move_.M_uid] {
 		mgr.m_aoi_list[mgr.M_current_index[move_.M_uid]].Forget(move_.M_uid)
 	}
-
+	
 	_quit_cell := getDiff(_old_round_arr, _new_round_arr)
 	mgr.quitCell(&move_, _quit_cell)
-
+	
 	mgr.M_current_index[move_.M_uid] = _current_index
-
+	
 }
 
 func (mgr *GoNineGirdAoiManager) CalcIndex(xy_ YMsg.PositionXY) uint32 {
 	return mgr.buildIndex(uint32(xy_.M_x/mgr.m_block_width), uint32(xy_.M_y/mgr.m_block_height))
 }
 
-func (mgr *GoNineGirdAoiManager) buildIndex(row_, col_ uint32) uint32 {
-	return row_ + col_*uint32(mgr.m_block_size)
+func (mgr *GoNineGirdAoiManager) buildIndex(col_, row_ uint32) uint32 {
+	return col_ + row_*uint32(mgr.m_block_size)
 }
 
 func (mgr *GoNineGirdAoiManager) getOldRoundBlock(uid_ uint64) map[uint32]struct{} {
@@ -350,9 +350,9 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 	_ret_round := make(map[uint32]struct{})
 	_cent_idex := int(cent_index_)
 	_block_size := int(mgr.m_block_size)
-
+	
 	_max_idx := int(mgr.m_block_size * mgr.m_block_size)
-
+	
 	_cent_row := int(cent_index_ / uint32(mgr.m_block_size))
 	_ret_round[cent_index_] = struct{}{}
 	{
@@ -361,7 +361,7 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 			_ret_round[uint32(_left_up)] = struct{}{}
 		}
 	}
-
+	
 	{
 		_up := _cent_idex - _block_size
 		if _up >= 0 && (_up/_block_size+1) == _cent_row {
@@ -374,7 +374,7 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 			_ret_round[uint32(_up_right)] = struct{}{}
 		}
 	}
-
+	
 	{
 		_left := _cent_idex - 1
 		if _left >= 0 && (_left/_block_size) == _cent_row {
@@ -387,14 +387,14 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 			_ret_round[uint32(_right)] = struct{}{}
 		}
 	}
-
+	
 	{
 		_down_left := _cent_idex + _block_size - 1
 		if _down_left < _max_idx && (_down_left/_block_size-1) == _cent_row {
 			_ret_round[uint32(_down_left)] = struct{}{}
 		}
 	}
-
+	
 	{
 		_down := _cent_idex + _block_size
 		if _down < _max_idx && (_down/_block_size-1) == _cent_row {
@@ -407,6 +407,6 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 			_ret_round[uint32(_down_right)] = struct{}{}
 		}
 	}
-
+	
 	return _ret_round
 }
