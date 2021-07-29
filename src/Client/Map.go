@@ -3,8 +3,10 @@ package main
 import (
 	"YMsg"
 	"YNet"
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
@@ -78,7 +80,12 @@ func (m *Map) DeleteUser(uid_ uint64) {
 func (m *Map) AddNewUser(user_data_ YMsg.UserData) {
 	m.m_user_list[user_data_.M_uid] = user_data_.M_pos
 }
+var g_slope string
 func (m *Map) UpdateUser(user_data_ YMsg.UserData) {
+
+	if g_main_uid== user_data_.M_uid {
+		g_slope = fmt.Sprintf("%.2f", (user_data_.M_pos.M_y -m.m_user_list[user_data_.M_uid].M_y)/(user_data_.M_pos.M_x -m.m_user_list[user_data_.M_uid].M_x))
+	}
 	m.m_user_list[user_data_.M_uid] = user_data_.M_pos
 }
 
@@ -91,11 +98,14 @@ func (m *Map) Update() {
 }
 
 func (m *Map) Draw(screen *ebiten.Image) {
+	text.Draw(screen, g_slope, uiFont, int(100), int(100), color.White)
 	for _uid_it, it := range m.m_user_list {
 		if m.m_user_list[_uid_it].Distance(it) > 100 {
 			panic("1")
 		}
 		if g_main_uid== _uid_it{
+			detailStr := fmt.Sprintf("%.2f,%.2f", it.M_x,it.M_y)
+			text.Draw(screen, detailStr, uiFont, int(it.M_x), int(it.M_y + 50), color.White)
 			ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0xff, 0xa0, 0x00, 0xff})
 		}else{
 			ebitenutil.DrawRect(screen, it.M_x, it.M_y, gridSize, gridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})

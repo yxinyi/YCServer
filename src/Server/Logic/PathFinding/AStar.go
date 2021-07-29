@@ -9,8 +9,8 @@ const (
 
 type AStar struct {
 	m_maze       [][]float64
-	m_open_list  map[int]*PathBlock
-	m_close_list map[int]*PathBlock
+	m_open_list  map[int]*pathBlock
+	m_close_list map[int]*pathBlock
 	m_col_max    int
 	m_row_max    int
 	m_target     blockPos
@@ -19,8 +19,8 @@ type AStar struct {
 func NewAStar() *AStar {
 	return &AStar{
 		m_maze:       make([][]float64, 0),
-		m_open_list:  make(map[int]*PathBlock),
-		m_close_list: make(map[int]*PathBlock),
+		m_open_list:  make(map[int]*pathBlock),
+		m_close_list: make(map[int]*pathBlock),
 	}
 }
 
@@ -30,8 +30,8 @@ func (a *AStar) Init(maze_ [][]float64) {
 	a.m_maze = maze_
 }
 func (a *AStar) Clear() {
-	a.m_open_list = make(map[int]*PathBlock)
-	a.m_close_list = make(map[int]*PathBlock)
+	a.m_open_list = make(map[int]*pathBlock)
+	a.m_close_list = make(map[int]*pathBlock)
 	
 }
 
@@ -53,7 +53,7 @@ func (a *AStar) SearchWithIndex(st_idx_, ed_idx_ int) []int {
 	return _ret_arr
 }
 
-func (a *AStar) search(st_, ed_ blockPos) *PathBlock {
+func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 	a.m_target = ed_
 	
 	_st_block := a.newPathBlock(st_)
@@ -97,9 +97,9 @@ func (a *AStar) search(st_, ed_ blockPos) *PathBlock {
 	return nil
 }
 
-func (a *AStar) getLeastDistanceBlock() *PathBlock {
+func (a *AStar) getLeastDistanceBlock() *pathBlock {
 	_least_disance := float64(math.MaxFloat64)
-	var _least_disance_block *PathBlock
+	var _least_disance_block *pathBlock
 	for _, _it := range a.m_open_list {
 		_it_least_distance := _it.GetTotalDistance()
 		if _it_least_distance < _least_disance {
@@ -119,7 +119,7 @@ func (a *AStar) indexConvertToBlockPos(index_ int) blockPos {
 	return a.newBlockPos(_col, _row)
 }
 
-func (a *AStar) getRound(cent_block_ *PathBlock) map[int]struct{} {
+func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 	_ret_round := make(map[int]struct{})
 	_cent_idex := cent_block_.m_index
 	_col_max := a.m_col_max
@@ -203,40 +203,40 @@ func (pos *blockPos) CalcDisTar(tar_ blockPos) float64 {
 	return math.Sqrt(_row_diff*_row_diff + _col_diff*_col_diff)
 }
 
-type PathBlock struct {
+type pathBlock struct {
 	blockPos
 	m_dis_start       float64
 	m_dis_target      float64
 	m_block_delay_val float64
-	m_parent_block    *PathBlock
+	m_parent_block    *pathBlock
 }
 
-func (a *AStar) newPathBlock(pos_ blockPos) *PathBlock {
-	_block := &PathBlock{}
+func (a *AStar) newPathBlock(pos_ blockPos) *pathBlock {
+	_block := &pathBlock{}
 	_block.blockPos = pos_
 	_block.setBlockDelayVal(a.m_maze[pos_.m_col][pos_.m_row])
 	return _block
 }
 
-func (b *PathBlock) setParentBlock(parent_ *PathBlock) {
+func (b *pathBlock) setParentBlock(parent_ *pathBlock) {
 	b.m_parent_block = parent_
 }
 
-func (b *PathBlock) setBlockDelayVal(block_delay_val_ float64) {
+func (b *pathBlock) setBlockDelayVal(block_delay_val_ float64) {
 	b.m_block_delay_val = block_delay_val_
 }
-func (b *PathBlock) setMaxBlock() {
+func (b *pathBlock) setMaxBlock() {
 	b.m_block_delay_val = math.MaxFloat64
 }
 
-func (b *PathBlock) SetDisStart(distance_ float64) {
+func (b *pathBlock) SetDisStart(distance_ float64) {
 	b.m_dis_start = distance_
 }
 
-func (b *PathBlock) CalcDisTar(tar_ blockPos) {
+func (b *pathBlock) CalcDisTar(tar_ blockPos) {
 	b.m_dis_target = b.blockPos.CalcDisTar(tar_)
 }
 
-func (b *PathBlock) GetTotalDistance() float64 {
+func (b *pathBlock) GetTotalDistance() float64 {
 	return b.m_dis_target + b.m_dis_start + b.m_block_delay_val
 }

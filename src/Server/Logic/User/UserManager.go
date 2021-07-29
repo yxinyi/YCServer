@@ -40,7 +40,7 @@ func userLogin(session_ *YNet.Session) {
 	}
 	
 	if len(G_user_manager.m_user_list) == 1{
-		for _idx := 0 ;_idx < 1000 ; _idx++{
+		for _idx := 0 ;_idx < 10 ; _idx++{
 			_s := YNet.NewSession(nil)
 			_tmp_user := NewUserInfo(_s)
 			_s.M_is_rotbot = true

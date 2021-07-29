@@ -1,6 +1,9 @@
 package YMsg
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 const (
 	MESSAGE_TEST uint32 = iota
@@ -28,6 +31,10 @@ type UserData struct {
 type PositionXY struct {
 	M_x float64
 	M_y float64
+}
+
+func (p PositionXY) String() string{
+	return fmt.Sprintf("[x:%v|y:%v]",p.M_x,p.M_y)
 }
 
 func (p *PositionXY) IsSame(rhs_ PositionXY) bool {

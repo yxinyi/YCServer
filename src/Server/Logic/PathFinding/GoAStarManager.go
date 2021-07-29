@@ -2,13 +2,13 @@ package PathFinding
 
 import "queue"
 
-type AStarCallbackMsg struct {
+type aStarCallbackMsg struct {
 	m_uid         uint32
 	m_st          int
 	m_ed          int
 	m_search_path []int
 }
-type AStarCallback func([]int)
+type aStarCallback func([]int)
 
 type AStarManager struct {
 	m_maze  [][]float64
@@ -17,19 +17,21 @@ type AStarManager struct {
 	m_cache_path map[uint64][]int
 	
 	m_call_back_idx uint32
-	m_call_back     map[uint32]AStarCallback
+	m_call_back     map[uint32]aStarCallback
 }
 
-func NewAStarManager(maze_ [][]float64) *AStarManager {
+func NewAStarManager() *AStarManager {
 	return &AStarManager{
-		m_maze:       maze_,
 		m_queue:      queue.NewSyncQueue(),
-		m_call_back:  make(map[uint32]AStarCallback),
+		m_call_back:  make(map[uint32]aStarCallback),
 		m_cache_path: make(map[uint64][]int),
 	}
 }
 
-func (mgr *AStarManager) Search(st_, ed_ int, cb_ AStarCallback) {
+func (mgr *AStarManager) Init(maze_ [][]float64) {
+	mgr.m_maze = maze_
+}
+func (mgr *AStarManager) Search(st_, ed_ int, cb_ aStarCallback) {
 	
 	_cache_path, exists := mgr.m_cache_path[uint64(st_)<<32|uint64(ed_)]
 	if exists {
@@ -41,7 +43,7 @@ func (mgr *AStarManager) Search(st_, ed_ int, cb_ AStarCallback) {
 	mgr.m_call_back_idx++
 	mgr.m_call_back[_tmp_idx] = cb_
 	go func() {
-		_msg := AStarCallbackMsg{}
+		_msg := aStarCallbackMsg{}
 		_msg.m_uid = _tmp_idx
 		_msg.m_st = st_
 		_msg.m_ed = ed_
@@ -58,7 +60,7 @@ func (mgr *AStarManager) Update() {
 		if mgr.m_queue.Len() == 0 {
 			break
 		}
-		_msg := mgr.m_queue.Pop().(AStarCallbackMsg)
+		_msg := mgr.m_queue.Pop().(aStarCallbackMsg)
 		mgr.m_call_back[_msg.m_uid](_msg.m_search_path)
 		
 		mgr.m_cache_path[uint64(_msg.m_st)<<32|uint64(_msg.m_ed)] = _msg.m_search_path

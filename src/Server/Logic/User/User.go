@@ -24,7 +24,15 @@ func NewUserInfo(s_ *YNet.Session) *User {
 }
 
 func (u *User) Update(time_ time.Time) {
-	u.MoveControl.Update(time_)
+
+}
+
+func (u *User) MoveUpdate(time_ time.Time) bool {
+	return u.MoveControl.MoveUpdate(time_)
+}
+
+func (u *User) CanToNextPath() bool {
+	return u.MoveControl.CanToNextPath()
 }
 
 func (u *User) ToClientJson() YMsg.UserData {
@@ -34,4 +42,3 @@ func (u *User) ToClientJson() YMsg.UserData {
 	}
 	return _user_msg
 }
-
