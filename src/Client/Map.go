@@ -17,7 +17,7 @@ import (
 const (
 	ScreenWidth  = 1200
 	ScreenHeight = 700
-	gridSize     = 100
+	gridSize     = 10
 )
 
 var uiFont font.Face
@@ -120,8 +120,8 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			} else {
 				ebitenutil.DrawRect(screen, float64(_col_idx)*_grid_size, float64(_row_idx)*_grid_size, _grid_size, _grid_size, color.White)
 			}
-			detailStr := fmt.Sprintf("%d", _row_idx*len(g_map_maze_info.M_maze[0])+_col_idx)
-			text.Draw(screen, detailStr, uiFont, int (float64(_col_idx)*_grid_size + _grid_size/2), int (float64(_row_idx)*_grid_size+ _grid_size/2), color.White)
+			/*detailStr := fmt.Sprintf("%d", _row_idx*len(g_map_maze_info.M_maze[0])+_col_idx)
+			text.Draw(screen, detailStr, uiFont, int (float64(_col_idx)*_grid_size + _grid_size/2), int (float64(_row_idx)*_grid_size+ _grid_size/2), color.White) */
 		}
 	}
 	

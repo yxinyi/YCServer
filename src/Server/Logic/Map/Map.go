@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	ScreenWidth  = 1200
-	ScreenHeight = 700
-	MAZE_GRID_SIZE float64 = 100
+	ScreenWidth  = 1280
+	ScreenHeight = 720
+	MAZE_GRID_SIZE float64 = 10
 
 )
 

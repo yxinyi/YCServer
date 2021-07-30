@@ -162,8 +162,8 @@ func (a *AStar) pathToBetter(before_path_ []int) []int {
 }
 
 func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
-	st_idx_ = 12
-	ed_idx_ = 26
+/*	st_idx_ = 12
+	ed_idx_ = 26*/
 	_indx_arr := a.SearchWithIndex(st_idx_, ed_idx_)
 	//_indx_arr = a.pathToBetter(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
