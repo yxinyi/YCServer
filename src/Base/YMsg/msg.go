@@ -16,6 +16,8 @@ const (
 	MSG_S2C_MAP_ADD_USER
 	MSG_S2C_MAP_UPDATE_USER
 	MSG_S2C_MAP_DELETE_USER
+	MSG_S2C_MAP_ASTAR_NODE_UPDATE
+	MSG_S2C_MAP_FLUSH_MAP_MAZE
 )
 
 type Message struct {
@@ -24,8 +26,9 @@ type Message struct {
 }
 
 type UserData struct {
-	M_uid uint64
-	M_pos PositionXY
+	M_uid  uint64
+	M_pos  PositionXY
+	M_path []PositionXY
 }
 
 type PositionXY struct {
@@ -33,8 +36,8 @@ type PositionXY struct {
 	M_y float64
 }
 
-func (p PositionXY) String() string{
-	return fmt.Sprintf("[x:%v|y:%v]",p.M_x,p.M_y)
+func (p PositionXY) String() string {
+	return fmt.Sprintf("[x:%v|y:%v]", p.M_x, p.M_y)
 }
 
 func (p *PositionXY) IsSame(rhs_ PositionXY) bool {
@@ -67,7 +70,7 @@ type C2S_MOVE struct {
 
 type S2C_MOVE struct {
 	M_uid uint64
-	M_pos PositionXY
+	M_data UserData
 }
 
 type S2CMapFullSync struct {
@@ -83,9 +86,18 @@ type S2CMapUpdateUser struct {
 type S2CMapDeleteUser struct {
 	M_user []UserData
 }
-
-
+type S2CMapAStarNodeUpdate struct {
+	M_uid  uint64
+	M_path []PositionXY
+}
 
 type S2CUserSuccessLogin struct {
 	M_uid uint64
+}
+
+type S2CFlushMapMaze struct {
+	M_map_uid uint64
+	M_maze    [][]float64
+	M_height  float64
+	M_width   float64
 }

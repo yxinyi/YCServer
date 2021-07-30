@@ -8,6 +8,18 @@ type aStarCallbackMsg struct {
 	m_ed          int
 	m_search_path []int
 }
+
+func NewAStarCallbackMsg() *aStarCallbackMsg {
+	return &aStarCallbackMsg{}
+}
+
+func (a *aStarCallbackMsg) Init(uid_ uint32, st_, ed_ int, search_path_ []int) {
+	a.m_uid = uid_
+	a.m_st = st_
+	a.m_ed = ed_
+	a.m_search_path = search_path_
+}
+
 type aStarCallback func([]int)
 
 type AStarManager struct {
@@ -28,6 +40,10 @@ func NewAStarManager() *AStarManager {
 	}
 }
 
+func (mgr *AStarManager) GetMaze() [][]float64 {
+	return mgr.m_maze
+}
+
 func (mgr *AStarManager) Init(maze_ [][]float64) {
 	mgr.m_maze = maze_
 }
@@ -43,14 +59,11 @@ func (mgr *AStarManager) Search(st_, ed_ int, cb_ aStarCallback) {
 	mgr.m_call_back_idx++
 	mgr.m_call_back[_tmp_idx] = cb_
 	go func() {
-		_msg := aStarCallbackMsg{}
-		_msg.m_uid = _tmp_idx
-		_msg.m_st = st_
-		_msg.m_ed = ed_
 		_a := NewAStar()
 		_a.Init(mgr.m_maze)
-		_ret := _a.SearchWithIndex(st_, ed_)
-		_msg.m_search_path = _ret
+		_ret := _a.SearchBetterWithIndex(st_, ed_)
+		_msg := NewAStarCallbackMsg()
+		_msg.Init(_tmp_idx, st_, ed_, _ret)
 		mgr.m_queue.Add(_msg)
 	}()
 }
@@ -60,7 +73,7 @@ func (mgr *AStarManager) Update() {
 		if mgr.m_queue.Len() == 0 {
 			break
 		}
-		_msg := mgr.m_queue.Pop().(aStarCallbackMsg)
+		_msg := mgr.m_queue.Pop().(*aStarCallbackMsg)
 		mgr.m_call_back[_msg.m_uid](_msg.m_search_path)
 		
 		mgr.m_cache_path[uint64(_msg.m_st)<<32|uint64(_msg.m_ed)] = _msg.m_search_path

@@ -12,6 +12,7 @@ type MoveControl struct {
 
 	M_next_path      YMsg.PositionXY
 	m_path_queue     *queue.Queue
+	m_path_cache     []YMsg.PositionXY
 	M_speed          float64
 	m_last_move_time time.Time
 	M_view_range     float64
@@ -40,6 +41,11 @@ func (c *MoveControl) String() string {
 	return _str
 }
 
+func (c *MoveControl) GetPathNode() []YMsg.PositionXY {
+	
+	return c.m_path_cache
+}
+
 func (c *MoveControl) toNextPath() {
 	c.M_next_path = c.m_path_queue.Pop().(YMsg.PositionXY)
 }
@@ -47,6 +53,12 @@ func (c *MoveControl) toNextPath() {
 func (c *MoveControl) MoveQueue(path_queue_ *queue.Queue) {
 	c.m_path_queue = path_queue_
 	c.toNextPath()
+	_path_node := make([]YMsg.PositionXY,0)
+	for _idx := 0; _idx < c.m_path_queue.Length(); _idx++ {
+		_path_node = append(_path_node, c.m_path_queue.Get(_idx).(YMsg.PositionXY))
+	}
+	c.m_path_cache = _path_node
+	
 }
 func (c *MoveControl) MoveTarget(tar_ YMsg.PositionXY) {
 	c.M_tar = tar_
@@ -60,11 +72,12 @@ func (c *MoveControl) MoveUpdate(time_ time.Time) bool {
 	if c.M_pos.IsSame(c.M_tar) {
 		return false
 	}
-	if !c.CanToNextPath() {
-		return false
-	}
+
 
 	if c.M_pos.IsSame(c.M_next_path) {
+		if !c.CanToNextPath() {
+			return false
+		}
 		c.toNextPath()
 	}
 

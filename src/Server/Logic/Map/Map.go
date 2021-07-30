@@ -11,9 +11,10 @@ import (
 )
 
 const (
-	ScreenWidth  = 1280
-	ScreenHeight = 720
-	gridSize     = 10
+	ScreenWidth  = 1200
+	ScreenHeight = 700
+	MAZE_GRID_SIZE float64 = 100
+
 )
 
 type MapNotifyMsg struct {
@@ -26,12 +27,12 @@ type MazeMap struct {
 	m_uid        uint64
 	m_user_list  map[uint64]*user.User
 	m_msg_notify map[uint64]*MapNotifyMsg
-
+	
 	m_width        float64
 	m_height       float64
 	m_row_grid_max int
 	m_col_grid_max int //
-
+	
 	//m_aoi    *aoi.AoiManager
 	//m_go_aoi *aoi.GoAoiManager
 	m_go_ng_aoi *aoi.GoNineGirdAoiManager
@@ -61,7 +62,7 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 				delete(_maze_map.m_msg_notify[tar_].m_delete, _it)
 			}
 		}
-
+		
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
 			_, exists := _maze_map.m_msg_notify[tar_]
@@ -79,81 +80,22 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 			}
 		}
 	})
-	/*	_maze_map.m_go_aoi.Init(func(tar_, move_ uint64) {
-			_mover := _maze_map.m_user_list[move_]
-			_tar := _maze_map.m_user_list[tar_]
-			if _tar.M_pos.Distance(_mover.M_pos) < _tar.M_view_range {
-				_maze_map.m_msg_notify[tar_].m_update[move_] = struct{}{}
-				//delete(_maze_map.m_msg_notify[tar_].m_delete, move_)
-			} else {
-				_maze_map.m_msg_notify[tar_].m_delete[move_] = struct{}{}
-			}
-		}, func(tar_, add_ uint64) {
-
-			_mover := _maze_map.m_user_list[add_]
-			_tar := _maze_map.m_user_list[tar_]
-			if _tar.M_pos.Distance(_mover.M_pos) < _tar.M_view_range {
-				_maze_map.m_msg_notify[tar_].m_add[add_] = struct{}{}
-				//delete(_maze_map.m_msg_notify[tar_].m_delete, add_)
-			}
-
-		}, func(tar_, quit_ uint64) {
-			_maze_map.m_msg_notify[tar_].m_delete[quit_] = struct{}{}
-
-		})*/
-	/*	_maze_map.m_aoi.Init(func(move_, tar_ uint32) bool {
-			_user := _maze_map.m_user_list[move_]
-			_tar := _maze_map.m_user_list[tar_]
-			if _user.M_pos.Distance(_tar.M_pos) > _user.M_view_range {
-				return false
-			}
-			return true
-		}, func(tar_, move_ uint32) {
-			_mover := _maze_map.m_user_list[move_]
-			_tar := _maze_map.m_user_list[tar_]
-			if _tar.M_pos.Distance(_mover.M_pos) < _tar.M_view_range {
-				_maze_map.m_msg_notify[tar_].m_update[move_] = struct{}{}
-				delete(_maze_map.m_msg_notify[tar_].m_delete, move_)
-			}else{
-				_maze_map.m_msg_notify[tar_].m_delete[move_] = struct{}{}
-				delete(_maze_map.m_msg_notify[tar_].m_add, move_)
-				delete(_maze_map.m_msg_notify[tar_].m_update, move_)
-			}
-		}, func(tar_, add_ uint32) {
-
-			_mover := _maze_map.m_user_list[add_]
-			_tar := _maze_map.m_user_list[tar_]
-			if _tar.M_pos.Distance(_mover.M_pos) < _tar.M_view_range {
-				_maze_map.m_msg_notify[tar_].m_add[add_] = struct{}{}
-				delete(_maze_map.m_msg_notify[tar_].m_delete, add_)
-			}
-
-		}, func(tar_, quit_ uint32) {
-			_maze_map.m_msg_notify[tar_].m_delete[quit_] = struct{}{}
-			delete(_maze_map.m_msg_notify[tar_].m_add, quit_)
-			delete(_maze_map.m_msg_notify[tar_].m_update, quit_)
-
-		})*/
+	
 	return _maze_map
 }
 
-const (
-	MAZE_GRID_SIZE float64 = 10
-)
-const (
-	MAZE_BLOCK_ROCK = -1
-)
 
 func (m *MazeMap) PosConvertIdx(pos_ YMsg.PositionXY) int {
 	_col_max := int(m.m_width / MAZE_GRID_SIZE)
 	return int(pos_.M_y/MAZE_GRID_SIZE)*_col_max + int(pos_.M_x/MAZE_GRID_SIZE)
 }
+
 func (m *MazeMap) IdxConvertPos(idx_ int) YMsg.PositionXY {
 	_pos := YMsg.PositionXY{}
 	_cur_col := idx_ % m.m_col_grid_max
 	_cur_row := idx_ / m.m_col_grid_max
-	_pos.M_x = float64(_cur_col)*MAZE_GRID_SIZE + (MAZE_GRID_SIZE / 2)
-	_pos.M_y = float64(_cur_row)*MAZE_GRID_SIZE + (MAZE_GRID_SIZE / 2)
+	_pos.M_x = float64(_cur_col)*MAZE_GRID_SIZE// + (MAZE_GRID_SIZE / 2)
+	_pos.M_y = float64(_cur_row)*MAZE_GRID_SIZE// + (MAZE_GRID_SIZE / 2)
 	return _pos
 }
 
@@ -169,10 +111,16 @@ func (m *MazeMap) InitMazeMap() {
 	/*_row_max := int(m.m_height / MAZE_GRID_SIZE)
 	_col_max := int(m.m_width / MAZE_GRID_SIZE)*/
 	_maze := make([][]float64, 0, m.m_row_grid_max)
-	for _row_idx := 0; _row_idx < m.m_col_grid_max; _row_idx++ {
+	for _row_idx := 0; _row_idx < m.m_row_grid_max; _row_idx++ {
 		_tmp_col := make([]float64, 0, m.m_col_grid_max)
 		for _col_idx := 0; _col_idx < m.m_col_grid_max; _col_idx++ {
-			_tmp_col = append(_tmp_col, 0)
+			//_tmp_col = append(_tmp_col, 0)
+			if rand.Int31n(10)%10 >8 {
+				_tmp_col = append(_tmp_col, 100000)
+			}else{
+				_tmp_col = append(_tmp_col, 0)
+			}
+			
 		}
 		_maze = append(_maze, _tmp_col)
 	}
@@ -194,7 +142,6 @@ func (m *MazeMap) Update(time_ time.Time) {
 	for _user_id_it, _it := range m.m_user_list {
 		_user_id := _user_id_it
 		_it.Update(time_)
-		//ylog.Info("uid [%v] path [%v]",_user_id,_it.MoveControl.String())
 		if _it.MoveUpdate(time_) {
 			m.m_go_ng_aoi.Move(ConvertUserToAoiObj(_it))
 		} else {
@@ -216,46 +163,49 @@ func (m *MazeMap) Update(time_ time.Time) {
 					return
 				}
 				_user.MoveQueue(m.IdxListConvertPosList(path))
+				_user.SendJson(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, YMsg.S2CMapAStarNodeUpdate{
+					_user.GetUID(),
+					_user.GetPathNode(),
+				})
 			})
 		}
 	}
-
-
+	
 	m.m_go_astar.Update()
 	m.m_go_ng_aoi.Update()
-
+	
 	for _id, _it := range m.m_msg_notify {
 		_user := m.m_user_list[_id]
-
-/*		if _id == 1 {
-			_new_idx := make(map[uint32]struct{})
-			_update_idx := make(map[uint32]struct{})
-			_remove_idx := make(map[uint32]struct{})
-			for _add_it := range _it.m_add {
-				_add_user := m.m_user_list[_add_it]
-				_new_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
-			}
-
-			for _add_it := range _it.m_update {
-				_add_user := m.m_user_list[_add_it]
-				_update_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
-			}
-
-			for _add_it := range _it.m_delete {
-				_add_user := m.m_user_list[_add_it]
-				_remove_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
-
-			}
-			ylog.Info("我当前格子 [%v] ", m.m_go_ng_aoi.CalcIndex(_user.M_pos))
-
-			ylog.Info("新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_new_idx))
-			ylog.Info("更新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_update_idx))
-			ylog.Info("删除玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_remove_idx))
-
-			ylog.Info("##################### ")
-
-		}*/
-
+		
+		/*		if _id == 1 {
+				_new_idx := make(map[uint32]struct{})
+				_update_idx := make(map[uint32]struct{})
+				_remove_idx := make(map[uint32]struct{})
+				for _add_it := range _it.m_add {
+					_add_user := m.m_user_list[_add_it]
+					_new_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
+				}
+		
+				for _add_it := range _it.m_update {
+					_add_user := m.m_user_list[_add_it]
+					_update_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
+				}
+		
+				for _add_it := range _it.m_delete {
+					_add_user := m.m_user_list[_add_it]
+					_remove_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
+		
+				}
+				ylog.Info("我当前格子 [%v] ", m.m_go_ng_aoi.CalcIndex(_user.M_pos))
+		
+				ylog.Info("新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_new_idx))
+				ylog.Info("更新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_update_idx))
+				ylog.Info("删除玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_remove_idx))
+		
+				ylog.Info("##################### ")
+		
+			}*/
+		
 		{
 			_add_msg := YMsg.S2CMapAddUser{
 				M_user: make([]YMsg.UserData, 0),
@@ -265,7 +215,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 				if _add_user != nil {
 					_add_msg.M_user = append(_add_msg.M_user, _add_user.ToClientJson())
 				}
-
+				
 			}
 			_user.SendJson(YMsg.MSG_S2C_MAP_ADD_USER, _add_msg)
 			_it.m_add = make(map[uint64]struct{}, 0)
@@ -279,7 +229,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 				if _update_user != nil {
 					_update_msg.M_user = append(_update_msg.M_user, _update_user.ToClientJson())
 				}
-
+				
 			}
 			_user.SendJson(YMsg.MSG_S2C_MAP_UPDATE_USER, _update_msg)
 			_it.m_update = make(map[uint64]struct{}, 0)
@@ -297,7 +247,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 			_user.SendJson(YMsg.MSG_S2C_MAP_DELETE_USER, _delete_msg)
 			_it.m_delete = make(map[uint64]struct{}, 0)
 		}
-
+		
 	}
 }
 func ConvertUserToAoiObj(user_ *user.User) aoi.GoAoiObj {
@@ -310,7 +260,7 @@ func ConvertUserToAoiObj(user_ *user.User) aoi.GoAoiObj {
 func (m *MazeMap) UserEnter(user_ *user.User) {
 	user_.M_current_map = m.m_uid
 	m.m_user_list[user_.GetUID()] = user_
-
+	
 	_notify_msg := &MapNotifyMsg{
 		m_update: make(map[uint64]struct{}, 0),
 		m_add:    make(map[uint64]struct{}, 0),
@@ -320,6 +270,13 @@ func (m *MazeMap) UserEnter(user_ *user.User) {
 	m.randPosition(user_)
 	//m.m_aoi.enter(user_.GetUID(), user_.M_pos)
 	m.m_go_ng_aoi.Enter(ConvertUserToAoiObj(user_))
+	
+	user_.SendJson(YMsg.MSG_S2C_MAP_FLUSH_MAP_MAZE, YMsg.S2CFlushMapMaze{
+		m.m_uid,
+		m.m_go_astar.GetMaze(),
+		m.m_height,
+		m.m_width,
+	})
 }
 func (m *MazeMap) UserQuit(user_ *user.User) {
 	user_.M_current_map = 0

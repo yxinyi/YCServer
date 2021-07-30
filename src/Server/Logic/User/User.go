@@ -39,6 +39,7 @@ func (u *User) ToClientJson() YMsg.UserData {
 	_user_msg := YMsg.UserData{
 		M_pos: u.M_pos,
 		M_uid: u.GetUID(),
+		//M_path: u.GetPathNode(),
 	}
 	return _user_msg
 }
