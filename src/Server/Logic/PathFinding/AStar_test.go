@@ -203,6 +203,16 @@ func TestPathToBetter(t_ *testing.T) {
 	}
 }
 
+var _block_maze = [][]float64{
+	{0, 0, 1000, 0, 0, 0, 0, 0, 0},
+	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
+	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
+	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0},
+}
+
 func CheckLinePassHelper(idx_ []int) bool {
 	_a := NewAStar()
 	_a.Init(_block_maze)
@@ -215,34 +225,117 @@ func TestCheckLinePass(t_ *testing.T) {
 	{
 		_test_arr = []int{0, 5}
 		if CheckLinePassHelper(_test_arr) {
-			t_.Fatalf("[%v]",_test_arr)
+			t_.Fatalf("[%v]", _test_arr)
 		}
 	}
 	{
-		_test_arr = []int{0, 30}
-		if !CheckLinePassHelper(_test_arr) {
-			t_.Fatalf("[%v]",_test_arr)
+		_test_arr = []int{3, 9}
+		if CheckLinePassHelper(_test_arr) {
+			t_.Fatalf("[%v]", _test_arr)
 		}
 	}
-}
-var _block_maze = [][]float64{
-	{0, 0, 1000, 0, 0, 0,    0, 0, 0},
-	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
-	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
-	{0, 0, 1000, 0, 0, 0, 1000, 0, 0},
-	{0, 0,    0, 0, 0, 0,    0, 0, 0},
-	{0, 0,    0, 0, 0, 0,    0, 0, 0},
-	{0, 0,    0, 0, 0, 0,    0, 0, 0},
-}
-func TestForceConn(t_ *testing.T) {
+	
 	_a := NewAStar()
-	_a.Init(_block_maze)
-	{
-		_force_path :=_a.forceConn([]int{0,1,10,19,28,37,38,39,40,31,32,23,14,6,7,8,17,26,35,44,53,62,61,60})
-		t_.Logf("[%v]",_force_path)
+	_a.Init([][]float64{
+		{0, 1000, 0},
+		{0, 0, 0},
+	})
+	if _a.checkLinePass(_a.indexConvertToBlockPos(0), _a.indexConvertToBlockPos(5)) {
+		t_.Fatal()
 	}
+}
+
+func TestForceConn(t_ *testing.T) {
 	{
-		_force_path :=_a.forceConn([]int{8,7,6,14,23,32,31,40,39,38,37,28,19,10,1,0})
-		t_.Logf("[%v]",_force_path)
+		_a := NewAStar()
+		_a.Init(_block_maze)
+		{
+			_force_path := _a.forceConn([]int{0, 1, 10, 19, 28, 37, 38, 39, 40, 31, 32, 23, 14, 6, 7, 8, 17, 26, 35, 44, 53, 62, 61, 60})
+			t_.Logf("[%v]", _force_path)
+		}
+		{
+			_force_path := _a.forceConn([]int{8, 7, 6, 14, 23, 32, 31, 40, 39, 38, 37, 28, 19, 10, 1, 0})
+			t_.Logf("[%v]", _force_path)
+		}
 	}
+	
+	{
+		
+		_a := NewAStar()
+		_a.Init([][]float64{
+			{0,    0, 0},
+			{1000, 0, 0},
+			{0, 1000, 0},
+		})
+		_force_path := _a.forceConn([]int{0,4,8})
+		if len(_force_path)!= 2 {
+			t_.Fatalf("[%v]", _force_path)
+		}
+		
+	}
+	
+}
+
+func TestAStarSlope(t_ *testing.T) {
+	_a := NewAStar()
+	
+	_cent_index := blockPos{
+		0, 2, 2,
+	}
+	_up_left := blockPos{
+		0, 1, 1,
+	}
+	_up_right := blockPos{
+		0, 3, 1,
+	}
+	_down_left := blockPos{
+		0, 1, 3,
+	}
+	_down_right := blockPos{
+		0, 3, 3,
+	}
+	
+	t_.Logf("up left slope [%.2f]", _a.slopeForStEd(_up_left, _cent_index))
+	t_.Logf("up right slope [%.2f]", _a.slopeForStEd(_up_right, _cent_index))
+	
+	t_.Logf("down left slope [%.2f]", _a.slopeForStEd(_down_left, _cent_index))
+	t_.Logf("down right slope [%.2f]", _a.slopeForStEd(_down_right, _cent_index))
+	t_.Logf("down right slope [%.2f]", _a.slopeForStEd(_cent_index, _down_right))
+	
+	_up_left_right := blockPos{
+		0, 1, 0,
+	}
+	t_.Logf("up left right slope [%.2f]", _a.slopeForStEd(_up_left_right, _cent_index))
+	//var _slope float64
+	
+	//2.2
+	/*	//_cent_pos
+		if _slope > 1{
+			//2.1,11
+			//_cent_pos.x _cent_pos.y-1
+			//_cent_pos.x-1, _cent_pos.y-1
+		}
+		if _slope == 1 {
+			//1.1
+			//_cent_pos.x-1, _cent_pos.y-1
+		}
+		if _slope < 1 && _slope > 0{
+			//1.1,1.2
+			//_cent_pos.x-1 _cent_pos.y
+			//_cent_pos.x-1, _cent_pos.y-1
+		}
+		if _slope > -1 && _slope < 0{
+			//1.3,1.2
+			//_cent_pos.x-1 _cent_pos.y+1
+			//_cent_pos.x-1, _cent_pos.y
+		}
+		if _slope == -1 {
+			//1.3
+			//_cent_pos.x-1 _cent_pos.y+1
+		}
+		if _slope < -1 {
+			//1.3,2.3
+			//_cent_pos.x-1 _cent_pos.y+1
+			//_cent_pos.x _cent_pos.y+1
+		}*/
 }

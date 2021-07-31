@@ -11,10 +11,9 @@ import (
 )
 
 const (
-	ScreenWidth  = 1280
-	ScreenHeight = 720
+	ScreenWidth            = 1280
+	ScreenHeight           = 720
 	MAZE_GRID_SIZE float64 = 10
-
 )
 
 type MapNotifyMsg struct {
@@ -84,7 +83,6 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 	return _maze_map
 }
 
-
 func (m *MazeMap) PosConvertIdx(pos_ YMsg.PositionXY) int {
 	_col_max := int(m.m_width / MAZE_GRID_SIZE)
 	return int(pos_.M_y/MAZE_GRID_SIZE)*_col_max + int(pos_.M_x/MAZE_GRID_SIZE)
@@ -94,8 +92,8 @@ func (m *MazeMap) IdxConvertPos(idx_ int) YMsg.PositionXY {
 	_pos := YMsg.PositionXY{}
 	_cur_col := idx_ % m.m_col_grid_max
 	_cur_row := idx_ / m.m_col_grid_max
-	_pos.M_x = float64(_cur_col)*MAZE_GRID_SIZE// + (MAZE_GRID_SIZE / 2)
-	_pos.M_y = float64(_cur_row)*MAZE_GRID_SIZE// + (MAZE_GRID_SIZE / 2)
+	_pos.M_x = float64(_cur_col) * MAZE_GRID_SIZE // + (MAZE_GRID_SIZE / 2)
+	_pos.M_y = float64(_cur_row) * MAZE_GRID_SIZE // + (MAZE_GRID_SIZE / 2)
 	return _pos
 }
 
@@ -115,9 +113,9 @@ func (m *MazeMap) InitMazeMap() {
 		_tmp_col := make([]float64, 0, m.m_col_grid_max)
 		for _col_idx := 0; _col_idx < m.m_col_grid_max; _col_idx++ {
 			//_tmp_col = append(_tmp_col, 0)
-			if rand.Int31n(10)%10 >8 {
+			if rand.Int31n(10)%10 > 8 {
 				_tmp_col = append(_tmp_col, 100000)
-			}else{
+			} else {
 				_tmp_col = append(_tmp_col, 0)
 			}
 			
@@ -154,12 +152,21 @@ func (m *MazeMap) Update(time_ time.Time) {
 				float64(rand.Int31n(ScreenWidth)),
 				float64(rand.Int31n(ScreenHeight)),
 			}
+			for m.m_go_astar.IsBlock(m.PosConvertIdx(_pos)){
+				_pos = YMsg.PositionXY{
+					float64(rand.Int31n(ScreenWidth)),
+					float64(rand.Int31n(ScreenHeight)),
+				}
+			}
 			_it.MoveTarget(_pos)
 			_go_search[_user_id] = struct{}{}
 			m.m_go_astar.Search(m.PosConvertIdx(_it.M_pos), m.PosConvertIdx(_pos), func(path []int) {
 				delete(_go_search, _user_id)
 				_user, exists := m.m_user_list[_user_id]
 				if !exists {
+					return
+				}
+				if len(path) == 0 {
 					return
 				}
 				_user.MoveQueue(m.IdxListConvertPosList(path))

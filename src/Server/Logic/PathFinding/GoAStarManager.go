@@ -47,8 +47,14 @@ func (mgr *AStarManager) GetMaze() [][]float64 {
 func (mgr *AStarManager) Init(maze_ [][]float64) {
 	mgr.m_maze = maze_
 }
+
+func (mgr *AStarManager) IsBlock(index_ int) bool {
+	_row := index_ / len(mgr.m_maze[0])
+	_col := index_ % len(mgr.m_maze[0])
+	return mgr.m_maze[_row][_col] != 0
+}
+
 func (mgr *AStarManager) Search(st_, ed_ int, cb_ aStarCallback) {
-	
 	_cache_path, exists := mgr.m_cache_path[uint64(st_)<<32|uint64(ed_)]
 	if exists {
 		cb_(_cache_path)

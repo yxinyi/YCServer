@@ -1,7 +1,7 @@
 package PathFinding
 
 import (
-	ylog "YServer/Logic/Log"
+	tool "YServer/Logic/Tool"
 	"math"
 )
 
@@ -35,13 +35,37 @@ func (a *AStar) Init(maze_ [][]float64) {
 func (a *AStar) Clear() {
 	a.m_open_list = make(map[int]*pathBlock)
 	a.m_close_list = make(map[int]*pathBlock)
-
+	
 }
+
+
+func (a *AStar) GridIsBlockWithIdx(idx_ int) bool {
+	_tmp_block := a.indexConvertToBlockPos(idx_)
+	return a.GridIsBlock(_tmp_block.m_col, _tmp_block.m_row)
+}
+
 func (a *AStar) GridIsBlock(x, y int) bool {
-	ylog.Info("GridIsBlock [%v:%v] [%v]", int(x), int(y), int(y)*a.m_col_max+int(x))
 	return a.m_maze[y][x] != 0
 }
-func (a *AStar) checkLinePass(st_, ed_ blockPos) bool {
+
+func (a *AStar) slopeForStEd(st_, ed_ blockPos) float64 {
+	type pos struct {
+		m_x float64
+		m_y float64
+	}
+	_local_st := pos{
+		float64(st_.m_col) + 0.5,
+		float64(st_.m_row) + 0.5,
+	}
+	_local_ed := pos{
+		float64(ed_.m_col) + 0.5,
+		float64(ed_.m_row) + 0.5,
+	}
+	
+	return (_local_ed.m_y - _local_st.m_y) / (_local_ed.m_x - _local_st.m_x)
+}
+
+func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 	type pos struct {
 		m_x float64
 		m_y float64
@@ -49,87 +73,476 @@ func (a *AStar) checkLinePass(st_, ed_ blockPos) bool {
 	if st_ == ed_ {
 		return true
 	}
-	_st := pos{
-		float64(st_.m_col) + 0.5,
-		float64(st_.m_row) + 0.5,
-	}
-	_ed := pos{
-		float64(ed_.m_col) + 0.5,
-		float64(ed_.m_row) + 0.5,
-	}
-	ylog.Info("######################################[%v:%v]st [%v] [%v:%v]ed [%v]", st_.m_col, st_.m_row, st_.m_index, ed_.m_col, ed_.m_row, ed_.m_index)
-
-	if _ed.m_x == _st.m_x {
-		for _row_idx := 0; _row_idx <= int(_ed.m_y-_st.m_y); _row_idx++ {
-
-			_tmp_pos := pos{
-				_st.m_x,
-				_st.m_y + float64(_row_idx),
+	//ylog.Info("######################################[%v:%v]st [%v] [%v:%v]ed [%v]", st_.m_col, st_.m_row, st_.m_index, ed_.m_col, ed_.m_row, ed_.m_index)
+	_func := func(_param_st, _param_ed pos) bool {
+		//先处理直线情况
+		//var _sma_y_pos pos
+		//var _big_y_pos pos
+		var _sma_x_pos pos
+		var _big_x_pos pos
+		
+		/*		if _param_st.m_y >= _param_ed.m_y {
+					_sma_y_pos = _param_ed
+					_big_y_pos = _param_st
+				} else {
+					_big_y_pos = _param_ed
+					_sma_y_pos = _param_st
+				}*/
+		
+		if _param_st.m_x >= _param_ed.m_x {
+			_sma_x_pos = _param_ed
+			_big_x_pos = _param_st
+		} else {
+			_big_x_pos = _param_ed
+			_sma_x_pos = _param_st
+		}
+		
+		if _sma_x_pos.m_x == _big_x_pos.m_x {
+			var _big_y float64
+			var _small_y float64
+			if _big_x_pos.m_y > _sma_x_pos.m_y {
+				_big_y = _big_x_pos.m_y
+				_small_y = _sma_x_pos.m_y
+			} else {
+				_small_y = _big_x_pos.m_y
+				_big_y = _sma_x_pos.m_y
 			}
-			if a.GridIsBlock(int(_tmp_pos.m_x), int(_tmp_pos.m_y)) {
-				return false
+			for _idx := int(_small_y); _idx <= int(_big_y); _idx++ {
+				if a.GridIsBlock(int(_big_x_pos.m_x), _idx) {
+					return false
+				}
+			}
+			return true
+		}
+		
+		if _sma_x_pos.m_y == _big_x_pos.m_y {
+			for _idx := int(_sma_x_pos.m_x); _idx <= int(_big_x_pos.m_x); _idx++ {
+				if a.GridIsBlock(_idx, int(_sma_x_pos.m_y)) {
+					return false
+				}
+			}
+			return true
+		}
+		{
+			_d_slope := (_big_x_pos.m_y - _sma_x_pos.m_y) / (_big_x_pos.m_x - _sma_x_pos.m_x)
+			_b_xy := _big_x_pos.m_y - (_d_slope * _big_x_pos.m_x)
+			
+			//y = dx+b
+			for _col_it := _sma_x_pos.m_x + 1; _col_it <= _big_x_pos.m_x; _col_it++ {
+				_tmp_y := _d_slope*float64(int(_col_it)) + _b_xy
+				if tool.Float64Equal(math.Abs(_d_slope), 1) {
+					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
+						return false
+					}
+					if int(_col_it) > 0 {
+						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)) {
+							return false
+						}
+					}
+					if int(_tmp_y) > 0 && int(_col_it) > 0 {
+						
+						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)-1) {
+							return false
+						}
+					}
+					if int(_tmp_y) > 0 {
+						if a.GridIsBlock(int(_col_it), int(_tmp_y)-1) {
+							return false
+						}
+					}
+				} else {
+					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
+						return false
+					}
+					if int(_col_it) > 0 {
+						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)) {
+							return false
+						}
+					}
+				}
+			}
+			var _big_y float64
+			var _small_y float64
+			if _big_x_pos.m_y > _sma_x_pos.m_y {
+				_big_y = _big_x_pos.m_y
+				_small_y = _sma_x_pos.m_y
+			} else {
+				_small_y = _big_x_pos.m_y
+				_big_y = _sma_x_pos.m_y
+			}
+			for _row_it := _small_y; _row_it <= _big_y; _row_it++ {
+				//x = (y-b) /d
+				_tmp_x := (float64(int(_row_it - _b_xy))) / _d_slope
+				if tool.Float64Equal(math.Abs(_d_slope), 1) {
+					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
+						return false
+					}
+					if int(_tmp_x) > 0 {
+						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)) {
+							return false
+						}
+					}
+					
+					if int(_row_it) > 0 {
+						if a.GridIsBlock(int(_tmp_x), int(_row_it)-1) {
+							return false
+						}
+					}
+					
+					if int(_tmp_x) > 0 && int(_row_it) > 0 {
+						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)-1) {
+							return false
+						}
+					}
+				} else {
+					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
+						return false
+					}
+					if int(_row_it) > 0 {
+						if a.GridIsBlock(int(_tmp_x), int(_row_it)-1) {
+							return false
+						}
+					}
+				}
 			}
 		}
+		
+		/*		{
+				_d_slope := (_big_y_pos.m_y - _sma_y_pos.m_y) / (_big_y_pos.m_x - _sma_y_pos.m_x)
+				_b_xy := _big_y_pos.m_y - (_d_slope * _big_y_pos.m_x)
+		
+				//x = (y-b) /d
+				for _row_it := _sma_y_pos.m_y ; _row_it <= _big_y_pos.m_y; _row_it++{
+					_tmp_x := (_row_it - _b_xy) / _d_slope
+					if math.Abs(_d_slope) == 1{
+						if a.GridIsBlock(int(_tmp_x),int(_row_it)) {
+							return false
+						}
+					}else{
+						if a.GridIsBlock(int(_tmp_x),int(_row_it)) {
+							return false
+						}
+						if int(_row_it)>0{
+							if a.GridIsBlock(int(_tmp_x),int(_row_it)-1) {
+								return false
+							}
+						}
+					}
+				}
+			}*/
+		
+		//for _row_it := range
+		
+		//_cent_pos 2.2
+		/*_cent_pos := _big_x_pos
+		if _d_slope > 1 {
+			//2.1,11
+			//_cent_pos.x _cent_pos.y-1
+			//_cent_pos.x-1, _cent_pos.y-1
+			if int(_cent_pos.m_y) > 0 {
+				if a.GridIsBlock(int(_cent_pos.m_x), int(_cent_pos.m_y)-1) {
+					return false
+				}
+				if int(_cent_pos.m_x) > 0 {
+					if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)-1) {
+						return false
+					}
+				}
+			}
+		}
+		if _d_slope == 1 {
+			//1.1
+			//_cent_pos.x-1, _cent_pos.y-1
+			if int(_cent_pos.m_y) > 0 && int(_cent_pos.m_x) > 0 {
+				if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)-1) {
+					return false
+				}
+			}
+		}
+		if _d_slope < 1 && _d_slope > 0 {
+			//1.1,1.2
+			//_cent_pos.x-1 _cent_pos.y
+			//_cent_pos.x-1, _cent_pos.y-1
+			if int(_cent_pos.m_x) > 0 {
+				if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)) {
+					return false
+				}
+				if int(_cent_pos.m_y) > 0 {
+					if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)-1) {
+						return false
+					}
+				}
+			}
+		}
+		if _d_slope > -1 && _d_slope < 0 {
+			//1.3,1.2
+			//_cent_pos.x-1 _cent_pos.y+1
+			//_cent_pos.x-1, _cent_pos.y
+			if int(_cent_pos.m_x) > 0 {
+				if int(_cent_pos.m_y) < a.m_row_max-1 {
+					if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)+1) {
+						return false
+					}
+				}
+				if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)) {
+					return false
+				}
+			}
+		}
+		if _d_slope == -1 {
+			//1.3
+			//_cent_pos.x-1 _cent_pos.y+1
+			if int(_cent_pos.m_x) > 0 && int(_cent_pos.m_y) < a.m_row_max-1 {
+				if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)+1) {
+					return false
+				}
+			}
+		}
+		if _d_slope < -1 {
+			//1.3,2.3
+			//_cent_pos.x-1 _cent_pos.y+1
+			//_cent_pos.x _cent_pos.y+1
+			if int(_cent_pos.m_y) < a.m_row_max-1 {
+				if a.GridIsBlock(int(_cent_pos.m_x), int(_cent_pos.m_y)+1) {
+					return false
+				}
+				if int(_cent_pos.m_x) > 0 {
+					if a.GridIsBlock(int(_cent_pos.m_x)-1, int(_cent_pos.m_y)+1) {
+						return false
+					}
+				}
+			}
+		}*/
+		
+		/*if math.Abs(_dxy) <=1{
+			//y = dx +b
+			for _idx := int(_sma_x_pos.m_x); _idx <= int(_big_x_pos.m_x); _idx++ {
+				_tmp_y := _dxy*float64(float64(_idx)+0.5) + _bxy
+				if a.GridIsBlock(_idx, int(_tmp_y)) {
+					return false
+				}
+				if _sma_x_pos.m_y > _big_y_pos.m_y {
+					if int(_tmp_y) > 0 {
+						if a.GridIsBlock(_idx, int(_tmp_y)-1) {
+							return false
+						}
+						if _idx > 0 {
+							if a.GridIsBlock(_idx-1, int(_tmp_y)-1) {
+								return false
+							}
+						}
+					}
+				} else {
+					if int(_tmp_y) < a.m_row_max-1 {
+						if a.GridIsBlock(_idx, int(_tmp_y)+1) {
+							return false
+						}
+		
+						if _idx > 0 {
+							if a.GridIsBlock(_idx-1, int(_tmp_y)+1) {
+								return false
+							}
+						}
+					}
+				}
+			}
+		}else{
+			//x = (y-b)/d
+			for _idx := int(_sma_y_pos.m_y); _idx <= int(_big_y_pos.m_y); _idx++ {
+				_tmp_x := (float64(float64(_idx)+0.5) - _bxy) / _dxy
+				if a.GridIsBlock(int(_tmp_x), _idx) {
+					return false
+				}
+				if _sma_y_pos.m_x > _big_y_pos.m_x {
+					if _idx < a.m_row_max-1 {
+						if a.GridIsBlock(int(_tmp_x), _idx+1) {
+							return false
+						}
+						if int(_tmp_x) < a.m_row_max-1 {
+							if a.GridIsBlock(int(_tmp_x)+1, _idx+1) {
+								return false
+							}
+						}
+					}
+				} else {
+					if _idx < a.m_row_max-1 {
+						if a.GridIsBlock(int(_tmp_x), _idx+1) {
+							return false
+						}
+						if int(_tmp_x) > 0 {
+							if a.GridIsBlock(int(_tmp_x)-1, _idx+1) {
+								return false
+							}
+						}
+					}
+				}
+			}
+		}*/
+		
+		/*		if _param_ed.m_x == _param_st.m_x {
+					if _param_ed.m_y > _param_st.m_y {
+						for _row_idx := 0; _row_idx <= int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
+							_tmp_y := _param_st.m_y + float64(_row_idx)
+							if _tmp_y > _param_ed.m_y {
+								break
+							}
+							if a.GridIsBlock(int(_param_st.m_x), int(_param_st.m_y+float64(_row_idx))) {
+								return false
+							}
+						}
+					} else {
+						for _row_idx := 0; _row_idx <= int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
+							_tmp_y := _param_st.m_y - float64(_row_idx)
+							if _tmp_y < 0 {
+								break
+							}
+							if a.GridIsBlock(int(_param_st.m_x), int(_param_st.m_y-float64(_row_idx))) {
+								return false
+							}
+						}
+					}
+		
+					return true
+				}
+				_dxy := (_param_ed.m_y - _param_st.m_y) / (_param_ed.m_x - _param_st.m_x)
+				_bxy := _param_st.m_y - (_dxy * _param_st.m_x)
+				if _dxy == 0 {
+					if _param_ed.m_x > _param_st.m_x {
+						for _col_idx := 0; _col_idx <= int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
+							_tmp_x := _param_st.m_x + float64(_col_idx)
+							if _tmp_x > _param_ed.m_x {
+								break
+							}
+							if a.GridIsBlock(int(_tmp_x), int(_param_st.m_y)) {
+								return false
+							}
+		
+						}
+					} else {
+						for _col_idx := 0; _col_idx <= int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
+							_tmp_x := _param_st.m_x - float64(_col_idx)
+							if _tmp_x < 0 {
+								break
+							}
+							if a.GridIsBlock(int(_tmp_x), int(_param_st.m_y)) {
+								return false
+							}
+		
+						}
+					}
+		
+					return true
+				}
+		
+				if _dxy < 0 {
+					for _col_idx := 0; _col_idx < int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
+						var _tmp_x float64
+						_tmp_x = _param_st.m_y - float64(_col_idx)
+						if _tmp_x <= 0 {
+							break
+						}
+						_tmp_x = _param_st.m_y + float64(_col_idx)
+						if a.GridIsBlock(int(_tmp_x), int(_dxy*_tmp_x+_bxy)) {
+							return false
+						}
+					}
+				} else {
+					for _col_idx := 0; _col_idx < int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
+						var _tmp_x float64
+						_tmp_x = _param_st.m_y - float64(_col_idx)
+						if _tmp_x >= _param_ed.m_x {
+							break
+						}
+						if a.GridIsBlock(int(_tmp_x), int(_dxy*_tmp_x+_bxy)) {
+							return false
+						}
+					}
+				}
+		
+				if _dxy < 0 {
+					for _row_idx := 0; _row_idx < int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
+						var _tmp_y float64
+						_tmp_y = _param_st.m_y - float64(_row_idx)
+						if _tmp_y <= 0 {
+							break
+						}
+						if a.GridIsBlock(int((_tmp_y-_bxy)/_dxy), int(_tmp_y)) {
+							return false
+						}
+					}
+				} else {
+					for _row_idx := 0; _row_idx < int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
+						var _tmp_y float64
+						_tmp_y = _param_st.m_y + float64(_row_idx)
+						if _tmp_y >= _param_ed.m_y {
+							break
+						}
+						if a.GridIsBlock(int((_tmp_y-_bxy)/_dxy), int(_tmp_y)) {
+							return false
+						}
+					}
+				}*/
+		
 		return true
 	}
-	_dxy := (_ed.m_y - _st.m_y) / (_ed.m_x - _st.m_x)
-	if _dxy == 0 {
-		for _col_idx := 0; _col_idx <= int(_ed.m_x-_st.m_x); _col_idx++ {
-
-			_tmp_pos := pos{
-				_st.m_x + float64(_col_idx),
-				_st.m_y,
-			}
-			if a.GridIsBlock(int(_tmp_pos.m_x), int(_tmp_pos.m_y)) {
-				return false
-			}
-
+	{
+		_local_st := pos{
+			float64(st_.m_col) + 0.5,
+			float64(st_.m_row) + 0.5,
 		}
-		return true
-	}
-	_func_x_to_y := func(pos_ pos, x_ float64) float64 {
-		_b := pos_.m_y - (_dxy * pos_.m_x)
-		return _dxy*float64(int(x_)) + _b
-	}
-	_func_y_to_x := func(pos_ pos, y_ float64) float64 {
-		// y = dx + b
-		//(y -b) /d = x
-		_b := pos_.m_y - (_dxy * pos_.m_x)
-		return (y_ - _b) / _dxy
-	}
-	for _col_idx := 0; _col_idx <= int(_ed.m_x-_st.m_x); _col_idx++ {
-		_tmp_x := _st.m_x + float64(_col_idx)
-		if a.GridIsBlock(int(_tmp_x), int(_func_x_to_y(_st, _tmp_x))) {
-			return false
+		_local_ed := pos{
+			float64(ed_.m_col) + 0.5,
+			float64(ed_.m_row) + 0.5,
 		}
-
-	}
-	for _row_idx := 0; _row_idx <= int(_ed.m_y-_st.m_y); _row_idx++ {
-		_tmp_y := _st.m_y + float64(_row_idx)
-		if a.GridIsBlock(int(_func_y_to_x(_st, _tmp_y)), int(_tmp_y)) {
+		if !_func(_local_st, _local_ed) {
 			return false
 		}
 	}
-
+	
 	return true
 }
 
-func (a *AStar) forceConn(before_path_ []int) []int {
-	_final_path := make([]int, 0)
-
+/*func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
+	_final_path := make([]*blockPos, 0)
 	//能否直连判断
-	_last_block_pos := a.indexConvertToBlockPos(before_path_[0])
+	_last_block_pos := before_path_[0]
 	_final_path = append(_final_path, before_path_[0])
-	for _idx := 1; _idx < len(before_path_); _idx++ {
-		_this_idx_block_pos := a.indexConvertToBlockPos(before_path_[_idx])
-		if !a.checkLinePass(_last_block_pos, _this_idx_block_pos) {
-			_final_path = append(_final_path, before_path_[_idx-1])
-			_last_block_pos = a.indexConvertToBlockPos(before_path_[_idx-1])
+	_loop_idx := len(before_path_)-1
+	_start_idx := 0
+	for  {
+		_loop_block := before_path_[_loop_idx]
+		if a.checkLinePass(_last_block_pos, _loop_block) {
+			_final_path = append(_final_path, before_path_[_loop_idx])
+			_start_idx = _loop_idx
+			_last_block_pos = before_path_[_start_idx]
+			_loop_idx = len(before_path_)-1
+			if _start_idx == len(before_path_)-1{
+				break
+			}
+		}else{
+			_loop_idx--
 		}
 	}
-
+	
 	_final_path = append(_final_path, before_path_[len(before_path_)-1])
+	return _final_path
+}*/
 
+func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
+	_final_path := make([]*blockPos, 0)
+	//能否直连判断
+	_last_block_pos := before_path_[0]
+	_final_path = append(_final_path, before_path_[0])
+	
+	for _idx := 1; _idx <= len(before_path_)-1 ; _idx++ {
+		_this_idx_block_pos := before_path_[_idx]
+		if !a.checkLinePass(_this_idx_block_pos,_last_block_pos) {
+			_final_path = append(_final_path, before_path_[_idx-1])
+			_last_block_pos = before_path_[_idx-1]
+		}
+	}
+	
+	_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
 }
 
@@ -154,47 +567,51 @@ func (a *AStar) pathToBetter(before_path_ []int) []int {
 			_after_path = append(_after_path, before_path_[_fast_idx])
 			_last_diff = _this_diff
 		}
-
+		
 	}
 	_after_path = append(_after_path, before_path_[len(before_path_)-1])
-
+	
 	return _after_path
 }
 
 func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
-/*	st_idx_ = 12
-	ed_idx_ = 26*/
+
 	_indx_arr := a.SearchWithIndex(st_idx_, ed_idx_)
 	//_indx_arr = a.pathToBetter(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
-	return _indx_arr
+	_indx_arr = a.forceConn(_indx_arr)
+	_ret_arr := make([]int,0, len(_indx_arr))
+	for _,_it := range _indx_arr{
+		_ret_arr = append(_ret_arr, _it.m_index)
+	}
+	return _ret_arr
 }
 
-func (a *AStar) SearchWithIndex(st_idx_, ed_idx_ int) []int {
-	_ret_arr := make([]int, 0)
+func (a *AStar) SearchWithIndex(st_idx_, ed_idx_ int) []*blockPos {
+	_ret_arr := make([]*blockPos , 0)
 	_path := a.search(a.indexConvertToBlockPos(st_idx_), a.indexConvertToBlockPos(ed_idx_))
 	if _path == nil {
 		return _ret_arr
 	}
-	_tmp_arr := make([]int, 0)
-
+	
+	_tmp_arr := make([]*blockPos, 0)
+	
 	for _path != nil {
-		_tmp_arr = append(_tmp_arr, _path.m_index)
+		_tmp_arr = append(_tmp_arr, &_path.blockPos)
 		_path = _path.m_parent_block
 	}
 	for _idx := len(_tmp_arr) - 1; _idx >= 0; _idx-- {
 		_ret_arr = append(_ret_arr, _tmp_arr[_idx])
 	}
-	//return a.pathToBetter(_ret_arr)
 	return _ret_arr
 }
 
 func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 	a.m_target = ed_
-
+	
 	_st_block := a.newPathBlock(st_)
 	_st_block.CalcDisTar(ed_)
-
+	
 	a.m_open_list[_st_block.m_index] = _st_block
 	_current_block := _st_block
 	for len(a.m_open_list) > 0 {
@@ -203,7 +620,7 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 		}
 		delete(a.m_open_list, _current_block.m_index)
 		a.m_close_list[_current_block.m_index] = _current_block
-
+		
 		_round_map := a.getRound(_current_block)
 		for _round_it := range _round_map {
 			_, _exists := a.m_open_list[_round_it]
@@ -215,7 +632,7 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 				continue
 			}
 			_new_path_block := a.newPathBlock(a.indexConvertToBlockPos(_round_it))
-
+			
 			_new_path_block.setParentBlock(_current_block)
 			var _dis_val float64
 			if a.isSlopeIndex(_round_it, _current_block.m_index) {
@@ -227,7 +644,7 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 			_new_path_block.CalcDisTar(a.m_target)
 			a.m_open_list[_new_path_block.m_index] = _new_path_block
 		}
-
+		
 		_current_block = a.getLeastDistanceBlock()
 	}
 	return nil
@@ -259,11 +676,11 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 	_ret_round := make(map[int]struct{})
 	_cent_idex := cent_block_.m_index
 	_col_max := a.m_col_max
-
+	
 	_max_idx := a.m_row_max * a.m_col_max
-
+	
 	_cent_row := cent_block_.m_row
-
+	
 	/*	{
 			_left_up := _cent_idex - _col_max - 1
 			if _left_up >= 0 && (_left_up/_col_max+1) == _cent_row {
@@ -283,7 +700,7 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 			_ret_round[_up_right] = struct{}{}
 		}
 	}*/
-
+	
 	{
 		_left := _cent_idex - 1
 		if _left >= 0 && (_left/_col_max) == _cent_row {
@@ -303,7 +720,7 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 				_ret_round[_down_left] = struct{}{}
 			}
 		}*/
-
+	
 	{
 		_down := _cent_idex + _col_max
 		if _down < _max_idx && (_down/_col_max-1) == _cent_row {

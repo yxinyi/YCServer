@@ -18,6 +18,7 @@ const (
 	ScreenWidth  = 1200
 	ScreenHeight = 700
 	gridSize     = 10
+	userGridSize = 5
 )
 
 var uiFont font.Face
@@ -35,6 +36,7 @@ func NewMap() *Map {
 var g_map = NewMap()
 var g_main_uid uint64
 var g_main_path_node []YMsg.PositionXY
+var g_main_check_node []YMsg.PositionXY
 var g_map_maze_info YMsg.S2CFlushMapMaze
 
 func (m *Map) Init() {
@@ -109,7 +111,7 @@ func (m *Map) Update() {
 
 func (m *Map) Draw(screen *ebiten.Image) {
 	text.Draw(screen, g_slope, uiFont, int(100), int(100), color.White)
-
+	
 	_grid_size := g_map_maze_info.M_height / float64(len(g_map_maze_info.M_maze))
 	for _row_idx_it, _row_it := range g_map_maze_info.M_maze {
 		_row_idx := _row_idx_it
@@ -139,17 +141,20 @@ func (m *Map) Draw(screen *ebiten.Image) {
 		if m.m_user_list[_uid_it].M_pos.Distance(it.M_pos) > 100 {
 			panic("1")
 		}
-
+		
 		if g_main_uid == _uid_it {
 			detailStr := fmt.Sprintf("%.2f,%.2f", it.M_pos.M_x, it.M_pos.M_y)
-			text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+50), color.White)
-			ebitenutil.DrawRect(screen, it.M_pos.M_x, it.M_pos.M_y, gridSize, gridSize, color.RGBA{0xff, 0xa0, 0x00, 0xff})
+			text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+20), color.White)
+			ebitenutil.DrawRect(screen, it.M_pos.M_x+(gridSize-userGridSize)/2, it.M_pos.M_y+(gridSize-userGridSize)/2, userGridSize, userGridSize, color.RGBA{0xff, 0xa0, 0x00, 0xff})
 		} else {
 			detailStr := fmt.Sprintf("%.2f,%.2f", it.M_pos.M_x, it.M_pos.M_y)
-			text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+50), color.White)
-			ebitenutil.DrawRect(screen, it.M_pos.M_x, it.M_pos.M_y, gridSize, gridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
+			text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+20), color.White)
+			ebitenutil.DrawRect(screen, it.M_pos.M_x+(gridSize-userGridSize)/2, it.M_pos.M_y+(gridSize-userGridSize)/2, userGridSize, userGridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
 		}
 	}
+	/*	for _, path_it := range g_main_check_node {
+		ebitenutil.DrawRect(screen, path_it.M_x*_grid_size, path_it.M_y*_grid_size, gridSize, gridSize, color.RGBA{0x00, 0xff, 0x00, 0x33})
+	}*/
 	/*
 		detailStr := fmt.Sprintf("%d", 10)
 		text.Draw(screen, detailStr, uiFont, 100, 100, color.White)*/

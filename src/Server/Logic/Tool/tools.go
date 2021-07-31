@@ -1,6 +1,9 @@
 package tool
 
-import "sort"
+import (
+	"math"
+	"sort"
+)
 
 func Uint32SetConvertToSortSlice(set_ map[uint32]struct{}) []uint32 {
 	_ret_slice := make([]uint32, 0, len(set_))
@@ -49,4 +52,11 @@ func Uint64MapUint64SetMerge(lhs_ map[uint64]map[uint64]struct{},rhs_ map[uint64
 		_ret_map[_key] = Uint64SetMerge(_ret_map[_key],_set_it)
 	}
 	return _ret_map
+}
+
+func Float64Equal(check_num_,target_ float64)bool{
+	if math.Abs(check_num_ - target_) < 0.00001{
+		return true
+	}
+	return false
 }
