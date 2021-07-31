@@ -10,6 +10,19 @@ const (
 	SlopeVal    = 1.4
 )
 
+func blockPosCompare(a, b interface{}) int {
+	_block_a := a.(*pathBlock)
+	_block_b := b.(*pathBlock)
+	switch {
+	case _block_a.GetTotalDistance() > _block_b.GetTotalDistance():
+		return 1
+	case _block_a.GetTotalDistance() < _block_b.GetTotalDistance():
+		return -1
+	default:
+		return 0
+	}
+}
+
 type AStar struct {
 	m_maze       [][]float64
 	m_open_list  map[int]*pathBlock
@@ -21,7 +34,9 @@ type AStar struct {
 
 func NewAStar() *AStar {
 	return &AStar{
-		m_maze:       make([][]float64, 0),
+		m_maze: make([][]float64, 0),
+		/*		m_open_list:  make(map[int]*pathBlock),
+				m_close_list: make(map[int]*pathBlock),*/
 		m_open_list:  make(map[int]*pathBlock),
 		m_close_list: make(map[int]*pathBlock),
 	}
@@ -35,9 +50,8 @@ func (a *AStar) Init(maze_ [][]float64) {
 func (a *AStar) Clear() {
 	a.m_open_list = make(map[int]*pathBlock)
 	a.m_close_list = make(map[int]*pathBlock)
-	
-}
 
+}
 
 func (a *AStar) GridIsBlockWithIdx(idx_ int) bool {
 	_tmp_block := a.indexConvertToBlockPos(idx_)
@@ -61,7 +75,7 @@ func (a *AStar) slopeForStEd(st_, ed_ blockPos) float64 {
 		float64(ed_.m_col) + 0.5,
 		float64(ed_.m_row) + 0.5,
 	}
-	
+
 	return (_local_ed.m_y - _local_st.m_y) / (_local_ed.m_x - _local_st.m_x)
 }
 
@@ -80,7 +94,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		//var _big_y_pos pos
 		var _sma_x_pos pos
 		var _big_x_pos pos
-		
+
 		/*		if _param_st.m_y >= _param_ed.m_y {
 					_sma_y_pos = _param_ed
 					_big_y_pos = _param_st
@@ -88,7 +102,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 					_big_y_pos = _param_ed
 					_sma_y_pos = _param_st
 				}*/
-		
+
 		if _param_st.m_x >= _param_ed.m_x {
 			_sma_x_pos = _param_ed
 			_big_x_pos = _param_st
@@ -96,7 +110,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			_big_x_pos = _param_ed
 			_sma_x_pos = _param_st
 		}
-		
+
 		if _sma_x_pos.m_x == _big_x_pos.m_x {
 			var _big_y float64
 			var _small_y float64
@@ -114,7 +128,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			}
 			return true
 		}
-		
+
 		if _sma_x_pos.m_y == _big_x_pos.m_y {
 			for _idx := int(_sma_x_pos.m_x); _idx <= int(_big_x_pos.m_x); _idx++ {
 				if a.GridIsBlock(_idx, int(_sma_x_pos.m_y)) {
@@ -126,7 +140,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		{
 			_d_slope := (_big_x_pos.m_y - _sma_x_pos.m_y) / (_big_x_pos.m_x - _sma_x_pos.m_x)
 			_b_xy := _big_x_pos.m_y - (_d_slope * _big_x_pos.m_x)
-			
+
 			//y = dx+b
 			for _col_it := _sma_x_pos.m_x + 1; _col_it <= _big_x_pos.m_x; _col_it++ {
 				_tmp_y := _d_slope*float64(int(_col_it)) + _b_xy
@@ -140,7 +154,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 						}
 					}
 					if int(_tmp_y) > 0 && int(_col_it) > 0 {
-						
+
 						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)-1) {
 							return false
 						}
@@ -182,13 +196,13 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 							return false
 						}
 					}
-					
+
 					if int(_row_it) > 0 {
 						if a.GridIsBlock(int(_tmp_x), int(_row_it)-1) {
 							return false
 						}
 					}
-					
+
 					if int(_tmp_x) > 0 && int(_row_it) > 0 {
 						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)-1) {
 							return false
@@ -206,11 +220,11 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				}
 			}
 		}
-		
+
 		/*		{
 				_d_slope := (_big_y_pos.m_y - _sma_y_pos.m_y) / (_big_y_pos.m_x - _sma_y_pos.m_x)
 				_b_xy := _big_y_pos.m_y - (_d_slope * _big_y_pos.m_x)
-		
+
 				//x = (y-b) /d
 				for _row_it := _sma_y_pos.m_y ; _row_it <= _big_y_pos.m_y; _row_it++{
 					_tmp_x := (_row_it - _b_xy) / _d_slope
@@ -230,9 +244,9 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 					}
 				}
 			}*/
-		
+
 		//for _row_it := range
-		
+
 		//_cent_pos 2.2
 		/*_cent_pos := _big_x_pos
 		if _d_slope > 1 {
@@ -313,7 +327,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				}
 			}
 		}*/
-		
+
 		/*if math.Abs(_dxy) <=1{
 			//y = dx +b
 			for _idx := int(_sma_x_pos.m_x); _idx <= int(_big_x_pos.m_x); _idx++ {
@@ -337,7 +351,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 						if a.GridIsBlock(_idx, int(_tmp_y)+1) {
 							return false
 						}
-		
+
 						if _idx > 0 {
 							if a.GridIsBlock(_idx-1, int(_tmp_y)+1) {
 								return false
@@ -378,7 +392,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				}
 			}
 		}*/
-		
+
 		/*		if _param_ed.m_x == _param_st.m_x {
 					if _param_ed.m_y > _param_st.m_y {
 						for _row_idx := 0; _row_idx <= int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
@@ -401,7 +415,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 							}
 						}
 					}
-		
+
 					return true
 				}
 				_dxy := (_param_ed.m_y - _param_st.m_y) / (_param_ed.m_x - _param_st.m_x)
@@ -416,7 +430,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 							if a.GridIsBlock(int(_tmp_x), int(_param_st.m_y)) {
 								return false
 							}
-		
+
 						}
 					} else {
 						for _col_idx := 0; _col_idx <= int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
@@ -427,13 +441,13 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 							if a.GridIsBlock(int(_tmp_x), int(_param_st.m_y)) {
 								return false
 							}
-		
+
 						}
 					}
-		
+
 					return true
 				}
-		
+
 				if _dxy < 0 {
 					for _col_idx := 0; _col_idx < int(_param_ed.m_x-_param_st.m_x); _col_idx++ {
 						var _tmp_x float64
@@ -458,7 +472,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 						}
 					}
 				}
-		
+
 				if _dxy < 0 {
 					for _row_idx := 0; _row_idx < int(_param_ed.m_y-_param_st.m_y); _row_idx++ {
 						var _tmp_y float64
@@ -482,7 +496,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 						}
 					}
 				}*/
-		
+
 		return true
 	}
 	{
@@ -498,7 +512,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -523,25 +537,28 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			_loop_idx--
 		}
 	}
-	
+
 	_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
 }*/
 
 func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	_final_path := make([]*blockPos, 0)
+	if len(before_path_) == 0 {
+		return _final_path
+	}
 	//能否直连判断
 	_last_block_pos := before_path_[0]
 	_final_path = append(_final_path, before_path_[0])
-	
-	for _idx := 1; _idx <= len(before_path_)-1 ; _idx++ {
+
+	for _idx := 1; _idx < len(before_path_); _idx++ {
 		_this_idx_block_pos := before_path_[_idx]
-		if !a.checkLinePass(_this_idx_block_pos,_last_block_pos) {
+		if !a.checkLinePass(_this_idx_block_pos, _last_block_pos) {
 			_final_path = append(_final_path, before_path_[_idx-1])
 			_last_block_pos = before_path_[_idx-1]
 		}
 	}
-	
+
 	_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
 }
@@ -567,10 +584,10 @@ func (a *AStar) pathToBetter(before_path_ []int) []int {
 			_after_path = append(_after_path, before_path_[_fast_idx])
 			_last_diff = _this_diff
 		}
-		
+
 	}
 	_after_path = append(_after_path, before_path_[len(before_path_)-1])
-	
+
 	return _after_path
 }
 
@@ -580,22 +597,22 @@ func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
 	//_indx_arr = a.pathToBetter(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
-	_ret_arr := make([]int,0, len(_indx_arr))
-	for _,_it := range _indx_arr{
+	_ret_arr := make([]int, 0, len(_indx_arr))
+	for _, _it := range _indx_arr {
 		_ret_arr = append(_ret_arr, _it.m_index)
 	}
 	return _ret_arr
 }
 
 func (a *AStar) SearchWithIndex(st_idx_, ed_idx_ int) []*blockPos {
-	_ret_arr := make([]*blockPos , 0)
+	_ret_arr := make([]*blockPos, 0)
 	_path := a.search(a.indexConvertToBlockPos(st_idx_), a.indexConvertToBlockPos(ed_idx_))
 	if _path == nil {
 		return _ret_arr
 	}
-	
+
 	_tmp_arr := make([]*blockPos, 0)
-	
+
 	for _path != nil {
 		_tmp_arr = append(_tmp_arr, &_path.blockPos)
 		_path = _path.m_parent_block
@@ -608,10 +625,10 @@ func (a *AStar) SearchWithIndex(st_idx_, ed_idx_ int) []*blockPos {
 
 func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 	a.m_target = ed_
-	
+
 	_st_block := a.newPathBlock(st_)
 	_st_block.CalcDisTar(ed_)
-	
+
 	a.m_open_list[_st_block.m_index] = _st_block
 	_current_block := _st_block
 	for len(a.m_open_list) > 0 {
@@ -620,7 +637,7 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 		}
 		delete(a.m_open_list, _current_block.m_index)
 		a.m_close_list[_current_block.m_index] = _current_block
-		
+
 		_round_map := a.getRound(_current_block)
 		for _round_it := range _round_map {
 			_, _exists := a.m_open_list[_round_it]
@@ -632,7 +649,7 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 				continue
 			}
 			_new_path_block := a.newPathBlock(a.indexConvertToBlockPos(_round_it))
-			
+
 			_new_path_block.setParentBlock(_current_block)
 			var _dis_val float64
 			if a.isSlopeIndex(_round_it, _current_block.m_index) {
@@ -642,9 +659,10 @@ func (a *AStar) search(st_, ed_ blockPos) *pathBlock {
 			}
 			_new_path_block.SetDisStart(_current_block.m_dis_start + _dis_val)
 			_new_path_block.CalcDisTar(a.m_target)
+
 			a.m_open_list[_new_path_block.m_index] = _new_path_block
 		}
-		
+
 		_current_block = a.getLeastDistanceBlock()
 	}
 	return nil
@@ -662,7 +680,6 @@ func (a *AStar) getLeastDistanceBlock() *pathBlock {
 	}
 	return _least_disance_block
 }
-
 func (a *AStar) isSlopeIndex(lhs_, rhs_ int) bool {
 	return math.Abs(float64(lhs_-rhs_)) != float64(a.m_col_max) && math.Abs(float64(lhs_-rhs_)) != 1
 }
@@ -676,11 +693,11 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 	_ret_round := make(map[int]struct{})
 	_cent_idex := cent_block_.m_index
 	_col_max := a.m_col_max
-	
+
 	_max_idx := a.m_row_max * a.m_col_max
-	
+
 	_cent_row := cent_block_.m_row
-	
+
 	/*	{
 			_left_up := _cent_idex - _col_max - 1
 			if _left_up >= 0 && (_left_up/_col_max+1) == _cent_row {
@@ -700,7 +717,7 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 			_ret_round[_up_right] = struct{}{}
 		}
 	}*/
-	
+
 	{
 		_left := _cent_idex - 1
 		if _left >= 0 && (_left/_col_max) == _cent_row {
@@ -720,7 +737,7 @@ func (a *AStar) getRound(cent_block_ *pathBlock) map[int]struct{} {
 				_ret_round[_down_left] = struct{}{}
 			}
 		}*/
-	
+
 	{
 		_down := _cent_idex + _col_max
 		if _down < _max_idx && (_down/_col_max-1) == _cent_row {
@@ -761,6 +778,7 @@ type pathBlock struct {
 	m_dis_start       float64
 	m_dis_target      float64
 	m_block_delay_val float64
+	m_total_distance  float64
 	m_parent_block    *pathBlock
 }
 
@@ -788,8 +806,11 @@ func (b *pathBlock) SetDisStart(distance_ float64) {
 
 func (b *pathBlock) CalcDisTar(tar_ blockPos) {
 	b.m_dis_target = b.blockPos.CalcDisTar(tar_)
+	b.SetTotalDistance(b.m_dis_target + b.m_dis_start + b.m_block_delay_val)
 }
-
+func (b *pathBlock) SetTotalDistance(val_ float64)  {
+	b.m_total_distance = val_
+}
 func (b *pathBlock) GetTotalDistance() float64 {
-	return b.m_dis_target + b.m_dis_start + b.m_block_delay_val
+	return b.m_total_distance
 }

@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	ScreenWidth  = 1200
-	ScreenHeight = 700
+	ScreenWidth  = 1280
+	ScreenHeight = 720
 	gridSize     = 10
 	userGridSize = 5
 )
