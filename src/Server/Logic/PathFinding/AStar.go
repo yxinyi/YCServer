@@ -549,7 +549,7 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	}
 	//能否直连判断
 	_last_block_pos := before_path_[0]
-	_final_path = append(_final_path, before_path_[0])
+	//_final_path = append(_final_path, before_path_[0])
 
 	for _idx := 1; _idx < len(before_path_); _idx++ {
 		_this_idx_block_pos := before_path_[_idx]
@@ -596,7 +596,7 @@ func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
 	_indx_arr := a.SearchWithIndex(st_idx_, ed_idx_)
 	//_indx_arr = a.pathToBetter(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
-	_indx_arr = a.forceConn(_indx_arr)
+	//_indx_arr = a.forceConn(_indx_arr)
 	_ret_arr := make([]int, 0, len(_indx_arr))
 	for _, _it := range _indx_arr {
 		_ret_arr = append(_ret_arr, _it.m_index)

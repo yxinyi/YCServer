@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
@@ -49,8 +50,8 @@ func (m *Map) Init() {
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
-	
-	YNet.Register(YMsg.S2C_MESSAGE_MOVE, m.UserMove)
+
+	YNet.Register(YMsg.MsgID_S2CUserMove, m.UserMove)
 	YNet.Register(YMsg.MSG_S2C_MAP_FULL_SYNC, func(msg_ YMsg.S2CMapFullSync, _ YNet.Session) {
 		for _, _it := range msg_.M_user {
 			m.AddNewUser(_it)
@@ -60,7 +61,7 @@ func (m *Map) Init() {
 		for _, _it := range msg_.M_user {
 			m.AddNewUser(_it)
 		}
-		
+
 	})
 	YNet.Register(YMsg.MSG_S2C_MAP_UPDATE_USER, func(msg_ YMsg.S2CMapUpdateUser, _ YNet.Session) {
 		for _, _it := range msg_.M_user {
@@ -72,9 +73,9 @@ func (m *Map) Init() {
 			m.DeleteUser(_it.M_uid)
 		}
 	})
-	YNet.Register(YMsg.MSG_S2C_USER_SUCCESS_LOGIN, func(msg_ YMsg.S2CUserSuccessLogin, _ YNet.Session) {
-		
-		g_main_uid = msg_.M_uid
+	YNet.Register(YMsg.MsgID_S2CUserSuccessLogin, func(msg_ YMsg.S2CUserSuccessLogin, _ YNet.Session) {
+		g_main_uid = msg_.M_data.M_uid
+		m.AddNewUser(msg_.M_data)
 	})
 	YNet.Register(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, func(msg_ YMsg.S2CMapAStarNodeUpdate, _ YNet.Session) {
 		g_main_path_node = msg_.M_path
@@ -94,7 +95,7 @@ func (m *Map) AddNewUser(user_data_ YMsg.UserData) {
 var g_slope string
 
 func (m *Map) UpdateUser(user_data_ YMsg.UserData) {
-	
+
 	if g_main_uid == user_data_.M_uid {
 		g_slope = fmt.Sprintf("%.2f", (user_data_.M_pos.M_y-m.m_user_list[user_data_.M_uid].M_pos.M_y)/(user_data_.M_pos.M_x-m.m_user_list[user_data_.M_uid].M_pos.M_x))
 	}
@@ -106,12 +107,20 @@ func (m *Map) UserMove(msg_ YMsg.S2C_MOVE, _ YNet.Session) {
 }
 
 func (m *Map) Update() {
-
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		_tar_x, _tar_y := ebiten.CursorPosition()
+		g_client_cnn.SendJson(YMsg.MsgID_C2SUserMove, YMsg.C2SUserMove{
+			YMsg.PositionXY{
+				float64(_tar_x),
+				float64(_tar_y),
+			},
+		})
+	}
 }
 
 func (m *Map) Draw(screen *ebiten.Image) {
 	text.Draw(screen, g_slope, uiFont, int(100), int(100), color.White)
-	
+
 	_grid_size := g_map_maze_info.M_height / float64(len(g_map_maze_info.M_maze))
 	for _row_idx_it, _row_it := range g_map_maze_info.M_maze {
 		_row_idx := _row_idx_it
@@ -126,22 +135,22 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			text.Draw(screen, detailStr, uiFont, int (float64(_col_idx)*_grid_size + _grid_size/2), int (float64(_row_idx)*_grid_size+ _grid_size/2), color.White) */
 		}
 	}
-	
+
 	for _, it := range m.m_user_list {
 		for _, path_it := range it.M_path {
 			ebitenutil.DrawRect(screen, path_it.M_x, path_it.M_y, gridSize, gridSize, color.RGBA{0xff, 0x00, 0x00, 0xff})
 		}
 	}
-	
+
 	for _, path_it := range g_main_path_node {
 		ebitenutil.DrawRect(screen, path_it.M_x, path_it.M_y, gridSize, gridSize, color.RGBA{0xff, 0x00, 0x00, 0xff})
 	}
-	
+
 	for _uid_it, it := range m.m_user_list {
 		if m.m_user_list[_uid_it].M_pos.Distance(it.M_pos) > 100 {
 			panic("1")
 		}
-		
+
 		if g_main_uid == _uid_it {
 			detailStr := fmt.Sprintf("%.2f,%.2f", it.M_pos.M_x, it.M_pos.M_y)
 			text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+20), color.White)
@@ -152,11 +161,4 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			ebitenutil.DrawRect(screen, it.M_pos.M_x+(gridSize-userGridSize)/2, it.M_pos.M_y+(gridSize-userGridSize)/2, userGridSize, userGridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
 		}
 	}
-	/*	for _, path_it := range g_main_check_node {
-		ebitenutil.DrawRect(screen, path_it.M_x*_grid_size, path_it.M_y*_grid_size, gridSize, gridSize, color.RGBA{0x00, 0xff, 0x00, 0x33})
-	}*/
-	/*
-		detailStr := fmt.Sprintf("%d", 10)
-		text.Draw(screen, detailStr, uiFont, 100, 100, color.White)*/
-	
 }

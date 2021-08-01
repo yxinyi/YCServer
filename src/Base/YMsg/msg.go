@@ -7,10 +7,10 @@ import (
 
 const (
 	MESSAGE_TEST uint32 = iota
-	C2S_MESSAGE_MOVE
-	S2C_MESSAGE_MOVE
-	
-	MSG_S2C_USER_SUCCESS_LOGIN
+	MsgID_C2SUserMove
+	MsgID_S2CUserMove
+
+	MsgID_S2CUserSuccessLogin
 	
 	MSG_S2C_MAP_FULL_SYNC
 	MSG_S2C_MAP_ADD_USER
@@ -63,8 +63,7 @@ func (p PositionXY) Distance(rhs_ PositionXY) float64 {
 	return math.Sqrt(_dx*_dx + _dy*_dy)
 }
 
-type C2S_MOVE struct {
-	M_uid uint64
+type C2SUserMove struct {
 	M_pos PositionXY
 }
 
@@ -92,7 +91,7 @@ type S2CMapAStarNodeUpdate struct {
 }
 
 type S2CUserSuccessLogin struct {
-	M_uid uint64
+	M_data UserData
 }
 
 type S2CFlushMapMaze struct {

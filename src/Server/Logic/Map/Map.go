@@ -26,12 +26,12 @@ type MazeMap struct {
 	m_uid        uint64
 	m_user_list  map[uint64]*user.User
 	m_msg_notify map[uint64]*MapNotifyMsg
-	
+
 	m_width        float64
 	m_height       float64
 	m_row_grid_max int
 	m_col_grid_max int //
-	
+
 	//m_aoi    *aoi.AoiManager
 	//m_go_aoi *aoi.GoAoiManager
 	m_go_ng_aoi *aoi.GoNineGirdAoiManager
@@ -61,7 +61,7 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 				delete(_maze_map.m_msg_notify[tar_].m_delete, _it)
 			}
 		}
-		
+
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
 			_, exists := _maze_map.m_msg_notify[tar_]
@@ -79,7 +79,7 @@ func NewMazeMap(uid_ uint64) *MazeMap {
 			}
 		}
 	})
-	
+
 	return _maze_map
 }
 
@@ -118,7 +118,7 @@ func (m *MazeMap) InitMazeMap() {
 			} else {
 				_tmp_col = append(_tmp_col, 0)
 			}
-			
+
 		}
 		_maze = append(_maze, _tmp_col)
 	}
@@ -134,15 +134,41 @@ func (m *MazeMap) ObjCount() uint32 {
 	return uint32(len(m.m_user_list))
 }
 
-var _go_search = make(map[uint64]struct{})
+func (m *MazeMap) UserMove(user_ *user.User, tar_pos_ YMsg.PositionXY) {
+	tar_pos_.M_x = float64(int(tar_pos_.M_x))
+	tar_pos_.M_y = float64(int(tar_pos_.M_y))
+	user_.MoveTarget(tar_pos_)
+	if m.m_go_astar.IsBlock(m.PosConvertIdx(tar_pos_)){
+		return
+	}
+
+	m.m_go_astar.Search(m.PosConvertIdx(user_.M_pos), m.PosConvertIdx(user_.M_tar), func(path []int) {
+		_user, exists := m.m_user_list[user_.GetUID()]
+		if !exists {
+			return
+		}
+		if len(path) == 0 {
+			return
+		}
+		_target_indx := m.PosConvertIdx(user_.M_tar)
+		if path[len(path)-1] != _target_indx {
+			return
+		}
+		_user.MoveQueue(m.IdxListConvertPosList(path))
+		_user.SendJson(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, YMsg.S2CMapAStarNodeUpdate{
+			_user.GetUID(),
+			_user.GetPathNode(),
+		})
+	})
+}
 
 func (m *MazeMap) Update(time_ time.Time) {
-	for _user_id_it, _it := range m.m_user_list {
-		_user_id := _user_id_it
+	for _, _it := range m.m_user_list {
+		//_user_id := _user_id_it
 		_it.Update(time_)
 		if _it.MoveUpdate(time_) {
 			m.m_go_ng_aoi.Move(ConvertUserToAoiObj(_it))
-		} else {
+		} /*else {
 			//如果没有移动,则随机新的目标点
 			_, exists := _go_search[_user_id]
 			if exists {
@@ -175,15 +201,15 @@ func (m *MazeMap) Update(time_ time.Time) {
 					_user.GetPathNode(),
 				})
 			})
-		}
+		}*/
 	}
-	
+
 	m.m_go_astar.Update()
 	m.m_go_ng_aoi.Update()
-	
+
 	for _id, _it := range m.m_msg_notify {
 		_user := m.m_user_list[_id]
-		
+
 		/*		if _id == 1 {
 				_new_idx := make(map[uint32]struct{})
 				_update_idx := make(map[uint32]struct{})
@@ -192,27 +218,27 @@ func (m *MazeMap) Update(time_ time.Time) {
 					_add_user := m.m_user_list[_add_it]
 					_new_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
 				}
-		
+
 				for _add_it := range _it.m_update {
 					_add_user := m.m_user_list[_add_it]
 					_update_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
 				}
-		
+
 				for _add_it := range _it.m_delete {
 					_add_user := m.m_user_list[_add_it]
 					_remove_idx[m.m_go_ng_aoi.CalcIndex(_add_user.M_pos)] = struct{}{}
-		
+
 				}
 				ylog.Info("我当前格子 [%v] ", m.m_go_ng_aoi.CalcIndex(_user.M_pos))
-		
+
 				ylog.Info("新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_new_idx))
 				ylog.Info("更新玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_update_idx))
 				ylog.Info("删除玩家格子 [%v] ", tool.Uint32SetConvertToSortSlice(_remove_idx))
-		
+
 				ylog.Info("##################### ")
-		
+
 			}*/
-		
+
 		{
 			_add_msg := YMsg.S2CMapAddUser{
 				M_user: make([]YMsg.UserData, 0),
@@ -222,7 +248,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 				if _add_user != nil {
 					_add_msg.M_user = append(_add_msg.M_user, _add_user.ToClientJson())
 				}
-				
+
 			}
 			_user.SendJson(YMsg.MSG_S2C_MAP_ADD_USER, _add_msg)
 			_it.m_add = make(map[uint64]struct{}, 0)
@@ -236,7 +262,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 				if _update_user != nil {
 					_update_msg.M_user = append(_update_msg.M_user, _update_user.ToClientJson())
 				}
-				
+
 			}
 			_user.SendJson(YMsg.MSG_S2C_MAP_UPDATE_USER, _update_msg)
 			_it.m_update = make(map[uint64]struct{}, 0)
@@ -254,7 +280,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 			_user.SendJson(YMsg.MSG_S2C_MAP_DELETE_USER, _delete_msg)
 			_it.m_delete = make(map[uint64]struct{}, 0)
 		}
-		
+
 	}
 }
 func ConvertUserToAoiObj(user_ *user.User) aoi.GoAoiObj {
@@ -267,7 +293,7 @@ func ConvertUserToAoiObj(user_ *user.User) aoi.GoAoiObj {
 func (m *MazeMap) UserEnter(user_ *user.User) {
 	user_.M_current_map = m.m_uid
 	m.m_user_list[user_.GetUID()] = user_
-	
+
 	_notify_msg := &MapNotifyMsg{
 		m_update: make(map[uint64]struct{}, 0),
 		m_add:    make(map[uint64]struct{}, 0),
@@ -277,7 +303,7 @@ func (m *MazeMap) UserEnter(user_ *user.User) {
 	m.randPosition(user_)
 	//m.m_aoi.enter(user_.GetUID(), user_.M_pos)
 	m.m_go_ng_aoi.Enter(ConvertUserToAoiObj(user_))
-	
+
 	user_.SendJson(YMsg.MSG_S2C_MAP_FLUSH_MAP_MAZE, YMsg.S2CFlushMapMaze{
 		m.m_uid,
 		m.m_go_astar.GetMaze(),

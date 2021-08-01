@@ -1,6 +1,8 @@
 package maze_map
 
 import (
+	"YMsg"
+	"YNet"
 	module "YServer/Logic/Module"
 	user "YServer/Logic/User"
 	"fmt"
@@ -30,7 +32,7 @@ var g_val_uid = uint64(0)
 
 func (mgr *MazeMapManager) NewMap() {
 	g_val_uid++
-	
+
 	mgr.m_map_list[g_val_uid] = NewMazeMap(g_val_uid)
 }
 
@@ -44,7 +46,7 @@ func (mgr *MazeMapManager) UserLogin(u_ *user.User) error {
 		//重新登陆
 		_enter_map = mgr.FindMap(u_.M_current_map)
 	}
-	
+
 	if _enter_map == nil {
 		_least_count := uint32(math.MaxUint32)
 		for _, _it := range mgr.m_map_list {
@@ -54,9 +56,9 @@ func (mgr *MazeMapManager) UserLogin(u_ *user.User) error {
 			}
 		}
 	}
-	
+
 	mgr.UserEnterWithMap(_enter_map, u_)
-	
+
 	return nil
 }
 
@@ -83,12 +85,25 @@ func (mgr *MazeMapManager) UserOut(user_ *user.User) error {
 func (mgr *MazeMapManager) Init() error {
 	YEventBus.Register("UserLoginSuccess", mgr.UserLogin)
 	YEventBus.Register("UserLogout", mgr.UserOut)
-	
+
+	YNet.Register(YMsg.MsgID_C2SUserMove, func(msg_ YMsg.C2SUserMove, s_ YNet.Session) {
+		_user := user.G_user_manager.FindUser(s_.GetUID())
+		if _user == nil {
+			return
+		}
+		_user_map := mgr.FindMap(_user.M_current_map)
+		if _user_map == nil {
+			return
+		}
+		_user_map.UserMove(_user, msg_.M_pos)
+
+	})
+
 	return nil
 }
 
 func (mgr *MazeMapManager) Start() error {
-	for _idx := 0; _idx < 10; _idx++ {
+	for _idx := 0; _idx < 1; _idx++ {
 		mgr.NewMap()
 	}
 	return nil

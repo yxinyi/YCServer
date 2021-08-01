@@ -38,8 +38,8 @@ func MainLoop() {
 		case _time := <-_time_tick:
 			module.Update(_time)
 			_tick_cout++
-			if _time.Sub(_last_time).Seconds() >= 1{
-				ylog.Info("[%v] tick count [%v]",_time.String(),_tick_cout)
+			if _time.Sub(_last_time).Seconds() >= 10{
+				ylog.Info("[%v] tick count [%v]",_time.String(),_tick_cout/10)
 				_tick_cout = 0
 				_last_time = _time
 			}

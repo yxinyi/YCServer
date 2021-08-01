@@ -36,11 +36,11 @@ func userLogin(session_ *YNet.Session) {
 		_user := NewUserInfo(session_)
 		G_user_manager.m_user_list[_user.GetUID()] = _user
 		YEventBus.Send("UserLoginSuccess", _user)
-		_user.SendJson(YMsg.MSG_S2C_USER_SUCCESS_LOGIN,YMsg.S2CUserSuccessLogin{_user.GetUID()})
+		_user.SendJson(YMsg.MsgID_S2CUserSuccessLogin,YMsg.S2CUserSuccessLogin{_user.ToClientJson()})
 	}
 	
 	if len(G_user_manager.m_user_list) == 1{
-		for _idx := 0 ;_idx < 1000 ; _idx++{
+		for _idx := 0 ;_idx < 0 ; _idx++{
 			_s := YNet.NewSession(nil)
 			_tmp_user := NewUserInfo(_s)
 			_s.M_is_rotbot = true
