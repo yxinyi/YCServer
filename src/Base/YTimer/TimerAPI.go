@@ -4,6 +4,9 @@ func TimerCall(t_ *Timer) uint32 {
 	return t_.m_uid
 }
 
+func Close() {
+	g_close <- struct{}{}
+}
 func CancelTimer(uid_ uint32) {
 	g_timer_manager.cancelTimer(uid_)
 }

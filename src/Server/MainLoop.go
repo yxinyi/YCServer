@@ -16,6 +16,7 @@ type Message struct {
 
 func MainLoop() {
 	ylog.Info("start module init ")
+	YTimer.NewWheelTimer()
 	err := module.Init()
 	if err != nil {
 		panic(" module init err")
