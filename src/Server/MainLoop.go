@@ -2,6 +2,7 @@ package main
 
 import (
 	"YNet"
+	"YTimer"
 	"YServer/Logic/Log"
 	module "YServer/Logic/Module"
 	"github.com/yxinyi/YEventBus"
@@ -49,6 +50,21 @@ func MainLoop() {
 				panic(" module Stop err")
 			}
 			return
+		case _timer_list := <-YTimer.G_call:
+			for _,_it := range _timer_list{
+				_it.M_callback()
+				if _it.M_times == -1 {
+					_it.M_call_time += _it.M_interval
+					YTimer.TimerCall(_it)
+					continue
+				}
+				if _it.M_times > 0 {
+					_it.M_times --
+					_it.M_call_time += _it.M_interval
+					YTimer.TimerCall(_it)
+					continue
+				}
+			}
 		case msg := <-YNet.G_net_msg_chan:
 			switch msg.M_msg_type {
 			case YNet.NET_SESSION_STATE_CONNECT:
