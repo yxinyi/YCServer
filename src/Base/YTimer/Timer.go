@@ -8,7 +8,7 @@ type Timer struct {
 	m_uid       uint32
 	M_interval  int64
 	M_call_time int64
-	M_times     int32
+	M_times     int
 	M_callback  TimerCallBack
 }
 
