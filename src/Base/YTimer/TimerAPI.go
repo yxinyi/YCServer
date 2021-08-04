@@ -97,3 +97,6 @@ func TimeToTimeWithIntervalCall(start_timestamp_ int64, end_timestamp_ int64, in
 	g_add_timer_channel <- _t
 	return _t.m_uid
 }
+func Loop(_timer_list *ChanTimer) {
+	g_timer_manager.loop(_timer_list)
+}

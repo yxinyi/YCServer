@@ -2,9 +2,9 @@ package main
 
 import (
 	"YNet"
-	"YTimer"
 	"YServer/Logic/Log"
 	module "YServer/Logic/Module"
+	"YTimer"
 	"github.com/yxinyi/YEventBus"
 	"time"
 )
@@ -16,7 +16,7 @@ type Message struct {
 
 func MainLoop() {
 	ylog.Info("start module init ")
-	YTimer.NewWheelTimer()
+	YTimer.NewWheelTimer(YTimer.WheelSlotCount)
 	err := module.Init()
 	if err != nil {
 		panic(" module init err")
@@ -40,8 +40,8 @@ func MainLoop() {
 		case _time := <-_time_tick:
 			module.Update(_time)
 			_tick_cout++
-			if _time.Sub(_last_time).Seconds() >= 10{
-				ylog.Info("[%v] tick count [%v]",_time.String(),_tick_cout/10)
+			if _time.Sub(_last_time).Seconds() >= 10 {
+				ylog.Info("[%v] tick count [%v]", _time.String(), _tick_cout/10)
 				_tick_cout = 0
 				_last_time = _time
 			}
@@ -52,28 +52,15 @@ func MainLoop() {
 			}
 			return
 		case _timer_list := <-YTimer.G_call:
-			for _,_it := range _timer_list{
-				_it.M_callback()
-				if _it.M_times == -1 {
-					_it.M_call_time += _it.M_interval
-					YTimer.TimerCall(_it)
-					continue
-				}
-				if _it.M_times > 0 {
-					_it.M_times --
-					_it.M_call_time += _it.M_interval
-					YTimer.TimerCall(_it)
-					continue
-				}
-			}
+			YTimer.Loop(_timer_list)
 		case msg := <-YNet.G_net_msg_chan:
 			switch msg.M_msg_type {
 			case YNet.NET_SESSION_STATE_CONNECT:
 				YEventBus.Send("UserLogin", msg.M_session)
 			case YNet.NET_SESSION_STATE_MSG:
 				_err := YNet.Dispatch(msg.M_session, msg.M_net_msg)
-				if _err !=nil{
-					ylog.Erro("SessionID [%v] msg id [%v] [%v]", msg.M_session.GetUID(), msg.M_uid,_err.Error())
+				if _err != nil {
+					ylog.Erro("SessionID [%v] msg id [%v] [%v]", msg.M_session.GetUID(), msg.M_uid, _err.Error())
 				}
 			case YNet.NET_SESSION_STATE_CLOSE:
 				YEventBus.Send("UserOffline", msg.M_session)
