@@ -23,7 +23,7 @@ func TimerApiHelp(t_ *testing.T, second_ uint32){
 	AfterSecondsCall(second_, func(tick_time_ time.Time) {
 		_diff_time := tick_time_.Sub(_before_time)
 		if uint32(_diff_time.Seconds()) != second_ {
-			t_.Errorf("err diff [%v] right diff [%v]", int(_diff_time.Seconds()),second_)
+			t_.Errorf("err diff [%v] right diff [%v] _before_time[%v] after_time [%v]", int(_diff_time.Seconds()),second_,_before_time.Unix(),tick_time_.Unix())
 		}
 		t_.Logf("TimerSize [%v]",GetTimerSize())
 		if GetTimerSize() != 0 {
