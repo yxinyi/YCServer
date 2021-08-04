@@ -1,6 +1,9 @@
 package YTimer
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type TimerCallBack func(time_ time.Time)
 
@@ -48,12 +51,14 @@ func NewWheelTimer(slot_count_ int) {
 		_wheel_timer.m_slots[_idx] = newTimer()
 	}
 	g_timer_manager = _wheel_timer
+	g_timer_manager.setTime(time.Now())
 	go func() {
 		ticker := time.Tick(TickerTime)
 		for {
 			select {
 			case _time := <-ticker:
 				g_timer_manager.setTime(_time)
+				fmt.Printf("_time[%v] \n",_time.Unix())
 				G_call <- g_timer_manager.getAllCall()
 			case _timer := <-g_add_timer_channel:
 				g_timer_manager.timeCall(_timer)
@@ -67,10 +72,11 @@ func NewWheelTimer(slot_count_ int) {
 	}()
 }
 
-func (t *wheelTimer) getSlot(nano_timestamp int64) uint32 {
-	_diff_tm := nano_timestamp - t.m_cur_time.UnixNano()
-	_future_slot := ((_diff_tm / int64(TickerTime)) + int64(t.m_cursor)) % int64(t.getSlotSize())
-
+func (t *wheelTimer) getSlot(timestamp int64) uint32 {
+	_diff_tm := timestamp - t.m_cur_time.Unix()
+	_future_slot := (_diff_tm + int64(t.m_cursor)) % int64(t.getSlotSize())
+	//fmt.Printf("timestamp[%v] t.m_cur_time.Unix() [%v] diff [%v] slot [%v] \n",timestamp,t.m_cur_time.Unix(),_diff_tm,_future_slot)
+	fmt.Printf("_future_slot [%d] \n",_future_slot)
 	return uint32(_future_slot)
 }
 func (t *wheelTimer) cancelTimer(t_ uint32) {
@@ -90,6 +96,8 @@ func (t *wheelTimer) cancelTimer(t_ uint32) {
 
 func (t *wheelTimer) setTime(t_ time.Time) {
 	t.m_cur_time = t_
+	fmt.Printf("setTime [%v]\n",t.m_cur_time.Unix())
+
 }
 
 func (t *wheelTimer) insertSlot(slot_ uint32, t_ *Timer) {
@@ -103,7 +111,7 @@ func (t *wheelTimer) insertSlot(slot_ uint32, t_ *Timer) {
 }
 
 func (t *wheelTimer) timeCall(t_ *Timer) {
-	if t_.M_call_time < t.m_cur_time.UnixNano() {
+	if t_.M_call_time <= t.m_cur_time.Unix() {
 		t.insertSlot(t.m_cursor+1, t_)
 		return
 	}
@@ -115,6 +123,7 @@ func (t *wheelTimer) getSlotSize() uint32 {
 func (t *wheelTimer) getNextCursor() uint32 {
 	t.m_cursor++
 	t.m_cursor %= t.getSlotSize()
+	fmt.Printf("t.m_cursor [%v]\n",t.m_cursor)
 	return t.m_cursor
 }
 
@@ -124,11 +133,11 @@ func (t *wheelTimer) close() {
 
 func (t *wheelTimer) getAllCall() *ChanTimer {
 	_timer_list := make([]*Timer, 0)
-
-	_first_timer := t.m_slots[t.getNextCursor()].m_next
-	_now_nano_time := t.m_cur_time.UnixNano()
+	_next_cursor := t.getNextCursor()
+	_first_timer := t.m_slots[_next_cursor].m_next
+	_now_time := t.m_cur_time.Unix()
 	for _first_timer != nil {
-		if _first_timer.M_call_time > _now_nano_time {
+		if _first_timer.M_call_time > _now_time {
 			_first_timer = _first_timer.m_next
 			continue
 		}
@@ -146,7 +155,7 @@ func (t *wheelTimer) getAllCall() *ChanTimer {
 		_append_timer.m_perv = nil
 		_first_timer = _first_timer.m_next
 	}
-	t.m_slots[t.getNextCursor()] = _first_timer
+	t.m_slots[_next_cursor] = _first_timer
 	return &ChanTimer{
 		M_timer_list: _timer_list,
 		M_tick_time:  t.m_cur_time,

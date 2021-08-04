@@ -18,8 +18,7 @@ func CancelTimer(uid_ uint32) {
 func AfterSecondsCall(after_time_ uint32, cb_ TimerCallBack) uint32 {
 	_t := newTimer()
 	_t.M_callback = cb_
-	_t.M_times = 0
-	_t.M_call_time = int64(after_time_)*time.Second.Nanoseconds() + time.Now().UnixNano()
+	_t.M_call_time = int64(after_time_) + time.Now().Unix()
 	g_add_timer_channel <- _t
 	return _t.m_uid
 }
@@ -30,7 +29,7 @@ func AfterSecondsWithIntervalAndLoopTimesCall(after_time_ uint32, inter_val_ int
 	_t.M_callback = cb_
 	_t.M_times = loop_times
 	_t.M_interval = inter_val_ * time.Second.Nanoseconds()
-	_t.M_call_time = int64(after_time_)*time.Second.Nanoseconds() + time.Now().UnixNano()
+	_t.M_call_time = int64(after_time_)*time.Second.Nanoseconds() + time.Now().Unix()
 	g_add_timer_channel <- _t
 	return _t.m_uid
 }
@@ -41,7 +40,7 @@ func AfterSecondsWithIntervalCall(after_time_ uint32, inter_val_ int64, cb_ Time
 	_t.M_callback = cb_
 	_t.M_times = -1
 	_t.M_interval = inter_val_ * time.Second.Nanoseconds()
-	_t.M_call_time = int64(after_time_)*time.Second.Nanoseconds() + time.Now().UnixNano()
+	_t.M_call_time = int64(after_time_)*time.Second.Nanoseconds() + time.Now().Unix()
 	g_add_timer_channel <- _t
 	return _t.m_uid
 }
