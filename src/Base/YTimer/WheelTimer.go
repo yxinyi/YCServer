@@ -39,6 +39,7 @@ type timerManagerInter interface {
 	close()
 	getNextCursor() uint32
 	getSlotSize() uint32
+	getTimerSize() uint32
 	loop(*ChanTimer)
 }
 
@@ -58,7 +59,7 @@ func NewWheelTimer(slot_count_ int) {
 			select {
 			case _time := <-ticker:
 				g_timer_manager.setTime(_time)
-				fmt.Printf("_time[%v] \n",_time.Unix())
+				fmt.Printf("_time[%v] \n", _time.Unix())
 				G_call <- g_timer_manager.getAllCall()
 			case _timer := <-g_add_timer_channel:
 				g_timer_manager.timeCall(_timer)
@@ -76,7 +77,7 @@ func (t *wheelTimer) getSlot(timestamp int64) uint32 {
 	_diff_tm := timestamp - t.m_cur_time.Unix()
 	_future_slot := (_diff_tm + int64(t.m_cursor)) % int64(t.getSlotSize())
 	//fmt.Printf("timestamp[%v] t.m_cur_time.Unix() [%v] diff [%v] slot [%v] \n",timestamp,t.m_cur_time.Unix(),_diff_tm,_future_slot)
-	fmt.Printf("_future_slot [%d] \n",_future_slot)
+	fmt.Printf("_future_slot [%d] \n", _future_slot)
 	return uint32(_future_slot)
 }
 func (t *wheelTimer) cancelTimer(t_ uint32) {
@@ -96,7 +97,7 @@ func (t *wheelTimer) cancelTimer(t_ uint32) {
 
 func (t *wheelTimer) setTime(t_ time.Time) {
 	t.m_cur_time = t_
-	fmt.Printf("setTime [%v]\n",t.m_cur_time.Unix())
+	fmt.Printf("setTime [%v]\n", t.m_cur_time.Unix())
 
 }
 
@@ -123,8 +124,12 @@ func (t *wheelTimer) getSlotSize() uint32 {
 func (t *wheelTimer) getNextCursor() uint32 {
 	t.m_cursor++
 	t.m_cursor %= t.getSlotSize()
-	fmt.Printf("t.m_cursor [%v]\n",t.m_cursor)
+	fmt.Printf("t.m_cursor [%v]\n", t.m_cursor)
 	return t.m_cursor
+}
+
+func (t *wheelTimer) getTimerSize() uint32 {
+	return uint32(len(t.m_map))
 }
 
 func (t *wheelTimer) close() {

@@ -11,7 +11,10 @@ func init(){
 
 func TestTimerIndexForeach(t_ *testing.T) {
 	for _idx := 0; _idx < 20; _idx++ {
-		t_.Logf("[%v]", g_timer_manager.getNextCursor())
+		if g_timer_manager.getNextCursor() != (uint32(_idx+1) % g_timer_manager.getSlotSize()){
+			t_.Errorf("[%v]", g_timer_manager.getNextCursor())
+		}
+
 	}
 }
 func TimerApiHelp(t_ *testing.T, second_ uint32){
@@ -20,8 +23,13 @@ func TimerApiHelp(t_ *testing.T, second_ uint32){
 	AfterSecondsCall(second_, func(tick_time_ time.Time) {
 		_diff_time := tick_time_.Sub(_before_time)
 		if uint32(_diff_time.Seconds()) != second_ {
-			t_.Errorf("err diff [%v]", int(_diff_time.Seconds()))
+			t_.Errorf("err diff [%v] right diff [%v]", int(_diff_time.Seconds()),second_)
 		}
+		t_.Logf("TimerSize [%v]",GetTimerSize())
+		if GetTimerSize() != 0 {
+			t_.Errorf("err size [%v]", GetTimerSize())
+		}
+
 		t_.Logf("info diff [%v]", int(_diff_time.Seconds()))
 		close(_close)
 	})

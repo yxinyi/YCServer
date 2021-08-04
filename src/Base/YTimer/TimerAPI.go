@@ -99,3 +99,7 @@ func TimeToTimeWithIntervalCall(start_timestamp_ int64, end_timestamp_ int64, in
 func Loop(_timer_list *ChanTimer) {
 	g_timer_manager.loop(_timer_list)
 }
+
+func GetTimerSize() uint32 {
+	return g_timer_manager.getTimerSize()
+}
