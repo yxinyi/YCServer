@@ -55,17 +55,13 @@ func NewWheelTimer(slot_count_ int) {
 		_wheel_timer.m_slots[_idx] = newTimer()
 	}
 	g_timer_manager = _wheel_timer
-	g_timer_manager.setTime(time.Now())
 	go func() {
-		ticker := time.Tick(5 * time.Millisecond)
+		g_timer_manager.setTime(time.Now())
+		ticker := time.Tick(TickerTime)
 		for {
 			select {
 			case _time := <-ticker:
-				if _time.Sub(*g_timer_manager.getCurTime()).Nanoseconds() < TickerTime.Nanoseconds() {
-					continue
-				}
-				//fmt.Printf("_time[%v] diif time [%v]\n", _time.Unix(), _time.Sub(*g_timer_manager.getCurTime()).Seconds())
-				g_timer_manager.setTime(g_timer_manager.getCurTime().Add(TickerTime))
+				g_timer_manager.setTime(_time)
 
 				G_call <- g_timer_manager.getAllCall()
 			case _timer := <-g_add_timer_channel:
@@ -110,7 +106,7 @@ func (t *wheelTimer) setTime(t_ time.Time) {
 
 func (t *wheelTimer) insertSlot(slot_ uint32, t_ *Timer) {
 	t.m_map[t_.m_uid] = t_
-	fmt.Printf("insertSlot [%v]",slot_)
+	fmt.Printf("cur [%v] insertSlot [%v]",t.m_cursor,slot_)
 	_root := t.m_slots[slot_]
 	if _root.m_next != nil {
 		_root.m_next.m_perv = t_

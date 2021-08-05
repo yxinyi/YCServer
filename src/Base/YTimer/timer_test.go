@@ -1,6 +1,7 @@
 package YTimer
 
 import (
+	"math"
 	"testing"
 	time "time"
 )
@@ -22,7 +23,7 @@ func TimerApiHelp(t_ *testing.T, second_ float64) {
 	_close := make(chan struct{})
 	AfterSecondsCall(second_, func() {
 		_diff_time := time.Now().Sub(_before_time)
-		if _diff_time.Seconds()-second_ > 0.01 {
+		if math.Abs(_diff_time.Seconds()-second_) > 0.01 {
 			t_.Errorf("err diff [%v] right diff [%v] _before_time[%v] after_time [%v]", int(_diff_time.Seconds()), second_, _before_time.Unix(), _diff_time.Seconds())
 		}
 		t_.Logf("TimerSize [%v]", GetTimerSize())
