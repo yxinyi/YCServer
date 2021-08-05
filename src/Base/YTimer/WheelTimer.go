@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type TimerCallBack func(time_ time.Time)
+type TimerCallBack func()
 
 var g_timer_manager timerManagerInter
 var g_add_timer_channel = make(chan *Timer, 100)
@@ -16,9 +16,11 @@ var G_call = make(chan *ChanTimer, 100)
 var g_close = make(chan struct{})
 
 const (
-	WheelSlotCount               = 10000
-	TickerTime     time.Duration = time.Second
+	WheelSlotCount               = 3
+
+	TickerTime     time.Duration = time.Millisecond*100
 )
+type YSecond = float64
 
 type wheelTimer struct {
 	m_slots    []*Timer
@@ -35,6 +37,7 @@ type timerManagerInter interface {
 	timeCall(t_ *Timer)
 	getAllCall() *ChanTimer
 	setTime(t_ time.Time)
+	getCurTime() *time.Time
 	cancelTimer(uint32)
 	close()
 	getNextCursor() uint32
@@ -54,12 +57,16 @@ func NewWheelTimer(slot_count_ int) {
 	g_timer_manager = _wheel_timer
 	g_timer_manager.setTime(time.Now())
 	go func() {
-		ticker := time.Tick(TickerTime)
+		ticker := time.Tick(5 * time.Millisecond)
 		for {
 			select {
 			case _time := <-ticker:
-				g_timer_manager.setTime(_time)
-				fmt.Printf("_time[%v] \n", _time.Unix())
+				if _time.Sub(*g_timer_manager.getCurTime()).Nanoseconds() < TickerTime.Nanoseconds() {
+					continue
+				}
+				//fmt.Printf("_time[%v] diif time [%v]\n", _time.Unix(), _time.Sub(*g_timer_manager.getCurTime()).Seconds())
+				g_timer_manager.setTime(g_timer_manager.getCurTime().Add(TickerTime))
+
 				G_call <- g_timer_manager.getAllCall()
 			case _timer := <-g_add_timer_channel:
 				g_timer_manager.timeCall(_timer)
@@ -74,10 +81,10 @@ func NewWheelTimer(slot_count_ int) {
 }
 
 func (t *wheelTimer) getSlot(timestamp int64) uint32 {
-	_diff_tm := timestamp - t.m_cur_time.Unix()
-	_future_slot := (_diff_tm + int64(t.m_cursor)) % int64(t.getSlotSize())
+	_diff_tm := timestamp - convertToTickUnit(float64(t.m_cur_time.Unix()))
+	_future_slot := (int64(_diff_tm) + int64(t.m_cursor)) % int64(t.getSlotSize())
 	//fmt.Printf("timestamp[%v] t.m_cur_time.Unix() [%v] diff [%v] slot [%v] \n",timestamp,t.m_cur_time.Unix(),_diff_tm,_future_slot)
-	fmt.Printf("_future_slot [%d] \n", _future_slot)
+	fmt.Printf("_future_slot [%d] _diff_tm[%v]\n", _future_slot,_diff_tm)
 	return uint32(_future_slot)
 }
 func (t *wheelTimer) cancelTimer(t_ uint32) {
@@ -97,22 +104,25 @@ func (t *wheelTimer) cancelTimer(t_ uint32) {
 
 func (t *wheelTimer) setTime(t_ time.Time) {
 	t.m_cur_time = t_
-	fmt.Printf("setTime [%v]\n", t.m_cur_time.Unix())
+	//fmt.Printf("setTime [%v]\n", t.m_cur_time.Unix())
 
 }
 
 func (t *wheelTimer) insertSlot(slot_ uint32, t_ *Timer) {
 	t.m_map[t_.m_uid] = t_
+	fmt.Printf("insertSlot [%v]",slot_)
 	_root := t.m_slots[slot_]
 	if _root.m_next != nil {
 		_root.m_next.m_perv = t_
 	}
+	t_.m_perv = _root
 	t_.m_next = _root.m_next
 	_root.m_next = t_
+	t_.M_slot = slot_
 }
 
 func (t *wheelTimer) timeCall(t_ *Timer) {
-	if t_.M_call_time <= t.m_cur_time.Unix() {
+	if t_.M_call_time <= convertToTickUnit(float64(t.m_cur_time.Unix())) {
 		t.insertSlot(t.m_cursor+1, t_)
 		return
 	}
@@ -124,7 +134,7 @@ func (t *wheelTimer) getSlotSize() uint32 {
 func (t *wheelTimer) getNextCursor() uint32 {
 	t.m_cursor++
 	t.m_cursor %= t.getSlotSize()
-	fmt.Printf("t.m_cursor [%v]\n", t.m_cursor)
+	fmt.Printf("t.m_cursor [%v] \n", t.m_cursor)
 	return t.m_cursor
 }
 
@@ -136,31 +146,34 @@ func (t *wheelTimer) close() {
 	g_close <- struct{}{}
 }
 
+func (t *wheelTimer) getCurTime() *time.Time {
+	return &t.m_cur_time
+}
 func (t *wheelTimer) getAllCall() *ChanTimer {
 	_timer_list := make([]*Timer, 0)
 	_next_cursor := t.getNextCursor()
-	_first_timer := t.m_slots[_next_cursor].m_next
-	_now_time := t.m_cur_time.Unix()
-	for _first_timer != nil {
-		if _first_timer.M_call_time > _now_time {
-			_first_timer = _first_timer.m_next
+	_root := t.m_slots[_next_cursor].m_next
+	_now_time := convertToTickUnit(float64(t.m_cur_time.Unix()))
+	for _root != nil {
+		if _root.M_call_time > _now_time {
+			_root = _root.m_next
 			continue
 		}
-		_append_timer := _first_timer
+		_append_timer := _root
 
 		_timer_list = append(_timer_list, _append_timer)
 		delete(t.m_map, _append_timer.m_uid)
-		if _first_timer.m_perv != nil {
-			_first_timer.m_perv.m_next = _first_timer.m_next
+		if _root.m_perv != nil {
+			_root.m_perv.m_next = _root.m_next
 		}
-		if _first_timer.m_next != nil {
-			_first_timer.m_next.m_perv = _first_timer.m_perv
+		if _root.m_next != nil {
+			_root.m_next.m_perv = _root.m_perv
 		}
 		_append_timer.m_next = nil
 		_append_timer.m_perv = nil
-		_first_timer = _first_timer.m_next
+		_root = _root.m_next
 	}
-	t.m_slots[_next_cursor] = _first_timer
+	//t.m_slots[_next_cursor].m_next = _root
 	return &ChanTimer{
 		M_timer_list: _timer_list,
 		M_tick_time:  t.m_cur_time,
@@ -168,7 +181,7 @@ func (t *wheelTimer) getAllCall() *ChanTimer {
 }
 func (t *wheelTimer) loop(_timer_list *ChanTimer) {
 	for _, _it := range _timer_list.M_timer_list {
-		_it.M_callback(_timer_list.M_tick_time)
+		_it.M_callback()
 		if _it.M_times == -1 {
 			_it.M_call_time += _it.M_interval
 			TimerCall(_it)

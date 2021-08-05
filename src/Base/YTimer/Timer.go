@@ -9,6 +9,7 @@ type Timer struct {
 	M_interval  int64
 	M_call_time int64
 	M_times     int
+	M_slot      uint32
 	M_callback  TimerCallBack
 }
 
