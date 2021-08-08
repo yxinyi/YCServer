@@ -3,7 +3,7 @@ package YTimer
 import (
 	"math"
 	"testing"
-	time "time"
+	"time"
 )
 
 func init() {

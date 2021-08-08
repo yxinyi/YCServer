@@ -2,6 +2,7 @@ package YTimer
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -55,9 +56,12 @@ func NewWheelTimer(slot_count_ int) {
 		_wheel_timer.m_slots[_idx] = newTimer()
 	}
 	g_timer_manager = _wheel_timer
+	_wg := &sync.WaitGroup{}
+	_wg.Add(1)
 	go func() {
 		g_timer_manager.setTime(time.Now())
 		ticker := time.Tick(TickerTime)
+		_wg.Done()
 		for {
 			select {
 			case _time := <-ticker:
@@ -74,6 +78,7 @@ func NewWheelTimer(slot_count_ int) {
 			}
 		}
 	}()
+	_wg.Wait()
 }
 
 func (t *wheelTimer) getSlot(timestamp int64) uint32 {
@@ -106,7 +111,7 @@ func (t *wheelTimer) setTime(t_ time.Time) {
 
 func (t *wheelTimer) insertSlot(slot_ uint32, t_ *Timer) {
 	t.m_map[t_.m_uid] = t_
-	fmt.Printf("cur [%v] insertSlot [%v]",t.m_cursor,slot_)
+	//fmt.Printf("cur [%v] insertSlot [%v]",t.m_cursor,slot_)
 	_root := t.m_slots[slot_]
 	if _root.m_next != nil {
 		_root.m_next.m_perv = t_
@@ -130,7 +135,7 @@ func (t *wheelTimer) getSlotSize() uint32 {
 func (t *wheelTimer) getNextCursor() uint32 {
 	t.m_cursor++
 	t.m_cursor %= t.getSlotSize()
-	fmt.Printf("t.m_cursor [%v] \n", t.m_cursor)
+	//fmt.Printf("t.m_cursor [%v] \n", t.m_cursor)
 	return t.m_cursor
 }
 

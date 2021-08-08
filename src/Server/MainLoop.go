@@ -35,6 +35,7 @@ func MainLoop() {
 	_time_tick := time.Tick(10 * time.Millisecond)
 	_last_time := time.Now()
 	_tick_cout := 0
+
 	for {
 		select {
 		case _time := <-_time_tick:
