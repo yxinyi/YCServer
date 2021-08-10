@@ -9,8 +9,9 @@ import (
 	"time"
 )
 
+const MapManager = "127.0.0.1:25000"
 
-func MainLoop() {
+func MapManagerMainLoop() {
 	ylog.Info("start module init ")
 	YTimer.NewWheelTimer(YTimer.WheelSlotCount)
 	err := module.Init()
@@ -23,7 +24,7 @@ func MainLoop() {
 		panic(" module Start err")
 	}
 
-	err = YNet.ListenTcp4("127.0.0.1:20000")
+	err = YNet.ListenTcp4(MapManager)
 	if err != nil {
 		panic(" ListenTcp4 err")
 	}
@@ -64,5 +65,4 @@ func MainLoop() {
 			}
 		}
 	}
-
 }

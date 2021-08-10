@@ -18,4 +18,11 @@ func main() {
 		MainLoop()
 	}
 
+	if *g_server_name == "MapManager" {
+		go func() {
+			http.ListenAndServe("0.0.0.0:6061", nil)
+		}()
+		MapManagerMainLoop()
+	}
+
 }
