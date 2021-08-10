@@ -11,6 +11,7 @@ import (
 
 
 func MainLoop() {
+	SingleLogicRegister()
 	ylog.Info("start module init ")
 	YTimer.NewWheelTimer(YTimer.WheelSlotCount)
 	err := module.Init()

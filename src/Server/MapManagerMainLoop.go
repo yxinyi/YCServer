@@ -12,6 +12,7 @@ import (
 const MapManager = "127.0.0.1:25000"
 
 func MapManagerMainLoop() {
+	MapManagerLogicRegister()
 	ylog.Info("start module init ")
 	YTimer.NewWheelTimer(YTimer.WheelSlotCount)
 	err := module.Init()

@@ -9,11 +9,8 @@ import (
 	"time"
 )
 
-var G_user_manager = NewModuleUserLogin()
+var G_user_manager *ModuleUserLogin
 
-func init() {
-	module.Register("UserManager", G_user_manager)
-}
 
 type ModuleUserLogin struct {
 	module.ModuleBase
@@ -21,9 +18,10 @@ type ModuleUserLogin struct {
 }
 
 func NewModuleUserLogin() *ModuleUserLogin {
-	return &ModuleUserLogin{
+	G_user_manager = &ModuleUserLogin{
 		m_user_list: make(map[uint64]*User),
 	}
+	return G_user_manager
 }
 
 func (mgr *ModuleUserLogin)FindUser(uid_ uint64) *User{

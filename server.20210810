@@ -1,0 +1,9 @@
+2021-08-10 22:58:55	INFO	Server/MainLoop.go:15	start module init 
+2021-08-10 22:58:55	INFO	Server/MainLoop.go:31	start main loop 
+2021-08-10 22:58:57	INFO	User/UserManager.go:33	User Login [1] 
+2021-08-10 22:59:01	INFO	User/UserManager.go:52	User Offline [1] 
+2021-08-10 22:59:05	INFO	Server/MainLoop.go:42	[2021-08-10 22:59:05.4273213 +0800 CST m=+10.120118001] tick count [99]
+2021-08-10 22:59:15	INFO	Server/MainLoop.go:42	[2021-08-10 22:59:15.4284224 +0800 CST m=+20.121219101] tick count [99]
+2021-08-10 22:59:25	INFO	Server/MainLoop.go:42	[2021-08-10 22:59:25.4289177 +0800 CST m=+30.121714401] tick count [99]
+2021-08-10 22:59:35	INFO	Server/MainLoop.go:42	[2021-08-10 22:59:35.4369617 +0800 CST m=+40.129758401] tick count [99]
+2021-08-10 22:59:45	INFO	Server/MainLoop.go:42	[2021-08-10 22:59:45.437262 +0800 CST m=+50.130058701] tick count [99]

@@ -11,11 +11,9 @@ import (
 	"time"
 )
 
-var G_maze_map_manager = NewMazeMapManager()
+var G_maze_map_manager *MazeMapManager
 
-func init() {
-	module.Register("MazeMapManager", G_maze_map_manager)
-}
+
 
 type MazeMapManager struct {
 	module.ModuleBase
@@ -23,9 +21,10 @@ type MazeMapManager struct {
 }
 
 func NewMazeMapManager() *MazeMapManager {
-	return &MazeMapManager{
+	G_maze_map_manager = &MazeMapManager{
 		m_map_list: make(map[uint64]*MazeMap),
 	}
+	return G_maze_map_manager
 }
 
 var g_val_uid = uint64(0)
