@@ -11,7 +11,6 @@ type User struct {
 	*YNet.Session
 	M_current_map uint64
 	move.MoveControl
-	M_is_root bool
 }
 
 func NewUserInfo(s_ *YNet.Session) *User {
