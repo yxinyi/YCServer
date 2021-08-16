@@ -63,13 +63,13 @@ func userEnterMap(user_ *user.User) {
 	//如果玩家初始坐标的map 还未开启,则新建一个 map 进程并与当前 manager 进行连接,连接完成后进行同步
 	for _, it := range _sync_map_list {
 		_map_sess := GetMapSession(it)
-		_enter_map := func() {
+		_enter_map_func := func() {
 
 		}
 		if _map_sess == nil {
-			CreateMapProcessWithCallBack(it, _enter_map)
+			CreateMapProcessWithCallBack(it, _enter_map_func)
 		} else {
-			_enter_map()
+			_enter_map_func()
 		}
 	}
 

@@ -43,7 +43,7 @@ func (s *Session) SendJson(msg_id_ uint32, json_ interface{}) error {
 	if _msg == nil {
 		return fmt.Errorf("[Session:SendJson] pack error")
 	}
-	s.Send(NewNetMsgPackWithJson(msg_id_, json_))
+	s.Send(_msg)
 	return nil
 }
 
