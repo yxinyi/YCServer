@@ -106,13 +106,10 @@ func (m *MazeMap) IdxListConvertPosList(idx_list_ []int) *queue.Queue {
 }
 
 func (m *MazeMap) InitMazeMap() {
-	/*_row_max := int(m.m_height / MAZE_GRID_SIZE)
-	_col_max := int(m.m_width / MAZE_GRID_SIZE)*/
 	_maze := make([][]float64, 0, m.m_row_grid_max)
 	for _row_idx := 0; _row_idx < m.m_row_grid_max; _row_idx++ {
 		_tmp_col := make([]float64, 0, m.m_col_grid_max)
 		for _col_idx := 0; _col_idx < m.m_col_grid_max; _col_idx++ {
-			//_tmp_col = append(_tmp_col, 0)
 			if rand.Int31n(10)%10 > 8 {
 				_tmp_col = append(_tmp_col, 100000)
 			} else {
@@ -126,9 +123,18 @@ func (m *MazeMap) InitMazeMap() {
 }
 
 func (m *MazeMap) randPosition(u_ *user.User) {
-	u_.M_pos.M_x = float64(rand.Int31n(ScreenWidth))
-	u_.M_pos.M_y = float64(rand.Int31n(ScreenHeight))
-	u_.M_tar = u_.M_pos
+	tmpPos := YMsg.PositionXY{}
+	tmpPos.M_x = float64(rand.Int31n(ScreenWidth-10))+5
+	tmpPos.M_y = float64(rand.Int31n(ScreenHeight-10))+5
+	for {
+		if !m.m_go_astar.IsBlock(m.PosConvertIdx(tmpPos)) {
+			break
+		}
+		tmpPos.M_x = float64(rand.Int31n(ScreenWidth-10))+5
+		tmpPos.M_y = float64(rand.Int31n(ScreenHeight-10))+5
+	}
+	u_.M_pos = tmpPos
+	u_.M_tar = tmpPos
 }
 func (m *MazeMap) ObjCount() uint32 {
 	return uint32(len(m.m_user_list))
@@ -137,10 +143,10 @@ func (m *MazeMap) ObjCount() uint32 {
 func (m *MazeMap) UserMove(user_ *user.User, tar_pos_ YMsg.PositionXY) {
 	tar_pos_.M_x = float64(int(tar_pos_.M_x))
 	tar_pos_.M_y = float64(int(tar_pos_.M_y))
-	user_.MoveTarget(tar_pos_)
-	if m.m_go_astar.IsBlock(m.PosConvertIdx(tar_pos_)){
+	if m.m_go_astar.IsBlock(m.PosConvertIdx(tar_pos_)) {
 		return
 	}
+	user_.MoveTarget(tar_pos_)
 
 	m.m_go_astar.Search(m.PosConvertIdx(user_.M_pos), m.PosConvertIdx(user_.M_tar), func(path []int) {
 		_user, exists := m.m_user_list[user_.GetUID()]
@@ -162,14 +168,19 @@ func (m *MazeMap) UserMove(user_ *user.User, tar_pos_ YMsg.PositionXY) {
 	})
 }
 
+var _go_search = make(map[uint64]struct{})
+
 func (m *MazeMap) Update(time_ time.Time) {
 	for _, _it := range m.m_user_list {
-		//_user_id := _user_id_it
+		_user_id := _it.GetUID()
 		_it.Update(time_)
 		if _it.MoveUpdate(time_) {
 			m.m_go_ng_aoi.Move(ConvertUserToAoiObj(_it))
-		} /*else {
+		} else {
 			//如果没有移动,则随机新的目标点
+			if !_it.M_is_rotbot{
+				continue
+			}
 			_, exists := _go_search[_user_id]
 			if exists {
 				continue
@@ -178,7 +189,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 				float64(rand.Int31n(ScreenWidth)),
 				float64(rand.Int31n(ScreenHeight)),
 			}
-			for m.m_go_astar.IsBlock(m.PosConvertIdx(_pos)){
+			for m.m_go_astar.IsBlock(m.PosConvertIdx(_pos)) {
 				_pos = YMsg.PositionXY{
 					float64(rand.Int31n(ScreenWidth)),
 					float64(rand.Int31n(ScreenHeight)),
@@ -201,7 +212,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 					_user.GetPathNode(),
 				})
 			})
-		}*/
+		}
 	}
 
 	m.m_go_astar.Update()

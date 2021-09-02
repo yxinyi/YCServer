@@ -5,12 +5,24 @@ import (
 	"YServer/Logic/Log"
 	module "YServer/Logic/Module"
 	"YTimer"
+	"fmt"
 	"github.com/yxinyi/YEventBus"
+	"math/rand"
+	"syscall"
 	"time"
+	"unsafe"
 )
 
 
+func setTitle(title string) {
+	kernel32, _ := syscall.LoadLibrary(`kernel32.dll`)
+	sct, _ := syscall.GetProcAddress(kernel32, `SetConsoleTitleW`)
+	syscall.Syscall(sct, 1, uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(title))), 0, 0)
+	syscall.FreeLibrary(kernel32)
+}
+
 func MainLoop() {
+	rand.Seed(time.Now().Unix())
 	SingleLogicRegister()
 	ylog.Info("start module init ")
 	YTimer.NewWheelTimer(YTimer.WheelSlotCount)
@@ -38,8 +50,10 @@ func MainLoop() {
 		case _time := <-_time_tick:
 			module.Update(_time)
 			_tick_cout++
-			if _time.Sub(_last_time).Seconds() >= 10 {
-				ylog.Info("[%v] tick count [%v]", _time.String(), _tick_cout/10)
+			if _time.Sub(_last_time).Seconds() >= 1 {
+				//ylog.Info("[%v] tick count [%v]", _time.String(), _tick_cout/10)
+				title := fmt.Sprintf("fps [%v]",_tick_cout)
+				setTitle(title)
 				_tick_cout = 0
 				_last_time = _time
 			}
