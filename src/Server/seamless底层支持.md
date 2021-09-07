@@ -1,3 +1,43 @@
+## 服务器框架几个重要结构
+
+### Node
+
+每个进程拥有唯一的 Node 模块,用于与其他进程进行 TCP 信息交互
+
+```
+type Node struct {
+	Session 
+	M_module_pool map[string]Module
+}
+```
+
+### Module
+
+```
+type Module struct{
+	M_name 		string
+	M_cluster	uint32	
+}
+```
+
+### Entity
+
+```
+type Entity struct{
+	M_type	uint32
+    M_uid 	uint64
+	Position	
+}
+```
+
+
+
+
+
+
+
+
+
 ### 底层支持
 
 无缝地图与普通mmo地图的差异为在地图边缘处,处于两个不同进程的玩家需要看到其他进程在视野范围内的行为,以及在边缘处进行攻击交互等操作.

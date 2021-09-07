@@ -100,3 +100,5 @@ type S2CFlushMapMaze struct {
 	M_height  float64
 	M_width   float64
 }
+
+
