@@ -1,10 +1,10 @@
 package main
 
 import (
-	ylog "YLog"
-	"YNet"
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
+	"github.com/yxinyi/YCServer/engine/YNet"
 	module "YServer/Logic/Module"
-	"YTimer"
+	"github.com/yxinyi/YCServer/engine/YTimer"
 	"github.com/yxinyi/YEventBus"
 	"time"
 )

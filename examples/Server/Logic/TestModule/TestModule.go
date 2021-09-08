@@ -1,10 +1,10 @@
 package TestModule
 
 import (
-	ylog "YLog"
-	"YModule"
-	"YMsg"
-	"YNode"
+	"github.com/yxinyi/YCServer/YMsg"
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
+	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YNode"
 )
 
 type TestInfo struct {

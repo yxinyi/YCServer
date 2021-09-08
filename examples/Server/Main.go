@@ -1,10 +1,10 @@
 package main
 
 import (
-	"YMsg"
-	"YNode"
-	"YServer/Logic/TestModule"
-	"YServer/Logic/TestModule2"
+	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/engine/YNode"
+	"github.com/yxinyi/YCServer/examples/Server/Logic/TestModule"
+	"github.com/yxinyi/YCServer/examples/Server/Logic/TestModule2"
 	"encoding/json"
 	"flag"
 	_ "net/http/pprof"

@@ -1,6 +1,6 @@
 package YEntity
 
-import "YMsg"
+import "github.com/yxinyi/YCServer/YMsg"
 
 type Inter interface {
 }

@@ -1,9 +1,9 @@
 package user
 
 import (
-	"YMsg"
-	"YNet"
-	move "YServer/Logic/Move"
+	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/engine/YNet"
+	move "github.com/yxinyi/YCServer/examples/Server/Logic/Move"
 	"time"
 )
 

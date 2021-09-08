@@ -1,10 +1,10 @@
 package YModule
 
 import (
-	"YDecode"
-	ylog "YLog"
-	"YMsg"
-	"YUIDFactory"
+	"github.com/yxinyi/YCServer/engine/YDecode"
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
+	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/engine/YTool"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -126,7 +126,7 @@ func (i *Info) RPCCallUsingJson(module_name_ string, module_uid_ uint64,func_ st
 			_rpc_msg.M_func_parameter = append(_rpc_msg.M_func_parameter, _param_byte)
 		}
 	}
-	_rpc_msg.M_uid = YUIDFactory.BuildUIDUint64()
+	_rpc_msg.M_uid = YTool.BuildUIDUint64()
 	
 	i.m_node.RPCCall(_rpc_msg)
 	return _rpc_msg.M_uid
