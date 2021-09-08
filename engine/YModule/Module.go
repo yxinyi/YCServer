@@ -9,7 +9,6 @@ import (
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"reflect"
 	"strings"
-	"time"
 )
 
 func (i *Info) PushRpc(msg *YMsg.S2S_rpc_msg) {
@@ -92,7 +91,6 @@ func (i *Info) Loop() {
 			}
 			i.call(_msg, _param_list)
 		}
-		time.Sleep(time.Millisecond * 10)
 	}
 }
 

@@ -3,15 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/YMsg/in_msg.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/YMsg/msg.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YEntity/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YEntity/Info.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YModule/Module.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/TestModule/TestModule.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/TestModule2/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Logic/User/User.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/User/User.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -58,7 +52,7 @@
     <property name="configurable..is.expanded" value="false" />
     <property name="configurable.GoLibrariesConfigurable.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/examples/Server/Main.go" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/examples/RPCExamples" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="go.vgo" />
   </component>
@@ -103,9 +97,9 @@
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
-      <kind value="FILE" />
+      <kind value="DIRECTORY" />
       <filePath value="$PROJECT_DIR$/examples/Server/Main.go" />
-      <directory value="$PROJECT_DIR$/src/Server" />
+      <directory value="$PROJECT_DIR$/examples/RPCExamples" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
