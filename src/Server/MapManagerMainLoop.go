@@ -1,8 +1,8 @@
 package main
 
 import (
+	ylog "YLog"
 	"YNet"
-	"YServer/Logic/Log"
 	module "YServer/Logic/Module"
 	"YTimer"
 	"github.com/yxinyi/YEventBus"
@@ -22,7 +22,7 @@ func MapManagerMainLoop() {
 
 	err = module.Start()
 	if err != nil {
-		panic(" module Start err")
+		panic(" module start err")
 	}
 
 	err = YNet.ListenTcp4(MapManager)

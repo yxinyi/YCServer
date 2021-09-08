@@ -3,7 +3,7 @@ package user
 import (
 	"YMsg"
 	"YNet"
-	ylog "YServer/Logic/Log"
+	ylog "YLog"
 	module "YServer/Logic/Module"
 	"github.com/yxinyi/YEventBus"
 	"time"

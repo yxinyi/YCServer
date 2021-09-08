@@ -2,13 +2,12 @@ package main
 
 import (
 	"flag"
-	"net/http"
 	_ "net/http/pprof"
 )
 
 var g_server_name = flag.String("ServerName", "", "servername")
 
-func main() {
+/*func main() {
 	flag.Parse()
 
 	if *g_server_name == "single" {
@@ -25,4 +24,4 @@ func main() {
 		MapManagerMainLoop()
 	}
 
-}
+}*/

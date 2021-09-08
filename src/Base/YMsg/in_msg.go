@@ -8,7 +8,7 @@ type ModuleInfo struct {
 
 type S2S_rpc_msg struct {
 	M_uid            uint64
-	M_from           ModuleInfo
+	M_source         ModuleInfo
 	M_tar            ModuleInfo
 	M_marshal_type   uint32
 	M_func_name      string

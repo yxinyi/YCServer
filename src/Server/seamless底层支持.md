@@ -1,22 +1,27 @@
-## 服务器框架几个重要结构
+## 服务器结构
 
 ### Node
 
-每个进程拥有唯一的 Node 模块,用于与其他进程进行 TCP 信息交互
+每个进程拥有唯一的 Node 模块,用于管理当前进程
 
 ```
 type Node struct {
-	Session 
-	M_module_pool map[string]Module
+	M_uid        uint64
+	M_module_pool map[string]map[uint64]YModule.Inter
 }
 ```
 
 ### Module
 
 ```
-type Module struct{
-	M_name 		string
-	M_cluster	uint32	
+type Module struct {
+	M_node_id     uint64
+	M_name        string
+	M_uid         uint64
+	M_cluster     uint32
+	M_entity_pool map[uint64]YEntity.Inter
+	M_func_map    map[string]*RPCFunc
+	m_queue       *queue.SyncQueue
 }
 ```
 
@@ -30,21 +35,15 @@ type Entity struct{
 }
 ```
 
-
-
-
-
-
-
-
-
 ### 底层支持
 
 无缝地图与普通mmo地图的差异为在地图边缘处,处于两个不同进程的玩家需要看到其他进程在视野范围内的行为,以及在边缘处进行攻击交互等操作.
 
-简单的处理方案为主从对象设计,每个对象会有一个主对象,所有的修改操作都将通过 rpc 进行执行,查询行为只需查阅当前从对象即可,保证进程间最少的消息通信交互.
+简单的处理方案为主从对象设计,每个对象会有一个主对象,所有的修改操作都将通过跨进程函数调用进行执行,查询行为只需查阅当前从对象即可,保证进程间最少的消息通信交互.
 
 基于此方案可以简单得出,所有地图元素,地图道具,怪物,玩家等都需满足这个需求,从设计的角度出发,我们可以设定一个基类,后续所有对象都进行继承即可,也就是将所有对象都抽象成一个 entity 对象,后续基于 entity 的基础上进行细节逻辑填充.
+
+
 
 ### 需要rpc以支持服务调用
 
@@ -109,34 +108,6 @@ service.AsyncCBRPC([]UserBSession,"Attack",&UserDiffInfo{},fun(success error){
 	//callback do add some buffer to self
 })
 ```
-
-### ServiceMananger 结构
-
-```
-type ServiceRPCFunc struct{
-	M_rpc_name string
-	M_func reflect.Value
-    M_param reflect.Type
-}
-type ServiceManager struct{
-	*Session
-	M_func_pool map[string]*ServiceRPCFunc
-    M_entity_pool map[uint64]*interface{}
-}
-func (mgr *ServiceManager)GetServiceList()[]string{}
-```
-
-### ConnectManager
-
-```
-
-```
-
-
-
-
-
-
 
 
 

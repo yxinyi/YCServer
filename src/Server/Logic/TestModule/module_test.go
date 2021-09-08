@@ -2,12 +2,13 @@ package TestModule
 
 import (
 	"YMsg"
-	"YServer/Frame/YNode"
+	"YNode"
 	"encoding/json"
 	"testing"
 )
-func init(){
-	YNode.Register(newInfo())
+
+func init() {
+	YNode.Register(NewInfo(YNode.Obj()))
 	YNode.Start()
 }
 
@@ -37,7 +38,7 @@ func TestModule(t *testing.T) {
 				123,
 				"TESTPARAMTER",
 				[]int{
-					1,2,3,4,5,6,7,
+					1, 2, 3, 4, 5, 6, 7,
 				},
 			})
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
@@ -47,7 +48,7 @@ func TestModule(t *testing.T) {
 }
 
 func BenchmarkModule(b_ *testing.B) {
-	for _idx := 0 ;_idx < b_.N;_idx++ {
+	for _idx := 0; _idx < b_.N; _idx++ {
 		{
 			msg := &YMsg.S2S_rpc_msg{}
 			msg.M_func_name = "Test"
@@ -91,7 +92,7 @@ func BenchmarkModule(b_ *testing.B) {
 					123,
 					"TESTPARAMTER",
 					[]int{
-						1,2,3,4,5,6,7,
+						1, 2, 3, 4, 5, 6, 7,
 					},
 				})
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)

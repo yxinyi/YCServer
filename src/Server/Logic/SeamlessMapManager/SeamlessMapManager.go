@@ -1,9 +1,9 @@
 package SeamlessMapManager
 
 import (
+	ylog "YLog"
 	"YMsg"
 	"YNet"
-	ylog "YServer/Logic/Log"
 	user "YServer/Logic/User"
 	"github.com/yxinyi/YEventBus"
 	"time"

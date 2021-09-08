@@ -12,7 +12,7 @@ var g_client_cnn = 	YNet.NewConnect()
 var g_sync_queue = 	queue.NewSyncQueue()
 
 func main() {
-	fmt.Println("Client Start")
+	fmt.Println("Client start")
 	g_client_cnn.Connect("127.0.0.1", "20000")
 	g_client_cnn.Start()
 

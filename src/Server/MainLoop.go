@@ -1,8 +1,8 @@
 package main
 
 import (
+	ylog "YLog"
 	"YNet"
-	"YServer/Logic/Log"
 	module "YServer/Logic/Module"
 	"YTimer"
 	"fmt"
@@ -33,7 +33,7 @@ func MainLoop() {
 
 	err = module.Start()
 	if err != nil {
-		panic(" module Start err")
+		panic(" module start err")
 	}
 
 	err = YNet.ListenTcp4("127.0.0.1:20000")
