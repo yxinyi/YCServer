@@ -1,7 +1,7 @@
 package YNode
 
 import (
-	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNet"
@@ -88,7 +88,7 @@ func (n *Info) loop() {
 						continue
 					}
 					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
-					_s.SendJson(YMsg.MSG_S2S_RPC_MSG, *_msg)
+					_s.SendJson(0, *_msg)
 				}
 			}
 		}

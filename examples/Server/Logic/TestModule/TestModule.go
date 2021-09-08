@@ -1,7 +1,7 @@
 package TestModule
 
 import (
-	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/examples/Msg"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
@@ -46,6 +46,6 @@ func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) {
 }
 
 
-func (m *TestInfo) RPC_Test_4(param_ YMsg.TestParam) {
+func (m *TestInfo) RPC_Test_4(param_ Msg.TestParam) {
 	ylog.Info("TestModule RPC_Test_4 [%v]",param_)
 }

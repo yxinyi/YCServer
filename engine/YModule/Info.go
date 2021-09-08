@@ -2,7 +2,7 @@ package YModule
 
 import (
 	"github.com/yxinyi/YCServer/engine/YEntity"
-	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"reflect"
 )

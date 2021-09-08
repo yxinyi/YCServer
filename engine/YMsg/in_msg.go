@@ -15,8 +15,3 @@ type S2S_rpc_msg struct {
 	M_func_parameter [][]byte
 }
 
-type TestParam struct {
-	M_uint64 uint64
-	M_str    string
-	M_slice  []int
-}

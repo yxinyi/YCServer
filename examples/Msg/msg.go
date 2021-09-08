@@ -1,4 +1,4 @@
-package YMsg
+package Msg
 
 import (
 	"fmt"
@@ -104,3 +104,8 @@ type S2CFlushMapMaze struct {
 }
 
 
+type TestParam struct {
+	M_uint64 uint64
+	M_str    string
+	M_slice  []int
+}

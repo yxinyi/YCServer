@@ -2,26 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/YMsg/in_msg.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/YMsg/msg.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YEntity/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YEntity/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YModule/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YModule/Module.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YEntity/Entity.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YEntity/Info.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YModule/Info.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YModule/Module.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YNode/Info.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/Frame/YNode/Node.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/TestModule/TestModule.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/TestModule2/TestModule.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Logic/User/User.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Logic/User/User.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/MainLoop.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/MainLoop.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/Server/MapManagerMainLoop.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/Server/MapManagerMainLoop.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/in_msg.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/msg/msg.go" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

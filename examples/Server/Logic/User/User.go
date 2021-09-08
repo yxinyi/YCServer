@@ -1,7 +1,7 @@
 package user
 
 import (
-	"github.com/yxinyi/YCServer/YMsg"
+	"github.com/yxinyi/YCServer/examples/Msg"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	move "github.com/yxinyi/YCServer/examples/Server/Logic/Move"
 	"time"
@@ -34,8 +34,8 @@ func (u *User) CanToNextPath() bool {
 	return u.MoveControl.CanToNextPath()
 }
 
-func (u *User) ToClientJson() YMsg.UserData {
-	_user_msg := YMsg.UserData{
+func (u *User) ToClientJson() Msg.UserData {
+	_user_msg := Msg.UserData{
 		M_pos: u.M_pos,
 		M_uid: u.GetUID(),
 		//M_path: u.GetPathNode(),
