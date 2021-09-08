@@ -5,7 +5,7 @@ substantial memory and time benefits, and fewer GC pauses.
 
 The queue implemented here is as fast as it is for an additional reason: it is *not* thread-safe.
 */
-package queue
+package YTool
 
 // minQueueLen is smallest capacity that queue may have.
 // Must be power of 2 for bitwise modulus: x % n == x & (n - 1).
