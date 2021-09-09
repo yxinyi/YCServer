@@ -1,9 +1,9 @@
 package YNode
 
 import (
-	"github.com/yxinyi/YCServer/engine/YMsg"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"reflect"
 	"strings"
@@ -28,27 +28,45 @@ func (n *Info) register(info YModule.Inter) {
 	info.GetInfo().M_node_id = obj.M_uid
 }
 
-func (n *Info) RPCCall(msg *YMsg.S2S_rpc_msg) {
+func (n *Info) RPCToOther(msg *YMsg.S2S_rpc_msg) {
 	obj.M_rpc_queue.Add(msg)
 }
+func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) {
+	{
+		_, exists := obj.M_module_pool[msg_.M_tar.M_name]
+		if !exists {
+			ylog.Erro("[YNode:dispatchRpc] miss module [%v]", msg_.M_tar.M_name)
+			return
+		}
+	}
+	{
+		_, exists := obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid]
+		if !exists {
+			ylog.Erro("[YNode:dispatchRpc] miss uid [%v]", msg_.M_tar.M_uid)
+			return
+		}
+	}
+	obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().PushNetMsg(msg_)
+}
 
-func (n *Info) dispatch(msg *YMsg.S2S_rpc_msg) {
+func (n *Info) dispatchRpc(msg *YMsg.S2S_rpc_msg) {
 	{
 		_, exists := obj.M_module_pool[msg.M_tar.M_name]
 		if !exists {
-			ylog.Erro("[YNode:dispatch] miss module [%v]", msg.M_tar.M_name)
+			ylog.Erro("[YNode:dispatchRpc] miss module [%v]", msg.M_tar.M_name)
 			return
 		}
 	}
 	{
 		_, exists := obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid]
 		if !exists {
-			ylog.Erro("[YNode:dispatch] miss uid [%v]", msg.M_tar.M_uid)
+			ylog.Erro("[YNode:dispatchRpc] miss uid [%v]", msg.M_tar.M_uid)
 			return
 		}
 	}
-	obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid].GetInfo().PushRpc(msg)
+	obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid].GetInfo().PushRpcMsg(msg)
 }
+
 
 func (n *Info) close() {
 	for _, _module_list := range obj.M_module_pool {
@@ -77,6 +95,20 @@ func (n *Info) loop() {
 		case <-g_stop:
 			return
 		default:
+			if obj.M_net_queue.Len() > 0 {
+				for {
+					if obj.M_net_queue.Len() == 0 {
+						break
+					}
+					_msg := obj.M_rpc_queue.Pop().(*YMsg.C2S_net_msg)
+					if _msg.M_tar.M_node_id != obj.M_uid {
+						n.dispatchNet(_msg)
+						continue
+					}
+					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
+					_s.SendJson(1, *_msg)
+				}
+			}
 			if obj.M_rpc_queue.Len() > 0 {
 				for {
 					if obj.M_rpc_queue.Len() == 0 {
@@ -84,7 +116,7 @@ func (n *Info) loop() {
 					}
 					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_node_id == obj.M_uid {
-						n.dispatch(_msg)
+						n.dispatchRpc(_msg)
 						continue
 					}
 					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
@@ -104,7 +136,7 @@ func Register(info YModule.Inter) {
 }
 
 func RPCCall(msg_ *YMsg.S2S_rpc_msg) {
-	obj.RPCCall(msg_)
+	obj.RPCToOther(msg_)
 }
 func Obj() *Info {
 	return obj

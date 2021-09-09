@@ -1,10 +1,10 @@
 package TestModule
 
 import (
-	"github.com/yxinyi/YCServer/examples/Msg"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
+	"github.com/yxinyi/YCServer/examples/Msg"
 )
 
 type TestInfo struct {
@@ -17,6 +17,7 @@ func NewInfo(node_ *YNode.Info) *TestInfo {
 	
 	return _info
 }
+
 func (m *TestInfo) GetInfo() *YModule.Info {
 	return m.Info
 }
@@ -42,7 +43,9 @@ func (m *TestInfo) RPC_Test_2(val_ uint32) {
 
 func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) {
 	ylog.Info("TestModule RPC_Test_3 [%v] [%v]", val_, str_)
-	m.Info.RPCCallUsingJson("TestModule2",0,"Test_3",val_+1,"从 Module 发出")
+	m.Info.RPCCallWithBack(func(){
+		ylog.Info("Test 回调")
+	},"TestModule2",0,"Test")
 }
 
 

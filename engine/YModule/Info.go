@@ -14,14 +14,23 @@ type Inter interface {
 	Close()
 }
 
+type BaseInter struct {
+	*Info
+}
+
+func (b *BaseInter) GetInfo() *Info {
+	return b.Info
+}
+
 type RPCFunc struct {
-	M_rpc_name string
-	M_func     reflect.Value
-	M_param    []reflect.Type
+	M_rpc_name   string
+	M_func       reflect.Value
+	M_param      []reflect.Type
+	M_back_param []reflect.Type
 }
 
 type remoteNodeER interface {
-	RPCCall(msg *YMsg.S2S_rpc_msg)
+	RPCToOther(msg *YMsg.S2S_rpc_msg)
 }
 
 type Info struct {
@@ -32,14 +41,23 @@ type Info struct {
 	M_cluster     uint32
 	M_entity_pool map[uint64]YEntity.Inter
 	M_func_map    map[string]*RPCFunc
-	m_queue       *YTool.SyncQueue
+	m_rpc_queue   *YTool.SyncQueue
+	m_net_queue   *YTool.SyncQueue
+	m_back_fun    map[uint64]CallBackFunc
+}
+
+type CallBackFunc struct {
+	M_func  reflect.Value
+	M_param []reflect.Type
 }
 
 func NewInfo(node_ remoteNodeER) *Info {
 	_info := &Info{
 		M_entity_pool: make(map[uint64]YEntity.Inter),
 		M_func_map:    make(map[string]*RPCFunc),
-		m_queue:       YTool.NewSyncQueue(),
+		m_rpc_queue:   YTool.NewSyncQueue(),
+		m_net_queue:   YTool.NewSyncQueue(),
+		m_back_fun:    make(map[uint64]CallBackFunc),
 		m_node:        node_,
 	}
 	return _info

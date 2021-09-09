@@ -5,8 +5,8 @@ import (
 	"flag"
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
-	"github.com/yxinyi/YCServer/examples/Server/Logic/TestModule"
-	"github.com/yxinyi/YCServer/examples/Server/Logic/TestModule2"
+	"github.com/yxinyi/YCServer/examples/RPCExamples/Logic/TestModule"
+	"github.com/yxinyi/YCServer/examples/RPCExamples/Logic/TestModule2"
 	_ "net/http/pprof"
 )
 
