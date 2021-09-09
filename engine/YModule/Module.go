@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"runtime/debug"
 	"strings"
+	"time"
 )
 
 func (i *Info) PushRpcMsg(msg_ *YMsg.S2S_rpc_msg) {
@@ -45,14 +46,14 @@ func (i *Info) Init(core Inter) {
 				_func.M_back_param = append(_func.M_back_param, _method_val.Type().Out(_out_idx))
 			}
 		}
-		
-		i.M_func_map[_func.M_rpc_name] = _func
+
+		i.M_rpc_func_map[_func.M_rpc_name] = _func
 	}
 	i.DebugPrint()
 }
 
 func (i *Info) DebugPrint() {
-	for _name_it, _func_it := range i.M_func_map {
+	for _name_it, _func_it := range i.M_rpc_func_map {
 		ylog.Info("#############")
 		ylog.Info("[name] [%v] [func] [%v]", _name_it, _func_it.M_func.String())
 		for _, _param_it := range _func_it.M_param {
@@ -75,12 +76,12 @@ func (i *Info) paramUnmarshalWithTypeSlice(bytes_list_ [][]byte, type_list_ []re
 }
 
 func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
-	_func, _exists := i.M_func_map[msg.M_func_name]
+	_func, _exists := i.M_rpc_func_map[msg.M_func_name]
 	if !_exists {
 		ylog.Erro("RPC param miss method [%v]", msg.M_func_name)
 		return nil
 	}
-	
+
 	if len(_func.M_param) != len(msg.M_func_parameter) {
 		ylog.Erro("RPC param count err right [%v] err [%v]", len(_func.M_param), len(msg.M_func_parameter))
 		return nil
@@ -89,7 +90,7 @@ func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 }
 
 func (i *Info) call(msg_ *YMsg.S2S_rpc_msg, val_list_ []reflect.Value) []reflect.Value {
-	_func := i.M_func_map[msg_.M_func_name]
+	_func := i.M_rpc_func_map[msg_.M_func_name]
 	return _func.M_func.Call(val_list_)
 }
 
@@ -113,8 +114,8 @@ func (i *Info) Loop() {
 			}
 			_back_param := i.call(_msg, _param_list)
 			if _msg.M_need_back {
-				_back_param_inter_list := make([]interface{},0, len(_back_param))
-				for _, _it := range _back_param{
+				_back_param_inter_list := make([]interface{}, 0, len(_back_param))
+				for _, _it := range _back_param {
 					_back_param_inter_list = append(_back_param_inter_list, _it.Interface())
 				}
 				_rpc_msg := i.RPCPackage(_msg.M_source.M_name, _msg.M_source.M_uid, _msg.M_func_name, _back_param_inter_list...)
@@ -123,6 +124,31 @@ func (i *Info) Loop() {
 				i.m_node.RPCToOther(_rpc_msg)
 			}
 		}
+
+		for {
+			if i.m_net_queue.Len() == 0 {
+				break
+			}
+			_msg := i.m_net_queue.Pop().(*YMsg.C2S_net_msg)
+
+			_net_func_obj := i.M_net_func_map[_msg.M_net_msg.M_msg_id]
+			if _net_func_obj == nil {
+				continue
+			}
+
+			_json_data := reflect.New(_net_func_obj.m_msg_data).Interface()
+			err := json.Unmarshal(_msg.M_net_msg.M_msg_data, _json_data)
+			if err != nil {
+				ylog.Erro("[%v] decode err [%v]", _msg.M_net_msg.M_msg_data, err.Error())
+				continue
+			}
+
+			_net_func_obj.M_fn.Call([]reflect.Value{
+				reflect.ValueOf(_msg.M_session_id),
+				reflect.ValueOf(_json_data).Elem(),
+			})
+		}
+		time.Sleep(time.Millisecond)
 	}
 }
 

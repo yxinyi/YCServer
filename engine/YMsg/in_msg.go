@@ -20,6 +20,7 @@ type S2S_rpc_msg struct {
 }
 
 type C2S_net_msg struct {
-	M_tar          Agent
-	M_net_msg      *YNet.NetMsgPack
+	M_tar        Agent
+	M_session_id uint64
+	M_net_msg    *YNet.NetMsgPack
 }

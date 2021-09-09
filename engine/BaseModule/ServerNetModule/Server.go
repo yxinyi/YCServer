@@ -15,7 +15,7 @@ const (
 func NewInfo(node_ *YNode.Info) *ServerNetModule {
 	_info := &ServerNetModule{}
 	_info.Info = YModule.NewInfo(node_)
-	
+
 	return _info
 }
 
@@ -52,6 +52,7 @@ func (m *ServerNetModule) Loop() {
 				for _, _agent_it := range m.m_net_msg_pool[_msg.M_net_msg.M_msg_id] {
 					_net_msg := &YMsg.C2S_net_msg{
 						_agent_it,
+						_msg.M_session.GetUID(),
 						_msg.M_net_msg,
 					}
 					m.Info.PushNetMsg(_net_msg)

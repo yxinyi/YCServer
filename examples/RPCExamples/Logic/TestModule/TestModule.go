@@ -43,9 +43,14 @@ func (m *TestInfo) RPC_Test_2(val_ uint32) {
 
 func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) {
 	ylog.Info("TestModule RPC_Test_3 [%v] [%v]", val_, str_)
-	m.Info.RPCCallWithBack(func(){
-		ylog.Info("Test 回调")
-	},"TestModule2",0,"Test")
+	var _func func()
+	_func = func(){
+		m.Info.RPCCallWithBack(func(){
+			ylog.Info("Test 回调")
+			_func()
+		},"TestModule2",0,"Test")
+	}
+	_func()
 }
 
 
