@@ -48,11 +48,11 @@ func (c *Connect) Connect(ip_, port_ string) bool {
 	c.m_session.Send(_net_msg)
 }*/
 
-func (c *Connect) SendJson(msg_id_ uint32, msg_ interface{}) {
+func (c *Connect) SendJson(msg_ interface{}) {
 	if c.m_session  == nil {
 		return
 	}
-	c.m_session.SendJson(msg_id_, msg_)
+	c.m_session.SendJson(msg_)
 }
 
 func (c *Connect) Start() bool {

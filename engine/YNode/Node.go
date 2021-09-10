@@ -31,6 +31,10 @@ func (n *Info) register(info YModule.Inter) {
 func (n *Info) RPCToOther(msg *YMsg.S2S_rpc_msg) {
 	obj.M_rpc_queue.Add(msg)
 }
+func (n *Info) NetToOther(msg *YMsg.C2S_net_msg){
+	obj.M_net_queue.Add(msg)
+}
+
 func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) {
 	{
 		_, exists := obj.M_module_pool[msg_.M_tar.M_name]
@@ -67,7 +71,6 @@ func (n *Info) dispatchRpc(msg *YMsg.S2S_rpc_msg) {
 	obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid].GetInfo().PushRpcMsg(msg)
 }
 
-
 func (n *Info) close() {
 	for _, _module_list := range obj.M_module_pool {
 		for _, it := range _module_list {
@@ -83,7 +86,11 @@ func (n *Info) start() {
 	}
 	for _, _module_list := range obj.M_module_pool {
 		for _, it := range _module_list {
-			go it.Loop()
+			go func() {
+				for {
+					it.Loop()
+				}
+			}()
 		}
 	}
 	n.loop()
@@ -95,18 +102,22 @@ func (n *Info) loop() {
 		case <-g_stop:
 			return
 		default:
+			
 			if obj.M_net_queue.Len() > 0 {
 				for {
 					if obj.M_net_queue.Len() == 0 {
 						break
 					}
-					_msg := obj.M_rpc_queue.Pop().(*YMsg.C2S_net_msg)
-					if _msg.M_tar.M_node_id != obj.M_uid {
+					_msg := obj.M_net_queue.Pop().(*YMsg.C2S_net_msg)
+					if _msg.M_tar.M_node_id == obj.M_uid {
 						n.dispatchNet(_msg)
 						continue
 					}
 					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
-					_s.SendJson(1, *_msg)
+					if _s == nil {
+						continue
+					}
+					_s.SendJson(*_msg)
 				}
 			}
 			if obj.M_rpc_queue.Len() > 0 {
@@ -116,11 +127,12 @@ func (n *Info) loop() {
 					}
 					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_node_id == obj.M_uid {
+						ylog.Info("[Node] dispatch [%v]", _msg.M_func_name)
 						n.dispatchRpc(_msg)
 						continue
 					}
 					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
-					_s.SendJson(0, *_msg)
+					_s.SendJson(*_msg)
 				}
 			}
 		}
@@ -131,13 +143,17 @@ func RegisterOtherNode(node_uid_ uint64, s_ *YNet.Session) {
 	obj.M_node_pool[node_uid_] = s_
 }
 
-func Register(info YModule.Inter) {
-	obj.register(info)
+func Register(info_list_ ...YModule.Inter) {
+	for _, _it := range info_list_{
+		obj.register(_it)
+	}
+	
 }
 
 func RPCCall(msg_ *YMsg.S2S_rpc_msg) {
 	obj.RPCToOther(msg_)
 }
+
 func Obj() *Info {
 	return obj
 }

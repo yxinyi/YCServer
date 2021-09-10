@@ -7,29 +7,30 @@ import (
 )
 
 type NetMsgHandler struct {
-	m_msg_id   uint32
+	m_msg_name string
 	m_fn       reflect.Value
 	m_msg_data reflect.Type
 }
 
-var net_msg_list = make(map[uint32]*NetMsgHandler)
+var net_msg_list = make(map[string]*NetMsgHandler)
 
-func Register(msg_id_ uint32, fn_ interface{}) {
+func Register(msg_ interface{}, fn_ interface{}) {
+	_msg_name := reflect.TypeOf(msg_).String()
 	_handler := &NetMsgHandler{
-		m_msg_id: msg_id_,
-		m_fn:     reflect.ValueOf(fn_),
+		m_msg_name: _msg_name,
+		m_fn:       reflect.ValueOf(fn_),
 	}
 	_handler.m_msg_data = reflect.TypeOf(fn_).In(0)
-	net_msg_list[msg_id_] = _handler
+	net_msg_list[_msg_name] = _handler
 }
 
 func Dispatch(s_ *Session, net_msg_ *NetMsgPack) error {
 	if net_msg_ == nil {
 		return nil
 	}
-	_handler, exists := net_msg_list[net_msg_.M_msg_id]
+	_handler, exists := net_msg_list[net_msg_.M_msg_name]
 	if !exists {
-		return fmt.Errorf("[%v] miss call back ", net_msg_.M_msg_id)
+		return fmt.Errorf("[%v] miss call back ", net_msg_.M_msg_name)
 	}
 	
 	//可以传入不同的解析类型,进行解析

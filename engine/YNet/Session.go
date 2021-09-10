@@ -35,11 +35,11 @@ func (s *Session) Close() {
 	close(s.m_stop)
 }
 
-func (s *Session) SendJson(msg_id_ uint32, json_ interface{}) error {
+func (s *Session) SendJson(json_ interface{}) error {
 	if s.M_is_rotbot {
 		return nil
 	}
-	_msg := NewNetMsgPackWithJson(msg_id_, json_)
+	_msg := NewNetMsgPackWithJson(json_)
 	if _msg == nil {
 		return fmt.Errorf("[Session:SendJson] pack error")
 	}

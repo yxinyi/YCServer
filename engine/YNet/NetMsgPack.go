@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"io"
+	"reflect"
+	"strings"
 	"unsafe"
 )
 
@@ -13,8 +15,8 @@ const (
 )
 
 type NetMsgPack struct {
-	M_msg_id     uint32
-	M_msg_data   []byte
+	M_msg_name string
+	M_msg_data []byte
 }
 
 const (
@@ -26,9 +28,13 @@ func NewNetMsgPack() *NetMsgPack {
 	return &NetMsgPack{
 	}
 }
-func NewNetMsgPackWithJson(msg_id_ uint32, json_ interface{}) *NetMsgPack {
+func NewNetMsgPackWithJson(json_ interface{}) *NetMsgPack {
 	_msg := NewNetMsgPack()
-	_msg.M_msg_id = msg_id_
+	
+	_msg_name := reflect.TypeOf(json_).String()
+	_split_idx := strings.Index(_msg_name,".")
+	_msg_name = _msg_name[_split_idx+1:]
+	_msg.M_msg_name = _msg_name
 	_byte, _err := json.Marshal(json_)
 	if _err != nil {
 		return nil
@@ -38,12 +44,16 @@ func NewNetMsgPackWithJson(msg_id_ uint32, json_ interface{}) *NetMsgPack {
 }
 
 func (pack *NetMsgPack) ToByteStream() []byte {
-	_total_length := const_type_size + const_length_size + len(pack.M_msg_data)
+	_name_length := len(pack.M_msg_name)
+	_data_length := len(pack.M_msg_data)
+	
+	_total_length := const_type_size + const_length_size + _name_length + _data_length
 	_stream_byte := make([]byte, _total_length)
 	
-	binary.LittleEndian.PutUint32(_stream_byte, pack.M_msg_id)
-	binary.LittleEndian.PutUint32(_stream_byte[const_type_size:], uint32(len(pack.M_msg_data)))
-	copy(_stream_byte[uint32(const_type_size+const_length_size):], pack.M_msg_data[:])
+	binary.LittleEndian.PutUint32(_stream_byte, uint32(_name_length))
+	binary.LittleEndian.PutUint32(_stream_byte[const_type_size:], uint32(_data_length))
+	copy(_stream_byte[uint32(const_type_size+const_length_size):], pack.M_msg_name[:])
+	copy(_stream_byte[uint32(const_type_size+const_length_size+_name_length):], pack.M_msg_data[:])
 	return _stream_byte
 }
 
@@ -58,13 +68,21 @@ func (pack *NetMsgPack) InitFromIO(io_ io.Reader) bool {
 		return false
 	}
 	
-	pack.M_msg_id = binary.LittleEndian.Uint32(_type_byte[0:const_type_size])
-	_msg_length := binary.LittleEndian.Uint32(_type_byte[const_type_size : const_type_size+const_length_size])
+	_name_length := binary.LittleEndian.Uint32(_type_byte[0:const_type_size])
+	_data_length := binary.LittleEndian.Uint32(_type_byte[const_type_size : const_type_size+const_type_size])
 	
-	pack.M_msg_data = make([]byte, _msg_length)
+	_msg_name_byte := make([]byte, _name_length)
+	_len, err = io.ReadFull(io_, _msg_name_byte)
+	if err != nil {
+		return false
+	}
+	pack.M_msg_name = string(_msg_name_byte)
+	
+	pack.M_msg_data = make([]byte, _data_length)
 	_len, err = io.ReadFull(io_, pack.M_msg_data)
 	if err != nil {
 		return false
 	}
+	
 	return true
 }
