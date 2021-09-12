@@ -35,7 +35,7 @@ func Dispatch(s_ *Session, net_msg_ *NetMsgPack) error {
 	if !exists {
 		return fmt.Errorf("[%v] miss call back ", net_msg_.M_msg_name)
 	}
-	
+	fmt.Printf("[Dispatch] [%v] \n",net_msg_.M_msg_name)
 	//可以传入不同的解析类型,进行解析
 	_json_data := reflect.New(_handler.m_msg_data).Interface()
 	err := json.Unmarshal(net_msg_.M_msg_data, _json_data)

@@ -145,9 +145,7 @@ func newMazeMap(uid_ uint64) *Info {
 	_maze_map.InitMazeMap()
 	_maze_map.m_go_ng_aoi.Init(func(tar_ uint64, move_ map[uint64]struct{}) {
 		for _it := range move_ {
-			if tar_ == _it{
-				continue
-			}
+
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_update[_it] = struct{}{}
@@ -157,6 +155,9 @@ func newMazeMap(uid_ uint64) *Info {
 
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
+			if tar_ == _it{
+				continue
+			}
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_add[_it] = struct{}{}
@@ -196,7 +197,7 @@ func (i *Info) Loop() {
 			i.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(*_it))
 			_, exists := i.m_msg_notify[_it.M_uid]
 			if exists {
-				i.m_msg_notify[_it.M_uid].m_add[_it.M_uid] = struct{}{}
+				i.m_msg_notify[_it.M_uid].m_update[_it.M_uid] = struct{}{}
 			}
 		} /*else {
 			//如果没有移动,则随机新的目标点
