@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/yxinyi/YCServer/engine/YNet"
 	"image/color"
 	"math/rand"
 	"time"
@@ -36,15 +36,15 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 // Update updates the current game state.
 func (g *Game) Update() error {
 
-	for _net_msg := range YNet.G_net_msg_chan{
-		YNet.Dispatch(_net_msg.M_session, _net_msg.M_net_msg)
-		if len(YNet.G_net_msg_chan) == 0 {
-			break
+	for more := true; more; {
+		select {
+		case _net_msg := <-YNet.G_net_msg_chan:
+			YNet.Dispatch(_net_msg.M_session, _net_msg.M_net_msg)
+		default:
+			more = false
 		}
 	}
-
 	g_map.Update()
-
 	return nil
 }
 

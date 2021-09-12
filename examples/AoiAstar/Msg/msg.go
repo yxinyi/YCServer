@@ -5,23 +5,6 @@ import (
 	"math"
 )
 
-const (
-	MESSAGE_TEST uint32 = iota
-	MsgID_C2SUserMove
-	MsgID_S2CUserMove
-
-	MsgID_S2CUserSuccessLogin
-	
-	MSG_S2C_MAP_FULL_SYNC
-	MSG_S2C_MAP_ADD_USER
-	MSG_S2C_MAP_UPDATE_USER
-	MSG_S2C_MAP_DELETE_USER
-	MSG_S2C_MAP_ASTAR_NODE_UPDATE
-	MSG_S2C_MAP_FLUSH_MAP_MAZE
-	
-	MSG_S2S_RPC_MSG
-)
-
 type Message struct {
 	Id     int
 	Number int
@@ -92,24 +75,12 @@ type S2CMapAStarNodeUpdate struct {
 	M_path []PositionXY
 }
 
-type S2CUserSuccessLogin struct {
-	M_data UserData
-}
-
-type S2CFlushMapMaze struct {
-	M_map_uid uint64
-	M_maze    [][]float64
-	M_height  float64
-	M_width   float64
-}
-
-
 type C2S_Login struct {
 
 }
 
 type S2C_Login struct {
-
+	M_data UserData
 }
 
 type C2S_FirstEnterMap struct {
@@ -121,6 +92,7 @@ type S2C_FirstEnterMap struct {
 	M_maze    [][]float64
 	M_height  float64
 	M_width   float64
+	M_data UserData
 }
 
 

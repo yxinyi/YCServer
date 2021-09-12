@@ -33,7 +33,9 @@ func (i *Info) MSG_C2S_Login(s_ uint64, msg_ Msg.C2S_Login) {
 	if !exists {
 		i.M_user_pool[s_] = NewUser(s_, s_)
 	}
-	i.Info.RPCCall("NetModule", 0, "SendNetMsgJson", s_, Msg.S2C_Login{})
+	i.Info.SendNetMsgJson(s_, Msg.S2C_Login{
+		i.M_user_pool[s_].ToClientJson(),
+	})
 }
 
 func (i *Info) MSG_C2S_FirstEnterMap(s_ uint64, msg_ Msg.C2S_FirstEnterMap) {
@@ -52,7 +54,7 @@ func (i *Info) MSG_C2S_UserMove(s_ uint64, msg_ Msg.C2S_UserMove) {
 		return
 	}
 	
-	i.Info.RPCCall("Map", _user.M_current_map, "UserMove", _user, msg_.M_pos)
+	i.Info.RPCCall("Map", _user.M_current_map, "UserMove", _user.M_uid, msg_.M_pos)
 }
 
 /*YNet.Register(YMsg.MsgID_C2SUserMove, func (msg_ Msg.C2SUserMove, s_ YNet.Session) {

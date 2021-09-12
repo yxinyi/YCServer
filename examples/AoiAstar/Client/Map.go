@@ -38,7 +38,7 @@ var g_map = NewMap()
 var g_main_uid uint64
 var g_main_path_node []Msg.PositionXY
 var g_main_check_node []Msg.PositionXY
-var g_map_maze_info Msg.S2CFlushMapMaze
+var g_map_maze_info Msg.S2C_FirstEnterMap
 
 func (m *Map) Init() {
 	tt, err := opentype.Parse(goregular.TTF)
@@ -50,8 +50,35 @@ func (m *Map) Init() {
 		DPI:     72,
 		Hinting: font.HintingFull,
 	})
+	YNet.Register(func( _ YNet.Session,msg_ Msg.S2C_FirstEnterMap) {
+		g_map_maze_info = msg_
+		m.UpdateUser(msg_.M_data)
+	})
+	YNet.Register(func(_ YNet.Session,msg_ Msg.S2C_Login) {
+		g_main_uid = msg_.M_data.M_uid
+		m.AddNewUser(msg_.M_data)
+	})
+	YNet.Register(func(_ YNet.Session,msg_ Msg.S2CMapAStarNodeUpdate) {
+		g_main_path_node = msg_.M_path
+	})
+	YNet.Register(func(_ YNet.Session,msg_ Msg.S2CMapAddUser) {
+		for _, _it := range msg_.M_user {
+			m.AddNewUser(_it)
+		}
 
-	YNet.Register(Msg.MsgID_S2CUserMove, m.UserMove)
+	})
+	YNet.Register(func(_ YNet.Session,msg_ Msg.S2CMapUpdateUser) {
+		for _, _it := range msg_.M_user {
+			m.UpdateUser(_it)
+		}
+	})
+	YNet.Register(func( _ YNet.Session,msg_ Msg.S2CMapDeleteUser,) {
+		for _, _it := range msg_.M_user {
+			m.DeleteUser(_it.M_uid)
+		}
+	})
+
+/*	YNet.Register(Msg.MsgID_S2CUserMove, m.UserMove)
 	YNet.Register(Msg.MSG_S2C_MAP_FULL_SYNC, func(msg_ Msg.S2CMapFullSync, _ YNet.Session) {
 		for _, _it := range msg_.M_user {
 			m.AddNewUser(_it)
@@ -82,7 +109,7 @@ func (m *Map) Init() {
 	})
 	YNet.Register(Msg.MSG_S2C_MAP_FLUSH_MAP_MAZE, func(msg_ Msg.S2CFlushMapMaze, _ YNet.Session) {
 		g_map_maze_info = msg_
-	})
+	})*/
 }
 func (m *Map) DeleteUser(uid_ uint64) {
 	delete(m.m_user_list, uid_)
@@ -109,7 +136,7 @@ func (m *Map) UserMove(msg_ Msg.S2C_MOVE, _ YNet.Session) {
 func (m *Map) Update() {
 	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 		_tar_x, _tar_y := ebiten.CursorPosition()
-		g_client_cnn.SendJson(Msg.C2SUserMove{
+		g_client_cnn.SendJson(Msg.C2S_UserMove{
 			Msg.PositionXY{
 				float64(_tar_x),
 				float64(_tar_y),

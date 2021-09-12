@@ -53,22 +53,22 @@ func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) {
 	obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().PushNetMsg(msg_)
 }
 
-func (n *Info) dispatchRpc(msg *YMsg.S2S_rpc_msg) {
+func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) {
 	{
-		_, exists := obj.M_module_pool[msg.M_tar.M_name]
+		_, exists := obj.M_module_pool[msg_.M_tar.M_name]
 		if !exists {
-			ylog.Erro("[YNode:dispatchRpc] miss module [%v]", msg.M_tar.M_name)
+			ylog.Erro("[YNode:dispatchRpc] miss module [%v]", msg_.M_tar.M_name)
 			return
 		}
 	}
 	{
-		_, exists := obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid]
+		_, exists := obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid]
 		if !exists {
-			ylog.Erro("[YNode:dispatchRpc] miss uid [%v]", msg.M_tar.M_uid)
+			ylog.Erro("[YNode:dispatchRpc] miss uid [%v]", msg_.M_tar.M_uid)
 			return
 		}
 	}
-	obj.M_module_pool[msg.M_tar.M_name][msg.M_tar.M_uid].GetInfo().PushRpcMsg(msg)
+	obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().PushRpcMsg(msg_)
 }
 
 func (n *Info) close() {
@@ -110,6 +110,7 @@ func (n *Info) loop() {
 					}
 					_msg := obj.M_net_queue.Pop().(*YMsg.C2S_net_msg)
 					if _msg.M_tar.M_node_id == obj.M_uid {
+						ylog.Info("[Node] dispatch Net [%v]", _msg.M_net_msg.M_msg_name)
 						n.dispatchNet(_msg)
 						continue
 					}
@@ -127,7 +128,7 @@ func (n *Info) loop() {
 					}
 					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_node_id == obj.M_uid {
-						ylog.Info("[Node] dispatch [%v]", _msg.M_func_name)
+						ylog.Info("[Node] dispatch RPC [%v]", _msg.M_func_name)
 						n.dispatchRpc(_msg)
 						continue
 					}

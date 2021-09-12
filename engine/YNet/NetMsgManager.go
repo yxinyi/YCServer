@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 type NetMsgHandler struct {
@@ -14,13 +15,15 @@ type NetMsgHandler struct {
 
 var net_msg_list = make(map[string]*NetMsgHandler)
 
-func Register(msg_ interface{}, fn_ interface{}) {
-	_msg_name := reflect.TypeOf(msg_).String()
+func Register(fn_ interface{}) {
+
 	_handler := &NetMsgHandler{
-		m_msg_name: _msg_name,
 		m_fn:       reflect.ValueOf(fn_),
 	}
-	_handler.m_msg_data = reflect.TypeOf(fn_).In(0)
+	_handler.m_msg_data = reflect.TypeOf(fn_).In(1)
+	_msg_name := _handler.m_msg_data.String()
+	_split_idx := strings.Index(_msg_name,".")
+	_msg_name = _msg_name[_split_idx+1:]
 	net_msg_list[_msg_name] = _handler
 }
 
@@ -41,8 +44,8 @@ func Dispatch(s_ *Session, net_msg_ *NetMsgPack) error {
 	}
 	
 	_handler.m_fn.Call([]reflect.Value{
-		reflect.ValueOf(_json_data).Elem(),
 		reflect.ValueOf(s_).Elem(),
+		reflect.ValueOf(_json_data).Elem(),
 	})
 	
 	return nil

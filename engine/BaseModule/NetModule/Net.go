@@ -28,7 +28,7 @@ func (m *NetModule) Init() {
 	if err != nil {
 		panic(" ListenTcp4 err")
 	}*/
-	
+
 }
 
 func (m *NetModule) RPC_Listen(ip_port_ string) {
@@ -46,12 +46,13 @@ func (m *NetModule) RPC_Connect(ip_ string, port_ string) {
 	_new_connect.Start()
 }
 
-func (m *NetModule) RPC_SendNetMsgJson(s_ uint64, json_ interface{}) {
+func (m *NetModule) RPC_SendNetMsgJson(s_ uint64, msg_ *YNet.NetMsgPack) {
 	_session := m.m_session_pool[s_]
 	if _session == nil {
 		return
 	}
-	_session.SendJson(json_)
+	ylog.Info("[NetModule:SendNetMsgJson] [%v]",msg_.M_msg_name)
+	_session.Send(msg_)
 }
 
 func (m *NetModule) RPC_NetMsgRegister(msg_list_ []string, agent_ YMsg.Agent) {

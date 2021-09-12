@@ -5,6 +5,7 @@ import (
 	"fmt"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YMsg"
+	"github.com/yxinyi/YCServer/engine/YNet"
 	"reflect"
 	"runtime/debug"
 	"strings"
@@ -112,7 +113,7 @@ func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 		ylog.Erro("RPC param miss method [%v]", msg.M_func_name)
 		return nil
 	}
-	
+
 	if len(_func.M_param) != len(msg.M_func_parameter) {
 		ylog.Erro("RPC param count err right [%v] err [%v]", len(_func.M_param), len(msg.M_func_parameter))
 		return nil
@@ -122,7 +123,7 @@ func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 
 func (i *Info) call(msg_ *YMsg.S2S_rpc_msg, val_list_ []reflect.Value) []reflect.Value {
 	_func := i.M_rpc_func_map[msg_.M_func_name]
-	if _func== nil {
+	if _func == nil {
 		panic(string(debug.Stack()))
 	}
 	return _func.M_fn.Call(val_list_)
@@ -157,25 +158,25 @@ func (i *Info) Loop() {
 			i.RPCToOther(_rpc_msg)
 		}
 	}
-	
+
 	for {
 		if i.m_net_queue.Len() == 0 {
 			break
 		}
 		_msg := i.m_net_queue.Pop().(*YMsg.C2S_net_msg)
-		
+
 		_net_func_obj := i.M_net_func_map[_msg.M_net_msg.M_msg_name]
 		if _net_func_obj == nil {
 			continue
 		}
-		
+
 		_json_data := reflect.New(_net_func_obj.m_msg_data).Interface()
 		err := json.Unmarshal(_msg.M_net_msg.M_msg_data, _json_data)
 		if err != nil {
 			ylog.Erro("[%v] decode err [%v]", _msg.M_net_msg.M_msg_data, err.Error())
 			continue
 		}
-		
+
 		_net_func_obj.M_fn.Call([]reflect.Value{
 			reflect.ValueOf(_msg.M_session_id),
 			reflect.ValueOf(_json_data).Elem(),
@@ -194,6 +195,17 @@ func (i *Info) GetAgent() YMsg.Agent {
 
 func (i *Info) String() string {
 	return fmt.Sprintf("[%v:%v:%v]", i.M_name, i.M_uid, i.M_node_id)
+}
+
+
+
+func (i *Info) SendNetMsgJson(session_id_ uint64, json_msg_ interface{}) {
+	_msg := YNet.NewNetMsgPackWithJson(json_msg_)
+	if _msg == nil {
+		ylog.Erro("[%v:SendNetMsgJson] err [%v]",i.M_name,reflect.TypeOf(json_msg_).String())
+		return
+	}
+	i.RPCCall("NetModule", 0, "SendNetMsgJson", session_id_, _msg)
 }
 
 func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) uint64 {
