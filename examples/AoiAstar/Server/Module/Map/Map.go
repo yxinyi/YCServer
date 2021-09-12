@@ -157,9 +157,6 @@ func newMazeMap(uid_ uint64) *Info {
 
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
-			if tar_ == _it{
-				continue
-			}
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_add[_it] = struct{}{}

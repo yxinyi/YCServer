@@ -165,6 +165,7 @@ func (mgr *GoNineGirdAoiManager) getObjInViewRangeMap(obj_ *GoAoiObj, cell_index
 		return _enter_sync_list
 	}
 	for _it := range _cell.GetWatch() {
+
 		_tmp_obj := mgr.FindObj(_it)
 		if _tmp_obj != nil {
 			if obj_.InViewRange(_tmp_obj) {
