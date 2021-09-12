@@ -145,6 +145,9 @@ func newMazeMap(uid_ uint64) *Info {
 	_maze_map.InitMazeMap()
 	_maze_map.m_go_ng_aoi.Init(func(tar_ uint64, move_ map[uint64]struct{}) {
 		for _it := range move_ {
+			if tar_ == _it{
+				continue
+			}
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_update[_it] = struct{}{}
@@ -154,6 +157,9 @@ func newMazeMap(uid_ uint64) *Info {
 
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
+			if tar_ == _it{
+				continue
+			}
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_add[_it] = struct{}{}
@@ -162,6 +168,9 @@ func newMazeMap(uid_ uint64) *Info {
 		}
 	}, func(tar_ uint64, quit_ map[uint64]struct{}) {
 		for _it := range quit_ {
+			if tar_ == _it{
+				continue
+			}
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_delete[_it] = struct{}{}
@@ -186,8 +195,8 @@ func (i *Info) Loop() {
 	for _, _it := range i.M_user_pool {
 		//_user_id := _it.M_uid
 		if _it.MoveUpdate(_time) {
-			ylog.Info("MoveUpdate [%v]", _time.UnixNano())
-			i.m_go_ng_aoi.Move(ConvertUserToAoiObj(*_it))
+			//ylog.Info("MoveUpdate [%v]", _time.UnixNano())
+			i.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(*_it))
 			_, exists := i.m_msg_notify[_it.M_uid]
 			if exists {
 				i.m_msg_notify[_it.M_uid].m_add[_it.M_uid] = struct{}{}
@@ -266,7 +275,6 @@ func (i *Info) Loop() {
 			_it.m_update = make(map[uint64]struct{}, 0)
 		}
 		if len(_it.m_delete) > 0 {
-			continue
 			_delete_msg := Msg.S2CMapDeleteUser{
 				M_user: make([]Msg.UserData, 0),
 			}
@@ -305,6 +313,7 @@ func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	user_.M_current_map = user_.M_uid
 	i.M_user_pool[user_.M_uid] = &user_
 	user_.M_speed = 100
+	user_.M_view_range = 100
 	_notify_msg := &MapNotifyMsg{
 		m_update: make(map[uint64]struct{}, 0),
 		m_add:    make(map[uint64]struct{}, 0),

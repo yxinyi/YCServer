@@ -297,7 +297,7 @@ func (mgr *GoNineGirdAoiManager) quit(quit_ GoAoiObj) {
 	delete(mgr.m_obj_copy, quit_.M_uid)
 }
 
-func (mgr *GoNineGirdAoiManager) Move(move_ GoAoiObj) {
+func (mgr *GoNineGirdAoiManager) ActionUpdate(move_ GoAoiObj) {
 	mgr.m_action_in <- GoNGInAoiAction{
 		GO_AOI_ACTION_UPDATE,
 		move_,

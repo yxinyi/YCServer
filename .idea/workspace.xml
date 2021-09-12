@@ -3,18 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/BaseModule/NetModule/Net.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/BaseModule/NetModule/Net.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Module.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Client/Client.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Client/Client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Client/Game.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Client/Game.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Client/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Client/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Msg/msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Msg/msg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/Aoi/GoNineGridAoiManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/Aoi/GoNineGridAoiManager.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/Map/Map.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/UserManager/UserManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/UserManager/UserManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -250,6 +241,21 @@
           <url>file://$PROJECT_DIR$/src/Server/Logic/PathFinding/AStar.go</url>
           <line>395</line>
           <option name="timeStamp" value="68" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go</url>
+          <line>150</line>
+          <option name="timeStamp" value="87" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go</url>
+          <line>162</line>
+          <option name="timeStamp" value="88" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go</url>
+          <line>172</line>
+          <option name="timeStamp" value="89" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

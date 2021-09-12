@@ -166,7 +166,7 @@ func (m *MazeMap) Update(time_ time.Time) {
 		_user_id := _it.GetUID()
 		_it.Update(time_)
 		if _it.MoveUpdate(time_) {
-			m.m_go_ng_aoi.Move(ConvertUserToAoiObj(_it))
+			m.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(_it))
 		} else {
 			//如果没有移动,则随机新的目标点
 			if !_it.M_is_rotbot{
