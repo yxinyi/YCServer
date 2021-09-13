@@ -6,6 +6,7 @@ import (
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/yxinyi/YCServer/engine/YNode"
+	"time"
 )
 
 type NetModule struct {
@@ -28,7 +29,7 @@ func (m *NetModule) Init() {
 	if err != nil {
 		panic(" ListenTcp4 err")
 	}*/
-
+	
 }
 
 func (m *NetModule) RPC_Listen(ip_port_ string) {
@@ -51,7 +52,7 @@ func (m *NetModule) RPC_SendNetMsgJson(s_ uint64, msg_ *YNet.NetMsgPack) {
 	if _session == nil {
 		return
 	}
-	ylog.Info("[NetModule:SendNetMsgJson] [%v]",msg_.M_msg_name)
+	//ylog.Info("[NetModule:SendNetMsgJson] [%v]",msg_.M_msg_name)
 	_session.Send(msg_)
 }
 
@@ -65,7 +66,7 @@ func (m *NetModule) RPC_NetMsgRegister(msg_list_ []string, agent_ YMsg.Agent) {
 	}
 }
 
-func (m *NetModule) Loop() {
+func (m *NetModule) Loop_100(time time.Time) {
 	for more := true; more; {
 		select {
 		case _msg := <-YNet.G_net_msg_chan:
@@ -88,7 +89,6 @@ func (m *NetModule) Loop() {
 			more = false
 		}
 	}
-	m.Info.Loop()
 }
 
 func (m *NetModule) Close() {

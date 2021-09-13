@@ -8,6 +8,8 @@ import (
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Module/Map"
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Module/MapManager"
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Module/UserManager"
+	"log"
+	"net/http"
 	_ "net/http/pprof"
 )
 
@@ -20,6 +22,11 @@ func main() {
 		MapManager.NewInfo(YNode.Obj()),
 		UserManager.NewInfo(YNode.Obj()),
 	)
+	go func(){
+		log.Fatal(http.ListenAndServe("0.0.0.0:9999", nil))
+	}()
+	
+	
 	YNode.RPCCall(YMsg.RPCPackage("NetModule", 0, "Listen", "0.0.0.0:20000"))
 	YNode.Start()
 }

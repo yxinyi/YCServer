@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	ScreenWidth            = 1280
-	ScreenHeight           = 720
+	ScreenWidth            = 5120
+	ScreenHeight           = 2880
 	MAZE_GRID_SIZE float64 = 10
 )
 
@@ -102,6 +102,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
 	if !exists {
 		return
 	}
+	ylog.Info("[RPC_UserMove] tar [%v]",tar_pos_.String())
 	_user.MoveTarget(tar_pos_)
 
 	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path []int) {
@@ -187,13 +188,12 @@ func (i *Info) Init() {
 	i.NotifyMapLoad()
 }
 
-func (i *Info) Loop() {
-	i.Info.Loop()
-	_time := time.Now()
+func (i *Info) Loop_100(time_ time.Time) {
+
 	for _, _it := range i.M_user_pool {
 		//_user_id := _it.M_uid
-		if _it.MoveUpdate(_time) {
-			//ylog.Info("MoveUpdate [%v]", _time.UnixNano())
+		if _it.MoveUpdate(time_) {
+			//ylog.Info("MoveUpdate [%v]", time_.UnixNano())
 			i.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(*_it))
 			_, exists := i.m_msg_notify[_it.M_uid]
 			if exists {
@@ -258,7 +258,6 @@ func (i *Info) Loop() {
 		}
 
 		if len(_it.m_update) > 0 {
-			ylog.Info("Send update")
 			_update_msg := Msg.S2CMapUpdateUser{
 				M_user: make([]Msg.UserData, 0),
 			}

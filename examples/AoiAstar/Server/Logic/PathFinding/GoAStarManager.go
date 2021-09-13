@@ -1,6 +1,7 @@
 package PathFinding
 
 import (
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YTool"
 )
 
@@ -57,6 +58,7 @@ func (mgr *AStarManager) IsBlock(index_ int) bool {
 }
 
 func (mgr *AStarManager) Search(st_, ed_ int, cb_ aStarCallback) {
+	ylog.Info("[%v:%v]",st_,ed_)
 	_cache_path, exists := mgr.m_cache_path[uint64(st_)<<32|uint64(ed_)]
 	if exists {
 		cb_(_cache_path)
@@ -83,8 +85,12 @@ func (mgr *AStarManager) Update() {
 		}
 		_msg := mgr.m_queue.Pop().(*aStarCallbackMsg)
 		mgr.m_call_back[_msg.m_uid](_msg.m_search_path)
-		
+		ylog.Info("###### [%v:%v]",_msg.m_st,_msg.m_ed)
 		mgr.m_cache_path[uint64(_msg.m_st)<<32|uint64(_msg.m_ed)] = _msg.m_search_path
+		for _idx,_path_node_it := range _msg.m_search_path{
+			mgr.m_cache_path[uint64(_path_node_it)<<32|uint64(_msg.m_ed)] = _msg.m_search_path[_idx:]
+		}
+		
 		delete(mgr.m_call_back, _msg.m_uid)
 	}
 }

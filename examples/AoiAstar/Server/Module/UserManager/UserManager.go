@@ -22,9 +22,6 @@ func (i *Info) Init() {
 	i.Info.Init(i)
 }
 
-func (i *Info) Loop() {
-	i.Info.Loop()
-}
 func (i *Info) Close() {
 }
 

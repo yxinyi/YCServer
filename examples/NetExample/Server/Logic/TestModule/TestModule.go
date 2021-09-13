@@ -8,7 +8,7 @@ import (
 )
 
 type TestInfo struct {
-	*YModule.Info
+	YModule.BaseInter
 }
 
 func NewInfo(node_ *YNode.Info) *TestInfo {
@@ -25,9 +25,6 @@ func (m *TestInfo) Init() {
 	m.Info.Init(m)
 }
 
-func (m *TestInfo) Loop() {
-	m.Info.Loop()
-}
 func (m *TestInfo) Close() {
 
 }
