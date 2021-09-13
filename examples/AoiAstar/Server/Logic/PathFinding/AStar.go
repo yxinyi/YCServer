@@ -242,14 +242,15 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 		if a.checkLinePass(before_path_[_start_idx], before_path_[_loop_idx]) {
 			_final_path = append(_final_path, before_path_[_loop_idx])
 			_start_idx = _loop_idx
-			_loop_idx = len(before_path_)-1
-			if _start_idx == len(before_path_)-1{
+			_loop_idx = len(before_path_) - 1
+			if _start_idx == _loop_idx {
 				break
 			}
 		}else{
 			_loop_idx--
 		}
 	}
+
 	
 	_path_str := ""
 	for _,_it := range _final_path{

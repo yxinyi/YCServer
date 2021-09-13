@@ -3,22 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/BaseModule/NetModule/Net.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/BaseModule/NetModule/Net.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Info.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Module.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Info.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Client/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Client/Map.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/AStar.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/AStar.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/GoAStarManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/GoAStarManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/Map/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/MapManager/MapManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/MapManager/MapManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/UserManager/UserManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Module/UserManager/UserManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,7 +18,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file://$PROJECT_DIR$/../../../../../../Go" />
+  <component name="GOROOT" url="file://C:/Program Files/Go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -71,7 +57,7 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="go.vgo" />
+    <property name="settings.editor.selected.configurable" value="go.sdk" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -105,8 +91,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/examples/AoiAstar/Client" />
       <filePath value="$PROJECT_DIR$" />
+      <directory value="$PROJECT_DIR$/examples/AoiAstar/Client" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -115,8 +101,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/examples/AoiAstar/Server" />
       <filePath value="$PROJECT_DIR$" />
+      <directory value="$PROJECT_DIR$/examples/AoiAstar/Server" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -134,8 +120,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="FILE" />
-      <directory value="$PROJECT_DIR$/Client" />
       <filePath value="$PROJECT_DIR$/examples/NetExample/Server/Main.go" />
+      <directory value="$PROJECT_DIR$/Client" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -144,8 +130,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/Client" />
       <filePath value="$PROJECT_DIR$" />
+      <directory value="$PROJECT_DIR$/Client" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -154,8 +140,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/src/Client" />
       <filePath value="$PROJECT_DIR$/src/Client" />
+      <directory value="$PROJECT_DIR$/src/Client" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -164,8 +150,8 @@
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
       <kind value="DIRECTORY" />
-      <directory value="$PROJECT_DIR$/examples/RPCExamples" />
       <filePath value="$PROJECT_DIR$/examples/Server/Main.go" />
+      <directory value="$PROJECT_DIR$/examples/RPCExamples" />
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
@@ -173,40 +159,40 @@
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
+      <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/src/Server/Logic/PathFinding/AStar_test.go" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="AoiManager_test.go" type="GoTestRunConfiguration" factoryName="Go Test" nameIsGenerated="true">
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
+      <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$/src/Base/YEventBus" />
       <filePath value="$PROJECT_DIR$/src/Server/Logic/Aoi/AoiManager_test.go" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="TimerTest.go" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
+      <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/src/Base/YTimer/timer_test.go" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <configuration name="test tools " type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
+      <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$/src/Server/Logic/Tool/tools_test.go" />
-      <framework value="gotest" />
       <method v="2" />
     </configuration>
     <list>
