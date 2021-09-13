@@ -1,10 +1,8 @@
 package PathFinding
 
 import (
-	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"math"
-	"strconv"
 )
 
 const (
@@ -232,36 +230,42 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 	return true
 }
 
-func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
+/*func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	_final_path := make([]*blockPos, 0)
+	_path_str := ""
+	for _,_it := range before_path_{
+		_path_str += strconv.Itoa(_it.m_index)
+		_path_str+=" "
+	}
+	ylog.Info("before forceConn [%v]",_path_str)
 	//能否直连判断
 	//_final_path = append(_final_path, before_path_[0])
-	_loop_idx := len(before_path_)-1
+	_end_idx := len(before_path_)-1
 	_start_idx := 0
 	for  {
-		if a.checkLinePass(before_path_[_start_idx], before_path_[_loop_idx]) {
-			_final_path = append(_final_path, before_path_[_loop_idx])
-			_start_idx = _loop_idx
-			_loop_idx = len(before_path_) - 1
-			if _start_idx == _loop_idx {
+		if a.checkLinePass(before_path_[_start_idx], before_path_[_end_idx]) {
+			_final_path = append(_final_path, before_path_[_end_idx])
+			_start_idx = _end_idx
+			_end_idx = len(before_path_) - 1
+			if _start_idx == _end_idx {
 				break
 			}
 		}else{
-			_loop_idx--
+			_end_idx--
 		}
 	}
 
 	
-	_path_str := ""
+	_path_str = ""
 	for _,_it := range _final_path{
 		_path_str += strconv.Itoa(_it.m_index)
 		_path_str+=" "
 	}
 	ylog.Info("forceConn [%v]",_path_str)
 	return _final_path
-}
+}*/
 
-/*func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
+func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	_final_path := make([]*blockPos, 0)
 	if len(before_path_) == 0 {
 		return _final_path
@@ -280,7 +284,7 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	
 	_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
-}*/
+}
 
 func (a *AStar) pathToBetter(before_path_ []int) []int {
 	_after_path := make([]int, 0)
@@ -314,8 +318,18 @@ func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
 	
 	_indx_arr := a.SearchWithIndex(st_idx_, ed_idx_)
 	//_indx_arr = a.pathToBetter(_indx_arr)
-	//_indx_arr = a.forceConn(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
+/*	_force_len := len(_indx_arr)
+	for{
+		_before := _force_len
+		_indx_arr = a.forceConn(_indx_arr)
+		if _before== len(_indx_arr){
+			break
+		}
+		_force_len = len(_indx_arr)
+	}*/
+
+
 	_ret_arr := make([]int, 0, len(_indx_arr))
 	for _, _it := range _indx_arr {
 		_ret_arr = append(_ret_arr, _it.m_index)

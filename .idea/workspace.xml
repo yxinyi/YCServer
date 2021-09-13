@@ -4,7 +4,6 @@
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/AStar.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/AStar.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/GoAStarManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstar/Server/Logic/PathFinding/GoAStarManager.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
