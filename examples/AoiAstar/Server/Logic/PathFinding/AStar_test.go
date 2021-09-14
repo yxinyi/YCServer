@@ -10,8 +10,12 @@ func AStarTestHelp(t_ *testing.T, maze_ [][]float64, answer_arr_ []int, st_, ed_
 	_a := NewAStar()
 	_a.Init(maze_)
 	_path_arr := _a.SearchWithIndex(st_, ed_)
-	if !reflect.DeepEqual(_path_arr, answer_arr_) {
-		t_.Fatalf("ture path [%v] err path [%v]", answer_arr_, _path_arr)
+	_idx_arr := make([]int, 0)
+	for _, it := range _path_arr {
+		_idx_arr = append(_idx_arr, it.m_index)
+	}
+	if !reflect.DeepEqual(_idx_arr, answer_arr_) {
+		t_.Fatalf("ture path [%v] err path [%v]", answer_arr_, _idx_arr)
 	}
 }
 func SlopeTestHelp(t_ *testing.T, maze_ [][]float64, _arr []int) {
@@ -128,7 +132,7 @@ func TestAStarMgr(t_ *testing.T) {
 	_a_mgr.Init(_maze)
 	//_answer_path := []int{80, 67, 54, 40, 27, 13, 0}
 	_st := 0 //len(_maze)
-	_ed := len(_maze[0])*len(_maze) - 1
+	_ed := 10
 	_pass := false
 	_a_mgr.Search(_st, _ed, func(path_ []int) {
 		if len(path_) != 0 {
@@ -143,6 +147,7 @@ func TestAStarMgr(t_ *testing.T) {
 		}
 	}
 }
+
 func BenchmarkAStarMgr(b_ *testing.B) {
 	_a_mgr := NewAStarManager()
 	_a_mgr.Init(_maze)
@@ -244,27 +249,124 @@ func TestCheckLinePass(t_ *testing.T) {
 	})
 	_0_p := _a.indexConvertToBlockPos(0)
 	_1_p := _a.indexConvertToBlockPos(5)
-	if _a.checkLinePass(&_0_p,&_1_p) {
+	if _a.checkLinePass(&_0_p, &_1_p) {
 		t_.Fatal()
 	}
 }
 
 func TestForceConn(t_ *testing.T) {
-/*	{
+	{
+		var _block_maze = [][]float64{
+			{0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 9, 0},
+			{0, 0, 0, 9, 0, 0},
+			{0, 0, 9, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0},
+		}
 		_a := NewAStar()
 		_a.Init(_block_maze)
+		//_a.indexConvertToBlockPos(0)
+		_block_list := []*blockPos{}
 		{
-			_force_path := _a.forceConn([]int{0, 1, 10, 19, 28, 37, 38, 39, 40, 31, 32, 23, 14, 6, 7, 8, 17, 26, 35, 44, 53, 62, 61, 60})
-			t_.Logf("[%v]", _force_path)
+			_block := _a.indexConvertToBlockPos(25)
+			_block_list = append(_block_list, &_block)
 		}
 		{
-			_force_path := _a.forceConn([]int{8, 7, 6, 14, 23, 32, 31, 40, 39, 38, 37, 28, 19, 10, 1, 0})
-			t_.Logf("[%v]", _force_path)
+			_block := _a.indexConvertToBlockPos(26)
+			_block_list = append(_block_list, &_block)
 		}
+		{
+			_block := _a.indexConvertToBlockPos(27)
+			_block_list = append(_block_list, &_block)
+		}
+		{
+			_block := _a.indexConvertToBlockPos(21)
+			_block_list = append(_block_list, &_block)
+		}
+		{
+			_block := _a.indexConvertToBlockPos(22)
+			_block_list = append(_block_list, &_block)
+		}
+		{
+			_block := _a.indexConvertToBlockPos(16)
+			_block_list = append(_block_list, &_block)
+		}
+		{
+			_block := _a.indexConvertToBlockPos(17)
+			_block_list = append(_block_list, &_block)
+		}
+		{
+			_block := _a.indexConvertToBlockPos(11)
+			_block_list = append(_block_list, &_block)
+		}
+		_force_path := _a.forceConn(_block_list)
+		
+		_idx_arr := make([]int, 0)
+		for _, it := range _force_path {
+			_idx_arr = append(_idx_arr, it.m_index)
+		}
+		
+		t_.Logf("forceConn [%v]", _idx_arr)
 	}
 	
 	{
-		
+		var _block_maze = [][]float64{
+			{0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 9},
+			{0, 0, 0, 9, 0, 0},
+			{0, 9, 9, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0},
+			{0, 0, 0, 0, 0, 0, 0},
+		}
+		_a := NewAStar()
+		_a.Init(_block_maze)
+		{
+			//_a.indexConvertToBlockPos(0)
+			_block_list := []*blockPos{}
+			{
+				_block := _a.indexConvertToBlockPos(19)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(20)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(14)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(15)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(16)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(10)
+				_block_list = append(_block_list, &_block)
+			}
+			{
+				_block := _a.indexConvertToBlockPos(11)
+				_block_list = append(_block_list, &_block)
+			}
+			_force_path := _a.forceConn(_block_list)
+			
+			_idx_arr := make([]int, 0)
+			for _, it := range _force_path {
+				_idx_arr = append(_idx_arr, it.m_index)
+			}
+			
+			t_.Logf("forceConn [%v]", _idx_arr)
+		}
+	}
+	
+	/*	{
+	
 		_a := NewAStar()
 		_a.Init([][]float64{
 			{0,    0, 0},
@@ -275,7 +377,7 @@ func TestForceConn(t_ *testing.T) {
 		if len(_force_path)!= 2 {
 			t_.Fatalf("[%v]", _force_path)
 		}
-		
+	
 	}*/
 	
 }

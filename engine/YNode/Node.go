@@ -13,6 +13,10 @@ import (
 var obj = newInfo()
 var g_stop = make(chan struct{})
 
+func init() {
+	obj.Info = YModule.NewInfo(obj)
+}
+
 func (n *Info) findNode(module_name_ string, uid uint64) *YNet.Session {
 	return nil
 }
@@ -30,10 +34,10 @@ func (n *Info) register(info YModule.Inter) {
 }
 
 func (n *Info) RPCToOther(msg *YMsg.S2S_rpc_msg) {
-	obj.M_rpc_queue.Add(msg)
+	obj.PushRpcMsg(msg)
 }
 func (n *Info) NetToOther(msg *YMsg.C2S_net_msg) {
-	obj.M_net_queue.Add(msg)
+	obj.PushNetMsg(msg)
 }
 
 func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) {
@@ -66,7 +70,7 @@ func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) {
 	{
 		_, exists := obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid]
 		if !exists {
-			ylog.Erro("[YNode:dispatchRpc] miss uid [%v]", msg_.M_tar.M_uid)
+			ylog.Erro("[YNode:dispatchRpc] [%v] miss uid ", msg_.String())
 			return
 		}
 	}
@@ -81,6 +85,41 @@ func (n *Info) close() {
 		}
 	}
 }
+func (n *Info) startModule(module_ YModule.Inter) {
+	_100_last_print_time := time.Now().Unix()
+	_10_last_print_time := time.Now().Unix()
+	_100_fps_count := 0
+	_10_fps_count := 0
+	
+	///////////
+	
+	_100_fps_timer := time.NewTicker(time.Millisecond * 10)
+	defer _100_fps_timer.Stop()
+	_10_fps_timer := time.NewTicker(time.Millisecond * 100)
+	defer _10_fps_timer.Stop()
+	for {
+		select {
+		case _time := <-_100_fps_timer.C:
+			_100_fps_count++
+			module_.Loop_100(_time)
+			module_.GetInfo().Loop_Msg()
+			if (_time.Unix() - _100_last_print_time) >= 10 {
+				ylog.Info("[Module:%v] 100 fps [%v]", module_.GetInfo().M_name, _100_fps_count/int(_time.Unix()-_100_last_print_time))
+				_100_last_print_time = _time.Unix()
+				_100_fps_count = 0
+			}
+		case _time := <-_10_fps_timer.C:
+			_10_fps_count++
+			module_.Loop_10(_time)
+			if (_time.Unix() - _10_last_print_time) >= 10 {
+				ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _10_fps_count/int(_time.Unix()-_10_last_print_time))
+				_10_last_print_time = _time.Unix()
+				_10_fps_count = 0
+			}
+		}
+		
+	}
+}
 func (n *Info) start() {
 	for _, _module_list := range obj.M_module_pool {
 		for _, it := range _module_list {
@@ -89,44 +128,12 @@ func (n *Info) start() {
 	}
 	for _, _module_list := range obj.M_module_pool {
 		for _, it := range _module_list {
-			go func() {
-				
-				_100_last_print_time := time.Now().Unix()
-				_10_last_print_time := time.Now().Unix()
-				_100_fps_count := 0
-				_10_fps_count := 0
-				
-				///////////
-				
-				_100_fps_timer := time.NewTicker(time.Millisecond * 10)
-				defer _100_fps_timer.Stop()
-				_10_fps_timer := time.NewTicker(time.Millisecond * 100)
-				defer _10_fps_timer.Stop()
-				for {
-					select {
-					case _time := <-_100_fps_timer.C:
-						_100_fps_count++
-						it.Loop_100(_time)
-						it.GetInfo().Loop_Msg()
-						if (_time.Unix() - _100_last_print_time) >= 10 {
-							ylog.Info("[Module:%v] 100 fps [%v]", it.GetInfo().M_name, _100_fps_count/int(_time.Unix()-_100_last_print_time))
-							_100_last_print_time = _time.Unix()
-							_100_fps_count = 0
-						}
-					case _time := <-_10_fps_timer.C:
-						_10_fps_count++
-						it.Loop_10(_time)
-						if (_time.Unix() - _10_last_print_time) >= 10 {
-							ylog.Info("[Module:%v] 10 fps [%v]", it.GetInfo().M_name, _10_fps_count/int(_time.Unix()-_10_last_print_time))
-							_10_last_print_time = _time.Unix()
-							_10_fps_count = 0
-						}
-					}
-					
-				}
-			}()
+			go n.startModule(it)
 		}
 	}
+	//主逻辑
+	obj.register(obj)
+	obj.GetInfo().Init(obj)
 	n.loop()
 }
 
@@ -163,7 +170,11 @@ func (n *Info) loop() {
 					//ylog.Info("[Node:RPC_QUEUE] [%v]", obj.M_rpc_queue.Len())
 					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_node_id == obj.M_uid {
-						n.dispatchRpc(_msg)
+						if _msg.M_tar.M_name == "YNode" {
+							n.DoRPCMsg(_msg)
+						} else {
+							n.dispatchRpc(_msg)
+						}
 						continue
 					}
 					_s := n.findNode(_msg.M_tar.M_name, _msg.M_tar.M_node_id)
@@ -182,7 +193,6 @@ func Register(info_list_ ...YModule.Inter) {
 	for _, _it := range info_list_ {
 		obj.register(_it)
 	}
-	
 }
 
 func RPCCall(msg_ *YMsg.S2S_rpc_msg) {

@@ -1,6 +1,7 @@
 package PathFinding
 
 import (
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"math"
 )
@@ -84,7 +85,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		m_x float64
 		m_y float64
 	}
-	if st_ == ed_ {
+	if *st_ == *ed_ {
 		return true
 	}
 	//ylog.Info("######################################[%v:%v]st [%v] [%v:%v]ed [%v]", st_.m_col, st_.m_row, st_.m_index, ed_.m_col, ed_.m_row, ed_.m_index)
@@ -102,7 +103,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			_sma_x_pos = _param_st
 		}
 		
-		if _sma_x_pos.m_x == _big_x_pos.m_x {
+		if YTool.Float64Equal(_sma_x_pos.m_x, _big_x_pos.m_x) {
 			var _big_y float64
 			var _small_y float64
 			if _big_x_pos.m_y > _sma_x_pos.m_y {
@@ -112,6 +113,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				_small_y = _big_x_pos.m_y
 				_big_y = _sma_x_pos.m_y
 			}
+			
 			for _idx := int(_small_y); _idx <= int(_big_y); _idx++ {
 				if a.GridIsBlock(int(_big_x_pos.m_x), _idx) {
 					return false
@@ -120,7 +122,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			return true
 		}
 		
-		if _sma_x_pos.m_y == _big_x_pos.m_y {
+		if YTool.Float64Equal(_sma_x_pos.m_y, _big_x_pos.m_y) {
 			for _idx := int(_sma_x_pos.m_x); _idx <= int(_big_x_pos.m_x); _idx++ {
 				if a.GridIsBlock(_idx, int(_sma_x_pos.m_y)) {
 					return false
@@ -131,9 +133,8 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		{
 			_d_slope := (_big_x_pos.m_y - _sma_x_pos.m_y) / (_big_x_pos.m_x - _sma_x_pos.m_x)
 			_b_xy := _big_x_pos.m_y - (_d_slope * _big_x_pos.m_x)
-			
 			//y = dx+b
-			for _col_it := _sma_x_pos.m_x + 1; _col_it <= _big_x_pos.m_x; _col_it++ {
+			for _col_it := _sma_x_pos.m_x; _col_it < _big_x_pos.m_x; _col_it++ {
 				_tmp_y := _d_slope*float64(int(_col_it)) + _b_xy
 				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
@@ -145,7 +146,6 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 						}
 					}
 					if int(_tmp_y) > 0 && int(_col_it) > 0 {
-						
 						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)-1) {
 							return false
 						}
@@ -175,10 +175,11 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				_small_y = _big_x_pos.m_y
 				_big_y = _sma_x_pos.m_y
 			}
-			for _row_it := _small_y; _row_it <= _big_y; _row_it++ {
+			for _row_it := _small_y; _row_it < _big_y; _row_it++ {
+				
 				//x = (y-b) /d
 				_tmp_x := (float64(int(_row_it - _b_xy))) / _d_slope
-				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
+/*				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}
@@ -195,11 +196,11 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 					}
 					
 					if int(_tmp_x) > 0 && int(_row_it) > 0 {
-						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)-1) {
+						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)+1) {
 							return false
 						}
 					}
-				} else {
+				} else*/ {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}
@@ -255,7 +256,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		}
 	}
 
-	
+
 	_path_str = ""
 	for _,_it := range _final_path{
 		_path_str += strconv.Itoa(_it.m_index)
@@ -270,21 +271,57 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	if len(before_path_) == 0 {
 		return _final_path
 	}
-	//能否直连判断
-	_last_block_pos := before_path_[0]
-	//_final_path = append(_final_path, before_path_[0])
 	
-	for _idx := 1; _idx < len(before_path_); _idx++ {
-		_this_idx_block_pos := before_path_[_idx]
-		if !a.checkLinePass(_this_idx_block_pos, _last_block_pos) {
-			_final_path = append(_final_path, before_path_[_idx-1])
-			_last_block_pos = before_path_[_idx-1]
+	//能否直连判断
+	_start_block_pos := 0
+	_last_block_pos := 1
+	_best_pos := _last_block_pos
+	/*for _start_block_pos < len(before_path_){
+	
+	}*/
+	_final_path = append(_final_path, before_path_[_start_block_pos])
+	for _last_block_pos < len(before_path_) {
+		ylog.Info("[start:%v:%v] [last:%v:%v]", _start_block_pos, before_path_[_start_block_pos].m_index, _last_block_pos, before_path_[_last_block_pos].m_index)
+		for ; _last_block_pos < len(before_path_); _last_block_pos++ {
+			_start_pos := before_path_[_start_block_pos]
+			_last_pos := before_path_[_last_block_pos]
+			if a.checkLinePass(_start_pos, _last_pos) {
+				_best_pos = _last_block_pos
+			}
 		}
+		
+		_final_path = append(_final_path, before_path_[_best_pos])
+		_start_block_pos = _best_pos
+		_last_block_pos = _start_block_pos + 1
+		
 	}
 	
-	_final_path = append(_final_path, before_path_[len(before_path_)-1])
+	//_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
 }
+
+/*func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
+	_final_path := make([]*blockPos, 0)
+	if len(before_path_) == 0 {
+		return _final_path
+	}
+	//能否直连判断
+	_last_block_pos := 2
+
+	for _idx := 1; _idx < len(before_path_);  {
+		if !a.checkLinePass(before_path_[_idx], before_path_[_last_block_pos]) {
+			_final_path = append(_final_path, before_path_[_idx-1])
+			_idx = _idx - 1
+
+			_last_block_pos = _idx
+		}else{
+			_idx++
+		}
+	}
+
+	_final_path = append(_final_path, before_path_[len(before_path_)-1])
+	return _final_path
+}*/
 
 func (a *AStar) pathToBetter(before_path_ []int) []int {
 	_after_path := make([]int, 0)
@@ -317,19 +354,8 @@ func (a *AStar) pathToBetter(before_path_ []int) []int {
 func (a *AStar) SearchBetterWithIndex(st_idx_, ed_idx_ int) []int {
 	
 	_indx_arr := a.SearchWithIndex(st_idx_, ed_idx_)
-	//_indx_arr = a.pathToBetter(_indx_arr)
 	_indx_arr = a.forceConn(_indx_arr)
-/*	_force_len := len(_indx_arr)
-	for{
-		_before := _force_len
-		_indx_arr = a.forceConn(_indx_arr)
-		if _before== len(_indx_arr){
-			break
-		}
-		_force_len = len(_indx_arr)
-	}*/
-
-
+	
 	_ret_arr := make([]int, 0, len(_indx_arr))
 	for _, _it := range _indx_arr {
 		_ret_arr = append(_ret_arr, _it.m_index)

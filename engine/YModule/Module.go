@@ -12,10 +12,10 @@ import (
 )
 
 func (i *Info) PushRpcMsg(msg_ *YMsg.S2S_rpc_msg) {
-	i.m_rpc_queue.Add(msg_)
+	i.M_rpc_queue.Add(msg_)
 }
 func (i *Info) PushNetMsg(msg_ *YMsg.C2S_net_msg) {
-	i.m_net_queue.Add(msg_)
+	i.M_net_queue.Add(msg_)
 }
 
 func (i *Info) buildRPCFunc(func_name_ string, method_val_ reflect.Value) *RPCFunc {
@@ -80,7 +80,7 @@ func (i *Info) Init(core Inter) {
 		}
 		i.RPCCall("NetModule", 0, "NetMsgRegister", _msg_name_list, i.GetAgent())
 	}
-	i.DebugPrint()
+	//i.DebugPrint()
 }
 
 func (i *Info) DebugPrint() {
@@ -109,12 +109,12 @@ func (i *Info) paramUnmarshalWithTypeSlice(bytes_list_ [][]byte, type_list_ []re
 func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 	_func, _exists := i.M_rpc_func_map[msg.M_func_name]
 	if !_exists {
-		ylog.Erro("RPC param miss method [%v]", msg.M_func_name)
+		ylog.Erro("[%v] RPC param miss method [%v]", msg.M_tar.M_name, msg.M_func_name)
 		return nil
 	}
 	
 	if len(_func.M_param) != len(msg.M_func_parameter) {
-		ylog.Erro("RPC param count err right [%v] err [%v]", len(_func.M_param), len(msg.M_func_parameter))
+		ylog.Erro("[%v]RPC param count err right [%v] err [%v]", msg.M_tar.M_name, len(_func.M_param), len(msg.M_func_parameter))
 		return nil
 	}
 	return i.paramUnmarshalWithTypeSlice(msg.M_func_parameter, _func.M_param)
@@ -128,41 +128,45 @@ func (i *Info) call(msg_ *YMsg.S2S_rpc_msg, val_list_ []reflect.Value) []reflect
 	return _func.M_fn.Call(val_list_)
 }
 
+func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
+	if msg_.M_is_back {
+		_call_back_func := i.M_back_fun[msg_.M_uid]
+		_param_value := i.paramUnmarshalWithTypeSlice(msg_.M_func_parameter, _call_back_func.M_param)
+		_call_back_func.M_func.Call(_param_value)
+		delete(i.M_back_fun, msg_.M_uid)
+		return
+	}
+	_param_list := i.msgUnmarshal(msg_)
+	if _param_list == nil {
+		return
+	}
+	_back_param := i.call(msg_, _param_list)
+	if msg_.M_need_back {
+		_back_param_inter_list := make([]interface{}, 0, len(_back_param))
+		for _, _it := range _back_param {
+			_back_param_inter_list = append(_back_param_inter_list, _it.Interface())
+		}
+		_rpc_msg := YMsg.RPCPackage(msg_.M_source.M_name, msg_.M_source.M_uid, msg_.M_func_name, _back_param_inter_list...)
+		_rpc_msg.M_is_back = true
+		_rpc_msg.M_uid = msg_.M_uid
+		i.RPCToOther(_rpc_msg)
+	}
+}
+
 func (i *Info) Loop_Msg() {
 	for {
-		if i.m_rpc_queue.Len() == 0 {
+		if i.M_rpc_queue.Len() == 0 {
 			break
 		}
-		_msg := i.m_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
-		if _msg.M_is_back {
-			_call_back_func := i.m_back_fun[_msg.M_uid]
-			_param_value := i.paramUnmarshalWithTypeSlice(_msg.M_func_parameter, _call_back_func.M_param)
-			_call_back_func.M_func.Call(_param_value)
-			delete(i.m_back_fun, _msg.M_uid)
-			continue
-		}
-		_param_list := i.msgUnmarshal(_msg)
-		if _param_list == nil {
-			continue
-		}
-		_back_param := i.call(_msg, _param_list)
-		if _msg.M_need_back {
-			_back_param_inter_list := make([]interface{}, 0, len(_back_param))
-			for _, _it := range _back_param {
-				_back_param_inter_list = append(_back_param_inter_list, _it.Interface())
-			}
-			_rpc_msg := YMsg.RPCPackage(_msg.M_source.M_name, _msg.M_source.M_uid, _msg.M_func_name, _back_param_inter_list...)
-			_rpc_msg.M_is_back = true
-			_rpc_msg.M_uid = _msg.M_uid
-			i.RPCToOther(_rpc_msg)
-		}
+		_msg := i.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
+		i.DoRPCMsg(_msg)
 	}
 	
 	for {
-		if i.m_net_queue.Len() == 0 {
+		if i.M_net_queue.Len() == 0 {
 			break
 		}
-		_msg := i.m_net_queue.Pop().(*YMsg.C2S_net_msg)
+		_msg := i.M_net_queue.Pop().(*YMsg.C2S_net_msg)
 		
 		_net_func_obj := i.M_net_func_map[_msg.M_net_msg.M_msg_name]
 		if _net_func_obj == nil {
@@ -224,10 +228,14 @@ func (i *Info) RPCCallWithBack(back_func_ interface{}, module_name_ string, modu
 	for _idx := 0; _idx < _back_func.Type().NumIn(); _idx++ {
 		_call_back_param_list = append(_call_back_param_list, _back_func.Type().In(_idx))
 	}
-	i.m_back_fun[_rpc_msg.M_uid] = CallBackFunc{
+	i.M_back_fun[_rpc_msg.M_uid] = CallBackFunc{
 		M_func:  _back_func,
 		M_param: _call_back_param_list,
 	}
 	i.RPCToOther(_rpc_msg)
 	return _rpc_msg.M_uid
+}
+
+func (i *Info) RegisterModule(module_name_ string, id_ uint64) {
+	i.RPCCall("YNode", i.M_node_id, "ModuleRegister", module_name_, id_)
 }

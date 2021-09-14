@@ -41,7 +41,6 @@ func (c *MoveControl) String() string {
 }
 
 func (c *MoveControl) GetPathNode() []Msg.PositionXY {
-	
 	return c.m_path_cache
 }
 

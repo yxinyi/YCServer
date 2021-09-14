@@ -8,7 +8,6 @@ import (
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Msg"
 	aoi "github.com/yxinyi/YCServer/examples/AoiAstar/Server/Logic/Aoi"
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Logic/PathFinding"
-	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Module/MapManager"
 	"github.com/yxinyi/YCServer/examples/AoiAstar/Server/Module/UserManager"
 	"math/rand"
 	"time"
@@ -19,6 +18,10 @@ const (
 	ScreenHeight           = 2880
 	MAZE_GRID_SIZE float64 = 10
 )
+
+func init() {
+	YNode.RegisterToFactory("NewMap", NewInfo)
+}
 
 type MapNotifyMsg struct {
 	m_update map[uint64]struct{}
@@ -39,9 +42,10 @@ type Info struct {
 	m_go_astar     *PathFinding.AStarManager
 }
 
-func NewInfo(node_ *YNode.Info, uid uint64) *Info {
+func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 	_info := newMazeMap(uid)
 	_info.Info = YModule.NewInfo(node_)
+	_info.M_uid = uid
 	return _info
 }
 
@@ -55,7 +59,7 @@ func (m *Info) InitMazeMap() {
 			} else {
 				_tmp_col = append(_tmp_col, 0)
 			}
-
+			
 		}
 		_maze = append(_maze, _tmp_col)
 	}
@@ -102,25 +106,32 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
 	if !exists {
 		return
 	}
-	ylog.Info("[RPC_UserMove] tar [%v]",tar_pos_.String())
+	ylog.Info("[RPC_UserMove] tar [%v]", tar_pos_.String())
 	_user.MoveTarget(tar_pos_)
-
-	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path []int) {
+	
+	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path_ []int) {
 		_user, exists := m.M_user_pool[_user.M_uid]
 		if !exists {
 			return
 		}
-		if len(path) == 0 {
+		if len(path_) == 0 {
 			return
 		}
 		_target_indx := m.PosConvertIdx(_user.M_tar)
-		if path[len(path)-1] != _target_indx {
+		if path_[len(path_)-1] != _target_indx {
 			return
 		}
-		_user.MoveQueue(m.IdxListConvertPosList(path))
+		_path_idx := m.IdxListConvertPosList(path_)
+		
+		_path_pos := make([]Msg.PositionXY, 0, len(path_))
+		for _, _it := range path_ {
+			_path_pos = append(_path_pos, m.IdxConvertPos(_it))
+		}
+		
+		_user.MoveQueue(_path_idx)
 		m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2CMapAStarNodeUpdate{
 			_user.M_uid,
-			_user.GetPathNode(),
+			_path_pos,
 		})
 	})
 }
@@ -146,17 +157,17 @@ func newMazeMap(uid_ uint64) *Info {
 	_maze_map.InitMazeMap()
 	_maze_map.m_go_ng_aoi.Init(func(tar_ uint64, move_ map[uint64]struct{}) {
 		for _it := range move_ {
-
+			
 			_, exists := _maze_map.m_msg_notify[tar_]
 			if exists {
 				_maze_map.m_msg_notify[tar_].m_update[_it] = struct{}{}
 				delete(_maze_map.m_msg_notify[tar_].m_delete, _it)
 			}
 		}
-
+		
 	}, func(tar_ uint64, add_ map[uint64]struct{}) {
 		for _it := range add_ {
-			if tar_ == _it{
+			if tar_ == _it {
 				continue
 			}
 			_, exists := _maze_map.m_msg_notify[tar_]
@@ -167,7 +178,7 @@ func newMazeMap(uid_ uint64) *Info {
 		}
 	}, func(tar_ uint64, quit_ map[uint64]struct{}) {
 		for _it := range quit_ {
-			if tar_ == _it{
+			if tar_ == _it {
 				continue
 			}
 			_, exists := _maze_map.m_msg_notify[tar_]
@@ -177,19 +188,19 @@ func newMazeMap(uid_ uint64) *Info {
 			}
 		}
 	})
-
+	
 	return _maze_map
 }
 
 func (i *Info) Init() {
 	i.Info.Init(i)
-
+	
 	//负载均衡同步
 	i.NotifyMapLoad()
 }
 
 func (i *Info) Loop_100(time_ time.Time) {
-
+	
 	for _, _it := range i.M_user_pool {
 		//_user_id := _it.M_uid
 		if _it.MoveUpdate(time_) {
@@ -237,12 +248,12 @@ func (i *Info) Loop_100(time_ time.Time) {
 			})
 		}*/
 	}
-
+	
 	i.m_go_astar.Update()
 	i.m_go_ng_aoi.Update()
 	for _id, _it := range i.m_msg_notify {
 		_user := i.M_user_pool[_id]
-
+		
 		if len(_it.m_add) > 0 {
 			_add_msg := Msg.S2CMapAddUser{
 				M_user: make([]Msg.UserData, 0),
@@ -256,7 +267,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 			i.Info.SendNetMsgJson(_user.M_session_id, _add_msg)
 			_it.m_add = make(map[uint64]struct{}, 0)
 		}
-
+		
 		if len(_it.m_update) > 0 {
 			_update_msg := Msg.S2CMapUpdateUser{
 				M_user: make([]Msg.UserData, 0),
@@ -266,7 +277,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 				if _update_user != nil {
 					_update_msg.M_user = append(_update_msg.M_user, _update_user.ToClientJson())
 				}
-
+				
 			}
 			i.Info.SendNetMsgJson(_user.M_session_id, _update_msg)
 			_it.m_update = make(map[uint64]struct{}, 0)
@@ -292,7 +303,7 @@ func (i *Info) Close() {
 }
 
 func (i *Info) NotifyMapLoad() {
-	i.Info.RPCCall("MapManager", 0, "MapRegister", MapManager.MapLoad{
+	i.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
 		i.M_uid,
 		uint32(len(i.M_user_pool)),
 	})
@@ -319,7 +330,7 @@ func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	i.m_msg_notify[user_.M_uid] = _notify_msg
 	i.randPosition(&user_)
 	i.m_go_ng_aoi.Enter(ConvertUserToAoiObj(user_))
-
+	
 	i.Info.SendNetMsgJson(user_.M_session_id, Msg.S2C_FirstEnterMap{
 		i.m_uid,
 		i.m_go_astar.GetMaze(),
@@ -327,7 +338,7 @@ func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 		i.m_width,
 		user_.ToClientJson(),
 	})
-
+	
 	//负载均衡同步
 	i.NotifyMapLoad()
 }

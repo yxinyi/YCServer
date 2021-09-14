@@ -3,7 +3,6 @@ package YNode
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNet"
-	"github.com/yxinyi/YCServer/engine/YTool"
 )
 
 type Info struct {
@@ -13,15 +12,15 @@ type Info struct {
 	M_node_pool   map[uint64]*YNet.Session
 	M_node_str2id map[string]uint64
 	
-	M_rpc_queue *YTool.SyncQueue
-	M_net_queue *YTool.SyncQueue
+	YModule.BaseInter
+	
+	m_moduele_factory map[string]func(er YModule.RemoteNodeER, uid_ uint64)YModule.Inter
 }
 
 func newInfo() *Info {
 	info := &Info{
-		M_module_pool: make(map[string]map[uint64]YModule.Inter),
-		M_rpc_queue:   YTool.NewSyncQueue(),
-		M_net_queue:   YTool.NewSyncQueue(),
+		M_module_pool:     make(map[string]map[uint64]YModule.Inter),
+		m_moduele_factory: make(map[string]func(er YModule.RemoteNodeER, uid_ uint64)YModule.Inter),
 	}
 	return info
 }

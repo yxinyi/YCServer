@@ -1,6 +1,7 @@
 package YMsg
 
 import (
+	"fmt"
 	"github.com/yxinyi/YCServer/engine/YDecode"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YNet"
@@ -46,11 +47,15 @@ func RPCPackage(module_name_ string, module_uid_ uint64, func_ string, param_lis
 		for _, _param_it := range param_list_ {
 			_param_byte, _err := YDecode.Marshal(_rpc_msg.M_marshal_type, _param_it)
 			if _err != nil {
-				ylog.Erro("[RPCToOther] tar [%v:%v]",module_name_, module_uid_)
+				ylog.Erro("[RPCToOther] tar [%v:%v] [%v]",module_name_, module_uid_,_err.Error())
 				return nil
 			}
 			_rpc_msg.M_func_parameter = append(_rpc_msg.M_func_parameter, _param_byte)
 		}
 	}
 	return _rpc_msg
+}
+
+func (m *S2S_rpc_msg)String()string{
+	return fmt.Sprintf("Tar [%v:%v:%v] Func [%v]",m.M_tar.M_node_id,m.M_tar.M_uid,m.M_tar.M_name,m.M_func_name)
 }

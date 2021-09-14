@@ -99,3 +99,9 @@ type S2C_FirstEnterMap struct {
 type C2S_UserMove struct {
 	M_pos PositionXY
 }
+
+
+type MapLoad struct {
+	M_map_uid uint64
+	M_load    uint32
+}

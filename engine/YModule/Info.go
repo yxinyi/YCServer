@@ -20,13 +20,11 @@ type BaseInter struct {
 	*Info
 }
 
-func (b *BaseInter) GetInfo() *Info {
-	return b.Info
-}
-func (b *BaseInter) Loop_10(time time.Time) {
-}
-func (b *BaseInter) Loop_100(time time.Time) {
-}
+func (b *BaseInter) GetInfo() *Info          { return b.Info }
+func (b *BaseInter) Loop_10(time time.Time)  {}
+func (b *BaseInter) Loop_100(time time.Time) {}
+func (b *BaseInter) Init()                   {}
+func (b *BaseInter) Close()                  {}
 
 type RPCFunc struct {
 	M_rpc_name   string
@@ -41,13 +39,13 @@ type NetFunc struct {
 	m_msg_data reflect.Type
 }
 
-type remoteNodeER interface {
+type RemoteNodeER interface {
 	RPCToOther(msg *YMsg.S2S_rpc_msg)
 	NetToOther(msg *YMsg.C2S_net_msg)
 }
 
 type Info struct {
-	remoteNodeER
+	RemoteNodeER
 	M_node_id      uint64
 	M_name         string
 	M_uid          uint64
@@ -55,9 +53,9 @@ type Info struct {
 	M_entity_pool  map[uint64]YEntity.Inter
 	M_rpc_func_map map[string]*RPCFunc
 	M_net_func_map map[string]*NetFunc
-	m_rpc_queue    *YTool.SyncQueue
-	m_net_queue    *YTool.SyncQueue
-	m_back_fun     map[uint64]CallBackFunc
+	M_rpc_queue    *YTool.SyncQueue
+	M_net_queue    *YTool.SyncQueue
+	M_back_fun     map[uint64]CallBackFunc
 }
 
 type CallBackFunc struct {
@@ -65,15 +63,15 @@ type CallBackFunc struct {
 	M_param []reflect.Type
 }
 
-func NewInfo(node_ remoteNodeER) *Info {
+func NewInfo(node_ RemoteNodeER) *Info {
 	_info := &Info{
 		M_entity_pool:  make(map[uint64]YEntity.Inter),
 		M_rpc_func_map: make(map[string]*RPCFunc),
 		M_net_func_map: make(map[string]*NetFunc),
-		m_rpc_queue:    YTool.NewSyncQueue(),
-		m_net_queue:    YTool.NewSyncQueue(),
-		m_back_fun:     make(map[uint64]CallBackFunc),
-		remoteNodeER:   node_,
+		M_rpc_queue:    YTool.NewSyncQueue(),
+		M_net_queue:    YTool.NewSyncQueue(),
+		M_back_fun:     make(map[uint64]CallBackFunc),
+		RemoteNodeER:   node_,
 	}
 	return _info
 }

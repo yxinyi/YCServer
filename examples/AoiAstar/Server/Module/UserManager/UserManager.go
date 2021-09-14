@@ -35,14 +35,29 @@ func (i *Info) MSG_C2S_Login(s_ uint64, msg_ Msg.C2S_Login) {
 	})
 }
 
+func (i *Info) RPC_UserChangeCurrentMap(s_, map_uid_ uint64) {
+	_user := i.M_user_pool[s_]
+	if _user != nil {
+		_user.M_current_map = map_uid_
+	}
+}
+
 func (i *Info) MSG_C2S_FirstEnterMap(s_ uint64, msg_ Msg.C2S_FirstEnterMap) {
-	i.Info.RPCCallWithBack(func(tar_map_ uint64) {
-		_user := i.M_user_pool[s_]
-		if _user != nil {
-			_user.M_current_map = tar_map_
-			i.Info.RPCCall("Map", tar_map_, "UserEnterMap", *_user)
+	
+	_user := i.M_user_pool[s_]
+	if _user != nil {
+		i.Info.RPCCall("MapManager", 0, "FirstEnterMap", *_user)
+	}
+	
+	/*	func(tar_map_ uint64) {
+			_user := i.M_user_pool[s_]
+			if _user != nil {
+				_user.M_current_map = tar_map_
+				i.Info.RPCCall("Map", tar_map_, "UserEnterMap", *_user)
+			}
+	
 		}
-	}, "MapManager", 0, "GetLeastLoadMap")
+	*/
 }
 
 func (i *Info) MSG_C2S_UserMove(s_ uint64, msg_ Msg.C2S_UserMove) {
