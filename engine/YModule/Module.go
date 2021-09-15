@@ -50,6 +50,10 @@ func (i *Info) buildNetFunc(func_name_ string, method_val_ reflect.Value) *NetFu
 	return _func
 }
 
+func (i *Info) CancelCBList() {
+	i.m_cb_list_cancel = true
+}
+
 func (i *Info) Init(core Inter) {
 	_ref_val := reflect.ValueOf(core)
 	_method_num := _ref_val.NumMethod()
@@ -80,7 +84,6 @@ func (i *Info) Init(core Inter) {
 		}
 		i.RPCCall("NetModule", 0, "NetMsgRegister", _msg_name_list, i.GetAgent())
 	}
-	//i.DebugPrint()
 }
 
 func (i *Info) DebugPrint() {
@@ -106,7 +109,7 @@ func (i *Info) paramUnmarshalWithTypeSlice(bytes_list_ [][]byte, type_list_ []re
 	return _param_list
 }
 
-func (i *Info) msgUnmarshal(msg *YMsg.S2S_rpc_msg) []reflect.Value {
+func (i *Info) msgUnmarshalParamList(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 	_func, _exists := i.M_rpc_func_map[msg.M_func_name]
 	if !_exists {
 		ylog.Erro("[%v] RPC param miss method [%v]", msg.M_tar.M_name, msg.M_func_name)
@@ -130,13 +133,29 @@ func (i *Info) call(msg_ *YMsg.S2S_rpc_msg, val_list_ []reflect.Value) []reflect
 
 func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 	if msg_.M_is_back {
-		_call_back_func := i.M_back_fun[msg_.M_uid]
-		_param_value := i.paramUnmarshalWithTypeSlice(msg_.M_func_parameter, _call_back_func.M_param)
-		_call_back_func.M_func.Call(_param_value)
-		delete(i.M_back_fun, msg_.M_uid)
+		_call_back_cmd_list := i.M_back_fun[msg_.M_uid]
+		_param_value := i.paramUnmarshalWithTypeSlice(msg_.M_func_parameter, _call_back_cmd_list.getCurCmd().M_back_param)
+		_call_back_cmd_list.call(_param_value)
+		if i.m_cb_list_cancel {
+			i.m_cb_list_cancel = false
+			delete(i.M_back_fun, msg_.M_uid)
+			return
+		}
+		if _call_back_cmd_list.isOver() {
+			delete(i.M_back_fun, msg_.M_uid)
+			return
+		}
+		
+		_rpc_msg := _call_back_cmd_list.popMsg()
+		if !_rpc_msg.M_need_back {
+			delete(i.M_back_fun, msg_.M_uid)
+		}
+		_rpc_msg.M_source = i.GetAgent()
+		i.RPCToOther(_rpc_msg)
 		return
 	}
-	_param_list := i.msgUnmarshal(msg_)
+	
+	_param_list := i.msgUnmarshalParamList(msg_)
 	if _param_list == nil {
 		return
 	}
@@ -146,7 +165,8 @@ func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 		for _, _it := range _back_param {
 			_back_param_inter_list = append(_back_param_inter_list, _it.Interface())
 		}
-		_rpc_msg := YMsg.RPCPackage(msg_.M_source.M_name, msg_.M_source.M_uid, msg_.M_func_name, _back_param_inter_list...)
+		_rpc_cmd := NewRPCCommand(msg_.M_source.M_name, msg_.M_source.M_uid, msg_.M_func_name, _back_param_inter_list...)
+		_rpc_msg := _rpc_cmd.ToRPCMsg()
 		_rpc_msg.M_is_back = true
 		_rpc_msg.M_uid = msg_.M_uid
 		i.RPCToOther(_rpc_msg)
@@ -208,32 +228,16 @@ func (i *Info) SendNetMsgJson(session_id_ uint64, json_msg_ interface{}) {
 	i.RPCCall("NetModule", 0, "SendNetMsgJson", session_id_, _msg)
 }
 
-func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) uint64 {
-	_rpc_msg := YMsg.RPCPackage(module_name_, module_uid_, func_, param_list_...)
-	_rpc_msg.M_source = i.GetAgent()
-	i.RPCToOther(_rpc_msg)
-	return _rpc_msg.M_uid
-}
-
-func (i *Info) RPCCallWithBack(back_func_ interface{}, module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) uint64 {
-	_back_func := reflect.ValueOf(back_func_)
-	if _back_func.Type().Kind() != reflect.Func {
-		debug.PrintStack()
-		panic(string(debug.Stack()))
-	}
-	_rpc_msg := YMsg.RPCPackage(module_name_, module_uid_, func_, param_list_...)
-	_rpc_msg.M_source = i.GetAgent()
-	_rpc_msg.M_need_back = true
-	_call_back_param_list := make([]reflect.Type, 0)
-	for _idx := 0; _idx < _back_func.Type().NumIn(); _idx++ {
-		_call_back_param_list = append(_call_back_param_list, _back_func.Type().In(_idx))
-	}
-	i.M_back_fun[_rpc_msg.M_uid] = CallBackFunc{
-		M_func:  _back_func,
-		M_param: _call_back_param_list,
+func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) *RPCCommandList {
+	_rpc_command_list := NewRPCCommandList()
+	_rpc_command_list.AfterRPC(module_name_, module_uid_, func_, param_list_...)
+	_rpc_msg := _rpc_command_list.popMsg()
+	if _rpc_msg.M_need_back {
+		_rpc_msg.M_source = i.GetAgent()
+		i.M_back_fun[_rpc_command_list.M_uid] = _rpc_command_list
 	}
 	i.RPCToOther(_rpc_msg)
-	return _rpc_msg.M_uid
+	return _rpc_command_list
 }
 
 func (i *Info) RegisterModule(module_name_ string, id_ uint64) {

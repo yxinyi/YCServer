@@ -4,7 +4,6 @@ import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
-	"github.com/yxinyi/YCServer/examples/Msg"
 )
 
 type TestInfo struct {
@@ -42,14 +41,18 @@ func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) {
 	ylog.Info("TestModule RPC_Test_3 [%v] [%v]", val_, str_)
 	var _func func()
 	_func = func() {
-		m.Info.RPCCallWithBack(func() {
+		m.Info.RPCCall("TestModule2", 0, "Test", func() {
 			ylog.Info("Test 回调")
 			_func()
-		}, "TestModule2", 0, "Test")
+		})
 	}
 	_func()
 }
 
-func (m *TestInfo) RPC_Test_4(param_ Msg.TestParam) {
-	ylog.Info("TestModule RPC_Test_4 [%v]", param_)
+func (m *TestInfo) RPC_Test_4(param_ int) {
+
 }
+
+
+
+

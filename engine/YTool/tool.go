@@ -2,6 +2,7 @@ package YTool
 
 import (
 	"math"
+	"reflect"
 	"sort"
 )
 
@@ -47,4 +48,13 @@ func Float64Equal(check_num_, target_ float64) bool {
 		return true
 	}
 	return false
+}
+
+
+func GetFuncInTypeList(func_ reflect.Value)[]reflect.Type{
+	ret_list := make([]reflect.Type, 0)
+	for _idx := 0; _idx < func_.Type().NumIn(); _idx++ {
+		ret_list = append(ret_list, func_.Type().In(_idx))
+	}
+	return ret_list
 }

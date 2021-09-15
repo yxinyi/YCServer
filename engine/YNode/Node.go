@@ -103,16 +103,23 @@ func (n *Info) startModule(module_ YModule.Inter) {
 			_100_fps_count++
 			module_.Loop_100(_time)
 			module_.GetInfo().Loop_Msg()
-			if (_time.Unix() - _100_last_print_time) >= 10 {
-				ylog.Info("[Module:%v] 100 fps [%v]", module_.GetInfo().M_name, _100_fps_count/int(_time.Unix()-_100_last_print_time))
+			if (_time.Unix() - _100_last_print_time) >= 60 {
+				_second_fps := _100_fps_count/int(_time.Unix()-_100_last_print_time)
+				if _second_fps < 80{
+					ylog.Erro("[Module:%v] 100 fps [%v]", module_.GetInfo().M_name, _100_fps_count/int(_time.Unix()-_100_last_print_time))
+				}
 				_100_last_print_time = _time.Unix()
 				_100_fps_count = 0
 			}
 		case _time := <-_10_fps_timer.C:
 			_10_fps_count++
 			module_.Loop_10(_time)
-			if (_time.Unix() - _10_last_print_time) >= 10 {
-				ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _10_fps_count/int(_time.Unix()-_10_last_print_time))
+			if (_time.Unix() - _10_last_print_time) >= 60 {
+				_second_fps := _10_fps_count/int(_time.Unix()-_10_last_print_time)
+				if _second_fps < 8 {
+					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _10_fps_count/int(_time.Unix()-_10_last_print_time))
+				}
+				
 				_10_last_print_time = _time.Unix()
 				_10_fps_count = 0
 			}
