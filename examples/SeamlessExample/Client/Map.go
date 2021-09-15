@@ -61,7 +61,7 @@ func (m *Map) Init() {
 		g_main_uid = msg_.M_data.M_uid
 		m.AddNewUser(msg_.M_data)
 	})
-	YNet.Register(func(_ YNet.Session, msg_ Msg.S2CMapAStarNodeUpdate) {
+	YNet.Register(func(_ YNet.Session, msg_ Msg.S2C_MapAStarNodeUpdate) {
 		g_main_path_node = msg_.M_path
 	})
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2CMapAddUser) {
@@ -120,7 +120,7 @@ func (m *Map) Init() {
 			g_main_uid = msg_.M_data.M_uid
 			m.AddNewUser(msg_.M_data)
 		})
-		YNet.Register(Msg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, func(msg_ Msg.S2CMapAStarNodeUpdate, _ YNet.Session) {
+		YNet.Register(Msg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, func(msg_ Msg.S2C_MapAStarNodeUpdate, _ YNet.Session) {
 			g_main_path_node = msg_.M_path
 		})
 		YNet.Register(Msg.MSG_S2C_MAP_FLUSH_MAP_MAZE, func(msg_ Msg.S2CFlushMapMaze, _ YNet.Session) {

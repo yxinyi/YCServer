@@ -129,7 +129,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
 		}
 		
 		_user.MoveQueue(_path_idx)
-		m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2CMapAStarNodeUpdate{
+		m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_MapAStarNodeUpdate{
 			_user.M_uid,
 			_path_pos,
 		})
@@ -241,7 +241,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 					return
 				}
 				_user.MoveQueue(m.IdxListConvertPosList(path))
-				_user.SendJson(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, YMsg.S2CMapAStarNodeUpdate{
+				_user.SendJson(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, YMsg.S2C_MapAStarNodeUpdate{
 					_user.GetUID(),
 					_user.GetPathNode(),
 				})

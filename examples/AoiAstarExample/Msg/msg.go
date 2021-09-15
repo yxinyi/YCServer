@@ -70,7 +70,7 @@ type S2CMapUpdateUser struct {
 type S2CMapDeleteUser struct {
 	M_user []UserData
 }
-type S2CMapAStarNodeUpdate struct {
+type S2C_MapAStarNodeUpdate struct {
 	M_uid  uint64
 	M_path []PositionXY
 }
