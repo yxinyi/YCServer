@@ -2,7 +2,7 @@ package move
 
 import (
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"time"
 )
 

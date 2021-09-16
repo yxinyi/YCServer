@@ -113,11 +113,11 @@ func (m *Map) Init() {
 		})
 		YNet.Register(Msg.MSG_S2C_MAP_DELETE_USER, func(msg_ Msg.S2CMapDeleteUser, _ YNet.Session) {
 			for _, _it := range msg_.M_user {
-				m.DeleteUser(_it.M_uid)
+				m.DeleteUser(_it.M_module_uid)
 			}
 		})
 		YNet.Register(Msg.MsgID_S2CUserSuccessLogin, func(msg_ Msg.S2CUserSuccessLogin, _ YNet.Session) {
-			g_main_uid = msg_.M_data.M_uid
+			g_main_uid = msg_.M_data.M_module_uid
 			m.AddNewUser(msg_.M_data)
 		})
 		YNet.Register(Msg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, func(msg_ Msg.S2C_MapAStarNodeUpdate, _ YNet.Session) {

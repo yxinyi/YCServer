@@ -48,9 +48,9 @@ type RemoteNodeER interface {
 
 type Info struct {
 	RemoteNodeER
-	M_node_id uint64
-	M_name    string
-	M_uid     uint64
+	M_node_id    uint64
+	M_name       string
+	M_module_uid uint64
 	
 	M_entity_pool map[uint64]YEntity.Inter
 	M_rpc_queue   *YTool.SyncQueue

@@ -1,9 +1,9 @@
 package TestModule
 
 import (
-	"YMsg"
-	"YNode"
 	"encoding/json"
+	"github.com/yxinyi/YCServer/engine/YMsg"
+	"github.com/yxinyi/YCServer/engine/YNode"
 	"testing"
 )
 
@@ -26,7 +26,7 @@ func TestModule(t *testing.T) {
 			_bytes, _ := json.Marshal("123")
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
-		YNode.Dispatch(msg)
+		YNode.RPCCall(msg)
 	}
 	{
 		msg := &YMsg.S2S_rpc_msg{}
@@ -43,7 +43,7 @@ func TestModule(t *testing.T) {
 			})
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
-		YNode.Dispatch(msg)
+		YNode.RPCCall(msg)
 	}
 }
 
@@ -54,7 +54,7 @@ func BenchmarkModule(b_ *testing.B) {
 			msg.M_func_name = "Test"
 			msg.M_func_parameter = make([][]byte, 0)
 			
-			YNode.Dispatch(msg)
+			YNode.RPCCall(msg)
 		}
 		{
 			msg := &YMsg.S2S_rpc_msg{}
@@ -65,7 +65,7 @@ func BenchmarkModule(b_ *testing.B) {
 				_bytes, _ := json.Marshal(1)
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
-			YNode.Dispatch(msg)
+			YNode.RPCCall(msg)
 		}
 		{
 			msg := &YMsg.S2S_rpc_msg{}
@@ -80,7 +80,7 @@ func BenchmarkModule(b_ *testing.B) {
 				_bytes, _ := json.Marshal("123")
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
-			YNode.Dispatch(msg)
+			YNode.RPCCall(msg)
 		}
 		{
 			msg := &YMsg.S2S_rpc_msg{}
@@ -97,7 +97,7 @@ func BenchmarkModule(b_ *testing.B) {
 				})
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
-			YNode.Dispatch(msg)
+			YNode.RPCCall(msg)
 		}
 	}
 }

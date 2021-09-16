@@ -1,4 +1,4 @@
-package PathFinding
+package YPathFinding
 
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
@@ -10,19 +10,6 @@ const (
 	StraightVal = 1
 	SlopeVal    = 1.4
 )
-
-func blockPosCompare(a, b interface{}) int {
-	_block_a := a.(*pathBlock)
-	_block_b := b.(*pathBlock)
-	switch {
-	case _block_a.GetTotalDistance() > _block_b.GetTotalDistance():
-		return 1
-	case _block_a.GetTotalDistance() < _block_b.GetTotalDistance():
-		return -1
-	default:
-		return 0
-	}
-}
 
 type AStar struct {
 	m_maze       [][]float64
@@ -134,8 +121,8 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 			_d_slope := (_big_x_pos.m_y - _sma_x_pos.m_y) / (_big_x_pos.m_x - _sma_x_pos.m_x)
 			_b_xy := _big_x_pos.m_y - (_d_slope * _big_x_pos.m_x)
 			//y = dx+b
-			for _col_it := _sma_x_pos.m_x; _col_it < _big_x_pos.m_x; _col_it++ {
-				_tmp_y := _d_slope*float64(int(_col_it)) + _b_xy
+			for _col_it := _sma_x_pos.m_x; _col_it <= _big_x_pos.m_x; _col_it++ {
+				_tmp_y := _d_slope*float64(_col_it) + _b_xy
 				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
 						return false
@@ -175,11 +162,11 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				_small_y = _big_x_pos.m_y
 				_big_y = _sma_x_pos.m_y
 			}
-			for _row_it := _small_y; _row_it < _big_y; _row_it++ {
+			for _row_it := _small_y; _row_it <= _big_y; _row_it++ {
 				
 				//x = (y-b) /d
-				_tmp_x := (float64(int(_row_it - _b_xy))) / _d_slope
-/*				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
+				_tmp_x := (float64(_row_it - _b_xy)) / _d_slope
+				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}
@@ -200,7 +187,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 							return false
 						}
 					}
-				} else*/ {
+				} else {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}

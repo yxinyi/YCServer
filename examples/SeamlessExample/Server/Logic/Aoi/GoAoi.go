@@ -94,16 +94,16 @@ func (cell *GoAoiCell) UpdateCell(enter_ GoAoiObj) {
 
 func (cell *GoAoiCell) enterCell(enter_ GoAoiObj) {
 	cell.m_obj_list[enter_.M_uid] = enter_
-	/*	_, exists := cell.m_watch_list[enter_.M_uid]
+	/*	_, exists := cell.m_watch_list[enter_.M_module_uid]
 		if !exists {
-			cell.m_watch_list[enter_.M_uid] = make(map[uint64]struct{})
+			cell.m_watch_list[enter_.M_module_uid] = make(map[uint64]struct{})
 		}*/
 }
 
 func (cell *GoAoiCell) notifyEnterCell(enter_ GoAoiObj) {
 	_func := func(notify_, action_ GoAoiObj) {
 		if notify_.PositionXY.Distance(action_.PositionXY) < notify_.M_view_range {
-			//cell.m_watch_list[notify_.M_uid][action_.M_uid] = struct{}{}
+			//cell.m_watch_list[notify_.M_module_uid][action_.M_module_uid] = struct{}{}
 			cell.m_mgr_chan.Add(GoAoiAction{
 				GO_AOI_ACTION_ENTER,
 				notify_.M_uid,

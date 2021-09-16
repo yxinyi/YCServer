@@ -5,7 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"log"
 )
 

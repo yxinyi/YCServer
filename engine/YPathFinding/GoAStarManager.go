@@ -1,4 +1,4 @@
-package PathFinding
+package YPathFinding
 
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"

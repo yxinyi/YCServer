@@ -17,6 +17,5 @@ func (n *Info) RPC_ModuleRegister(create_func_name string, uid_ uint64) {
 	
 	_new_module := n.m_moduele_factory[create_func_name](obj,uid_)
 	obj.register(_new_module)
-	_new_module.Init()
 	go obj.startModule(_new_module)
 }

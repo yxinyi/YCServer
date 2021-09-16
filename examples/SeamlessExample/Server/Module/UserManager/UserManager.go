@@ -3,7 +3,7 @@ package UserManager
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 )
 
 type Info struct {

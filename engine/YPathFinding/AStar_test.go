@@ -1,4 +1,4 @@
-package PathFinding
+package YPathFinding
 
 import (
 	"math/rand"

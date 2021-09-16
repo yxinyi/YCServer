@@ -1,7 +1,7 @@
 package aoi
 
 import (
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 )
 
 type AoiMoveCallBack func(move_, tar_ uint64)

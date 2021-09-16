@@ -2,8 +2,8 @@ package UserManager
 
 import (
 	"github.com/yxinyi/YCServer/engine/YEntity"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
-	move "github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Logic/Move"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	move "github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Logic/Move"
 	"time"
 )
 

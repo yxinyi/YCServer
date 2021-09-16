@@ -209,14 +209,14 @@ func (i *Info) Loop_Msg() {
 
 func (i *Info) GetAgent() YMsg.Agent {
 	_info := YMsg.Agent{}
-	_info.M_uid = i.M_uid
+	_info.M_uid = i.M_module_uid
 	_info.M_node_id = i.M_node_id
 	_info.M_name = i.M_name
 	return _info
 }
 
 func (i *Info) String() string {
-	return fmt.Sprintf("[%v:%v:%v]", i.M_name, i.M_uid, i.M_node_id)
+	return fmt.Sprintf("[%v:%v:%v]", i.M_name, i.M_module_uid, i.M_node_id)
 }
 
 func (i *Info) SendNetMsgJson(session_id_ uint64, json_msg_ interface{}) {

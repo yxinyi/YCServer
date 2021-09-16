@@ -2,7 +2,7 @@ package aoi
 
 import (
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 )
 
 type GoNGAoiMoveCallBack func(notify_ uint64, action_ map[uint64]struct{})

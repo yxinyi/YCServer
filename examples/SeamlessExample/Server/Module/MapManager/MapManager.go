@@ -3,9 +3,10 @@ package MapManager
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
-	_ "github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/Map"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/UserManager"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	_ "github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/Map"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Util"
 	"math"
 )
 
@@ -49,21 +50,37 @@ func (i *Info) GetLeastLoadMap() uint64 {
 }
 
 const (
-	FirstMapUID = 0x7FFF<<48 | 0x7FFF<<32 | 0x7FFF<<16 | 0x7FFF
+	FirstMapUID = 0x7FFFFFFF<<32 | 0x7FFFFFFF
 )
-
 
 func (i *Info) RPC_FirstEnterMap(user_ UserManager.User) {
 	if len(i.M_map_pool) == 0 {
-		i.RegisterModule("NewMap",FirstMapUID)
+		i.RegisterModule("NewMap", FirstMapUID)
 	}
 	
 	i.Info.RPCCall("Map", FirstMapUID, "UserEnterMap", user_)
 	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
 }
 
-func (i *Info) RPC_CreateMap() {
-	//i.NewInfo(YNode.Obj(),1)
+func (i *Info) RPC_CreateMap(map_uid_ uint64) {
+	_, exists := i.M_map_pool[map_uid_]
+	if exists {
+		return
+	}
+	
+	i.RegisterModule("NewMap", map_uid_)
+	{
+		_round_list := Util.GetRoundNeighborMapIDList(map_uid_)
+		_exists_round := make([]uint64, 0)
+		for _, _round_it := range _round_list {
+			_, exists := i.M_map_pool[_round_it]
+			if exists {
+				_exists_round = append(_exists_round, _round_it)
+				i.Info.RPCCall("Map", _round_it, "RegisterNeighborMap", []uint64{map_uid_})
+			}
+		}
+		i.Info.RPCCall("Map", map_uid_, "RegisterNeighborMap", _exists_round)
+	}
+	
+	//RegisterNeighborMap
 }
-
-//Map.NewInfo(YNode.Obj(),1)

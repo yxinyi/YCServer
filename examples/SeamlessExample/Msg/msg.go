@@ -11,9 +11,10 @@ type Message struct {
 }
 
 type UserData struct {
-	M_uid  uint64
-	M_pos  PositionXY
-	M_path []PositionXY
+	M_uid            uint64
+	M_current_map_id uint64
+	M_pos            PositionXY
+	M_path           []PositionXY
 }
 
 type PositionXY struct {
@@ -53,7 +54,7 @@ type C2SUserMove struct {
 }
 
 type S2C_MOVE struct {
-	M_uid uint64
+	M_uid  uint64
 	M_data UserData
 }
 
@@ -70,13 +71,12 @@ type S2CMapUpdateUser struct {
 type S2CMapDeleteUser struct {
 	M_user []UserData
 }
-type S2CMapAStarNodeUpdate struct {
+type S2C_MapAStarNodeUpdate struct {
 	M_uid  uint64
 	M_path []PositionXY
 }
 
 type C2S_Login struct {
-
 }
 
 type S2C_Login struct {
@@ -84,22 +84,23 @@ type S2C_Login struct {
 }
 
 type C2S_FirstEnterMap struct {
-
 }
 
 type S2C_FirstEnterMap struct {
+	M_data UserData
+}
+
+type S2C_AllSyncMapInfo struct {
 	M_map_uid uint64
 	M_maze    [][]float64
 	M_height  float64
 	M_width   float64
-	M_data UserData
 }
-
 
 type C2S_UserMove struct {
-	M_pos PositionXY
+	M_tar_map_uid uint64
+	M_pos         PositionXY
 }
-
 
 type MapLoad struct {
 	M_map_uid uint64

@@ -29,8 +29,9 @@ func (n *Info) register(info YModule.Inter) {
 			obj.M_module_pool[info.GetInfo().M_name] = make(map[uint64]YModule.Inter)
 		}
 	}
-	obj.M_module_pool[info.GetInfo().M_name][info.GetInfo().M_uid] = info
+	obj.M_module_pool[info.GetInfo().M_name][info.GetInfo().M_module_uid] = info
 	info.GetInfo().M_node_id = obj.M_uid
+	info.Init()
 }
 
 func (n *Info) RPCToOther(msg *YMsg.S2S_rpc_msg) {
@@ -128,11 +129,6 @@ func (n *Info) startModule(module_ YModule.Inter) {
 	}
 }
 func (n *Info) start() {
-	for _, _module_list := range obj.M_module_pool {
-		for _, it := range _module_list {
-			it.Init()
-		}
-	}
 	for _, _module_list := range obj.M_module_pool {
 		for _, it := range _module_list {
 			go n.startModule(it)

@@ -4,10 +4,10 @@ import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
+	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
 	aoi "github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Logic/Aoi"
-	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Logic/PathFinding"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/UserManager"
 	"math/rand"
 	"time"
@@ -39,13 +39,13 @@ type Info struct {
 	m_row_grid_max int
 	m_col_grid_max int //
 	m_go_ng_aoi    *aoi.GoNineGirdAoiManager
-	m_go_astar     *PathFinding.AStarManager
+	m_go_astar     *YPathFinding.AStarManager
 }
 
 func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 	_info := newMazeMap(uid)
 	_info.Info = YModule.NewInfo(node_)
-	_info.M_uid = uid
+	_info.M_module_uid = uid
 	return _info
 }
 
@@ -148,7 +148,7 @@ func newMazeMap(uid_ uint64) *Info {
 		M_user_pool:    make(map[uint64]*UserManager.User),
 		m_msg_notify:   make(map[uint64]*MapNotifyMsg),
 		m_go_ng_aoi:    aoi.NewGoNineGirdAoiCellManager(ScreenWidth, ScreenHeight, 10),
-		m_go_astar:     PathFinding.NewAStarManager(),
+		m_go_astar:     YPathFinding.NewAStarManager(),
 		m_width:        ScreenWidth,
 		m_height:       ScreenHeight,
 		m_col_grid_max: int(ScreenWidth / MAZE_GRID_SIZE),
@@ -202,7 +202,7 @@ func (i *Info) Init() {
 func (i *Info) Loop_100(time_ time.Time) {
 	
 	for _, _it := range i.M_user_pool {
-		//_user_id := _it.M_uid
+		//_user_id := _it.M_module_uid
 		if _it.MoveUpdate(time_) {
 			//ylog.Info("MoveUpdate [%v]", time_.UnixNano())
 			i.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(*_it))
@@ -304,7 +304,7 @@ func (i *Info) Close() {
 
 func (i *Info) NotifyMapLoad() {
 	i.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
-		i.M_uid,
+		i.M_module_uid,
 		uint32(len(i.M_user_pool)),
 	})
 }
