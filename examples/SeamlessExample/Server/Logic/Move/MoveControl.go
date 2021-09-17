@@ -2,16 +2,15 @@ package move
 
 import (
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"time"
 )
 
 type MoveControl struct {
-	M_pos            Msg.PositionXY
-	M_tar            Msg.PositionXY
-	M_next_path      Msg.PositionXY
+	M_pos            YTool.PositionXY
+	M_tar            YTool.PositionXY
+	M_next_path      YTool.PositionXY
 	m_path_queue     *YTool.Queue
-	m_path_cache     []Msg.PositionXY
+	m_path_cache     []YTool.PositionXY
 	M_speed          float64
 	m_last_move_time time.Time
 	M_view_range     float64
@@ -34,31 +33,31 @@ func (c *MoveControl) String() string {
 		return _str
 	}
 	for _idx := 0; _idx < c.m_path_queue.Length(); _idx++ {
-		_str += c.m_path_queue.Get(_idx).(Msg.PositionXY).String()
+		_str += c.m_path_queue.Get(_idx).(YTool.PositionXY).String()
 	}
 	
 	return _str
 }
 
-func (c *MoveControl) GetPathNode() []Msg.PositionXY {
+func (c *MoveControl) GetPathNode() []YTool.PositionXY {
 	return c.m_path_cache
 }
 
 func (c *MoveControl) toNextPath() {
-	c.M_next_path = c.m_path_queue.Pop().(Msg.PositionXY)
+	c.M_next_path = c.m_path_queue.Pop().(YTool.PositionXY)
 }
 
 func (c *MoveControl) MoveQueue(path_queue_ *YTool.Queue) {
 	c.m_path_queue = path_queue_
 	c.toNextPath()
-	_path_node := make([]Msg.PositionXY, 0)
+	_path_node := make([]YTool.PositionXY, 0)
 	for _idx := 0; _idx < c.m_path_queue.Length(); _idx++ {
-		_path_node = append(_path_node, c.m_path_queue.Get(_idx).(Msg.PositionXY))
+		_path_node = append(_path_node, c.m_path_queue.Get(_idx).(YTool.PositionXY))
 	}
 	c.m_path_cache = _path_node
 	
 }
-func (c *MoveControl) MoveTarget(tar_ Msg.PositionXY) {
+func (c *MoveControl) MoveTarget(tar_ YTool.PositionXY) {
 	c.M_tar = tar_
 }
 
@@ -89,7 +88,7 @@ func (c *MoveControl) MoveUpdate(time_ time.Time) bool {
 	}
 	_precent := _this_move_distance / _distance
 	
-	_distance_pos := c.M_pos.DistancePosition(c.M_next_path)
+	_distance_pos := c.M_pos.GetOffset(c.M_next_path)
 	
 	c.M_pos.M_x += _distance_pos.M_x * _precent
 	c.M_pos.M_y += _distance_pos.M_y * _precent

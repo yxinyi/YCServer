@@ -34,24 +34,23 @@ func (m *Info) InitMazeMap() {
 	for _row_idx := 0; _row_idx < m.m_row_grid_max; _row_idx++ {
 		_tmp_col := make([]float64, 0, m.m_col_grid_max)
 		for _col_idx := 0; _col_idx < m.m_col_grid_max; _col_idx++ {
-			if rand.Int31n(10)%10 > 8 {
+			if rand.Int31n(100)%100 > 80 {
 				_tmp_col = append(_tmp_col, 100000)
 			} else {
 				_tmp_col = append(_tmp_col, 0)
 			}
-			
 		}
 		_maze = append(_maze, _tmp_col)
 	}
 	m.m_go_astar.Init(_maze)
 }
-func (m *Info) PosConvertIdx(pos_ Msg.PositionXY) int {
+func (m *Info) PosConvertIdx(pos_ YTool.PositionXY) int {
 	_col_max := int(m.m_width / MAZE_GRID_SIZE)
 	return int(pos_.M_y/MAZE_GRID_SIZE)*_col_max + int(pos_.M_x/MAZE_GRID_SIZE)
 }
 
-func (m *Info) IdxConvertPos(idx_ int) Msg.PositionXY {
-	_pos := Msg.PositionXY{}
+func (m *Info) IdxConvertPos(idx_ int) YTool.PositionXY {
+	_pos := YTool.PositionXY{}
 	_cur_col := idx_ % m.m_col_grid_max
 	_cur_row := idx_ / m.m_col_grid_max
 	_pos.M_x = float64(_cur_col) * MAZE_GRID_SIZE // + (MAZE_GRID_SIZE / 2)
@@ -59,7 +58,7 @@ func (m *Info) IdxConvertPos(idx_ int) Msg.PositionXY {
 	return _pos
 }
 func (m *Info) randPosition(u_ *UserManager.User) {
-	tmpPos := Msg.PositionXY{}
+	tmpPos := YTool.PositionXY{}
 	tmpPos.M_x = float64(rand.Int31n(ScreenWidth-10)) + 5
 	tmpPos.M_y = float64(rand.Int31n(ScreenHeight-10)) + 5
 	for {
@@ -88,7 +87,7 @@ func (m *Info) InitBoundPos() {
 	_up_down_offset := 0x7FFFFFFF - int(m.m_map_uid>>32&0xFFFFFFFF)
 	_left_right_offset := 0x7FFFFFFF - int(m.m_map_uid&0xFFFFFFFF)
 	
-	m.m_up_left_pos = Msg.PositionXY{
+	m.m_up_left_pos = YTool.PositionXY{
 		M_x: float64(_up_down_offset * ScreenWidth),
 		M_y: float64(_left_right_offset * ScreenWidth),
 	}

@@ -77,6 +77,7 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 	}
 	//ylog.Info("######################################[%v:%v]st [%v] [%v:%v]ed [%v]", st_.m_col, st_.m_row, st_.m_index, ed_.m_col, ed_.m_row, ed_.m_index)
 	_func := func(_param_st, _param_ed pos) bool {
+		ylog.Info("######################################")
 		//先处理直线情况
 		//var _sma_y_pos pos
 		//var _big_y_pos pos
@@ -119,26 +120,31 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		}
 		{
 			_d_slope := (_big_x_pos.m_y - _sma_x_pos.m_y) / (_big_x_pos.m_x - _sma_x_pos.m_x)
+			
+			// b = y-dx
 			_b_xy := _big_x_pos.m_y - (_d_slope * _big_x_pos.m_x)
+			
 			//y = dx+b
+			ylog.Info("smx[%v]bgx[%v]_d_slope[%v]", _sma_x_pos.m_x, _big_x_pos.m_x, _d_slope)
 			for _col_it := _sma_x_pos.m_x; _col_it <= _big_x_pos.m_x; _col_it++ {
 				_tmp_y := _d_slope*float64(_col_it) + _b_xy
+				//ylog.Info("_col_it[%v] _tmp_y [%v]", _col_it, _tmp_y)
 				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
 						return false
 					}
 					if int(_col_it) > 0 {
-						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)) {
+						if a.GridIsBlock(int(_col_it-1), int(_tmp_y)) {
 							return false
 						}
 					}
 					if int(_tmp_y) > 0 && int(_col_it) > 0 {
-						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)-1) {
+						if a.GridIsBlock(int(_col_it-1), int(_tmp_y-1)) {
 							return false
 						}
 					}
 					if int(_tmp_y) > 0 {
-						if a.GridIsBlock(int(_col_it), int(_tmp_y)-1) {
+						if a.GridIsBlock(int(_col_it), int(_tmp_y-1)) {
 							return false
 						}
 					}
@@ -146,11 +152,20 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 					if a.GridIsBlock(int(_col_it), int(_tmp_y)) {
 						return false
 					}
-					if int(_col_it) > 0 {
-						if a.GridIsBlock(int(_col_it)-1, int(_tmp_y)) {
+					/*if _d_slope < 0 {
+						if _col_it+1 < _big_x_pos.m_x {
+							if a.GridIsBlock(int(_col_it+1), int(_tmp_y)) {
+								return false
+							}
+						}
+					}*/
+					//if _d_slope > 0 {
+					if _col_it > 1 {
+						if a.GridIsBlock(int(_col_it-1), int(_tmp_y)) {
 							return false
 						}
 					}
+					//}
 				}
 			}
 			var _big_y float64
@@ -162,28 +177,29 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 				_small_y = _big_x_pos.m_y
 				_big_y = _sma_x_pos.m_y
 			}
+			ylog.Info("smy[%v]bgy[%v]_d_slope[%v]", _small_y, _big_y, _d_slope)
 			for _row_it := _small_y; _row_it <= _big_y; _row_it++ {
-				
 				//x = (y-b) /d
 				_tmp_x := (float64(_row_it - _b_xy)) / _d_slope
+				//ylog.Info("_row_it[%v] _tmp_x [%v]", _row_it, _tmp_x)
 				if YTool.Float64Equal(math.Abs(_d_slope), 1) {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}
 					if int(_tmp_x) > 0 {
-						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)) {
+						if a.GridIsBlock(int(_tmp_x-1), int(_row_it)) {
 							return false
 						}
 					}
 					
 					if int(_row_it) > 0 {
-						if a.GridIsBlock(int(_tmp_x), int(_row_it)-1) {
+						if a.GridIsBlock(int(_tmp_x), int(_row_it-1)) {
 							return false
 						}
 					}
 					
 					if int(_tmp_x) > 0 && int(_row_it) > 0 {
-						if a.GridIsBlock(int(_tmp_x)-1, int(_row_it)+1) {
+						if a.GridIsBlock(int(_tmp_x-1), int(_row_it)) {
 							return false
 						}
 					}
@@ -191,11 +207,16 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 					if a.GridIsBlock(int(_tmp_x), int(_row_it)) {
 						return false
 					}
-					if int(_row_it) > 0 {
-						if a.GridIsBlock(int(_tmp_x), int(_row_it)-1) {
-							return false
-						}
+					//if int(_row_it) > 0 {
+					if a.GridIsBlock(int(_tmp_x), int(_row_it-1)) {
+						return false
 					}
+					//					}
+					/*					if _row_it+1 < _big_y {
+										if a.GridIsBlock(int(_tmp_x), int(_row_it+1)) {
+											return false
+										}
+									}*/
 				}
 			}
 		}
@@ -215,6 +236,144 @@ func (a *AStar) checkLinePass(st_, ed_ *blockPos) bool {
 		}
 	}
 	
+	return true
+}
+func (a *AStar) checkLinePassDDA(st_, ed_ *blockPos) bool {
+	type pos struct {
+		m_x float64
+		m_y float64
+	}
+	
+	ylog.Info("######################")
+	_func := func (pos_1_,pos_2_ pos)bool{
+		
+		ylog.Info("pos_1_[%v]pos_2_[%v]",pos_1_,pos_2_)
+		var _len float64
+		var _inc_x float64
+		var _inc_y float64
+		if math.Abs(pos_2_.m_x-pos_1_.m_x) > math.Abs(pos_2_.m_y-pos_1_.m_y) {
+			_len = math.Abs(pos_2_.m_x - pos_1_.m_x)
+		} else {
+			_len = math.Abs(pos_2_.m_y - pos_1_.m_y)
+		}
+		_len *= 2
+		
+		_inc_x = (pos_2_.m_x - pos_1_.m_x) / _len
+		_inc_y = (pos_2_.m_y - pos_1_.m_y) / _len
+		_x := pos_1_.m_x
+		_y := pos_1_.m_y
+		for _i := float64(1); _i <= _len; _i++ {
+			ylog.Info("_x[%v]_y[%v]",_x,_y)
+			if a.GridIsBlock(int(_x), int(_y)) {
+				return false
+			}
+			_x += _inc_x //x+增量
+			_y += _inc_y //y+增量
+		}
+		return true
+	}
+	
+	{
+		_pos_1 := pos{
+			float64(st_.m_col)+0.1,
+			float64(st_.m_row)+0.1,
+		}
+		_pos_2 := pos{
+			float64(ed_.m_col)+0.1,
+			float64(ed_.m_row)+0.1,
+		}
+		if !_func(_pos_1,_pos_2){
+			return false
+		}
+	}
+	
+	{
+		_pos_1 := pos{
+			float64(st_.m_col)+0.9,
+			float64(st_.m_row)+0.1,
+		}
+		_pos_2 := pos{
+			float64(ed_.m_col)+0.9,
+			float64(ed_.m_row)+0.1,
+		}
+		if !_func(_pos_1,_pos_2){
+			return false
+		}
+	}
+	{
+		_pos_1 := pos{
+			float64(st_.m_col)+0.1,
+			float64(st_.m_row)+0.9,
+		}
+		_pos_2 := pos{
+			float64(ed_.m_col)+0.1,
+			float64(ed_.m_row)+0.9,
+		}
+		if !_func(_pos_1,_pos_2){
+			return false
+		}
+	}
+	{
+		_pos_1 := pos{
+			float64(st_.m_col)+0.9,
+			float64(st_.m_row)+0.9,
+		}
+		_pos_2 := pos{
+			float64(ed_.m_col)+0.9,
+			float64(ed_.m_row)+0.9,
+		}
+		if !_func(_pos_1,_pos_2){
+			return false
+		}
+	}
+	
+	/*_pos_1 := pos{
+		float64(st_.m_col),
+		float64(st_.m_row),
+	}
+	_pos_2 := pos{
+		float64(ed_.m_col),
+		float64(ed_.m_row),
+	}*/
+	
+	/*var _len float64
+	var _inc_x float64
+	var _inc_y float64
+	if math.Abs(_pos_2.m_x-_pos_1.m_x) > math.Abs(_pos_2.m_y-_pos_1.m_y) {
+		_len = math.Abs(_pos_2.m_x - _pos_1.m_x)
+	} else {
+		_len = math.Abs(_pos_2.m_y - _pos_1.m_y)
+	}
+	
+	_inc_x = (_pos_2.m_x - _pos_1.m_x) / _len
+	_inc_y = (_pos_2.m_y - _pos_1.m_y) / _len
+	_x := _pos_1.m_x
+	_y := _pos_1.m_y
+	for _i := float64(1); _i <= _len; _i++ {
+		if _pos_2.m_x != _pos_1.m_x && _pos_2.m_y != _pos_1.m_y && YTool.Float64Equal(float64(int(_x)),_x)  && YTool.Float64Equal(float64(int(_y)),_y){
+			_slope := (_pos_2.m_y-_pos_1.m_y)/(_pos_2.m_x-_pos_1.m_x)
+			if _slope < 0 {
+				if a.GridIsBlock(int(_x+1.5), int(_y+0.5)) {
+					return false
+				}
+				if a.GridIsBlock(int(_x+0.5), int(_y+1.5)) {
+					return false
+				}
+			}else{
+				if a.GridIsBlock(int(_x+1.5), int(_y+0.5)) {
+					return false
+				}
+				if a.GridIsBlock(int(_x+0.5), int(_y-0.5)) {
+					return false
+				}
+			}
+		}
+		if a.GridIsBlock(int(_x+0.5), int(_y+0.5)) {
+			return false
+		}
+		_x += _inc_x //x+增量
+		_y += _inc_y //y+增量
+	}*/
 	return true
 }
 
@@ -272,7 +431,7 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 		for ; _last_block_pos < len(before_path_); _last_block_pos++ {
 			_start_pos := before_path_[_start_block_pos]
 			_last_pos := before_path_[_last_block_pos]
-			if a.checkLinePass(_start_pos, _last_pos) {
+			if a.checkLinePassDDA(_start_pos, _last_pos) {
 				_best_pos = _last_block_pos
 			}
 		}
@@ -280,7 +439,6 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 		_final_path = append(_final_path, before_path_[_best_pos])
 		_start_block_pos = _best_pos
 		_last_block_pos = _start_block_pos + 1
-		
 	}
 	
 	//_final_path = append(_final_path, before_path_[len(before_path_)-1])

@@ -2,6 +2,7 @@ package Map
 
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
+	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
 )
@@ -40,7 +41,7 @@ func (i *Info) RPC_UserQuitMap(user_ UserManager.User) {
 	i.NotifyMapLoad()
 }
 
-func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
+func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ YTool.PositionXY) {
 	tar_pos_.M_x = float64(int(tar_pos_.M_x))
 	tar_pos_.M_y = float64(int(tar_pos_.M_y))
 	if m.m_go_astar.IsBlock(m.PosConvertIdx(tar_pos_)) {
@@ -67,7 +68,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
 		}
 		_path_idx := m.IdxListConvertPosList(path_)
 		
-		_path_pos := make([]Msg.PositionXY, 0, len(path_))
+		_path_pos := make([]YTool.PositionXY, 0, len(path_))
 		for _, _it := range path_ {
 			_path_pos = append(_path_pos, m.IdxConvertPos(_it))
 		}

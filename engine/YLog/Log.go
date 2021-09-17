@@ -89,7 +89,7 @@ func initEncoder() zapcore.Encoder {
 func getWriter(filename string) io.Writer {
 	// 保存30天内的日志，每24小时(整点)分割一次日志
 	hook, err := rotatelogs.New(
-		filename+".%Y%m%d",
+		filename+".%M_y%m%d",
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(time.Hour*24*30),
 		rotatelogs.WithRotationTime(time.Hour*24),

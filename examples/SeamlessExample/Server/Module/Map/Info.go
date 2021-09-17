@@ -3,7 +3,7 @@ package Map
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
 )
 
@@ -24,10 +24,10 @@ type Info struct {
 	m_col_grid_max int //
 	m_go_astar     *YPathFinding.AStarManager
 	
-	m_up_left_pos    Msg.PositionXY
-	m_up_right_pos   Msg.PositionXY
-	m_down_left_pos  Msg.PositionXY
-	m_down_right_pos Msg.PositionXY
+	m_up_left_pos    YTool.PositionXY
+	m_up_right_pos   YTool.PositionXY
+	m_down_left_pos  YTool.PositionXY
+	m_down_right_pos YTool.PositionXY
 	
 	m_neighbor_uid map[uint64]struct{}
 }

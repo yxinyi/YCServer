@@ -1,8 +1,7 @@
 package Msg
 
 import (
-	"fmt"
-	"math"
+	"github.com/yxinyi/YCServer/engine/YTool"
 )
 
 type Message struct {
@@ -13,44 +12,13 @@ type Message struct {
 type UserData struct {
 	M_uid            uint64
 	M_current_map_id uint64
-	M_pos            PositionXY
-	M_path           []PositionXY
+	M_pos            YTool.PositionXY
+	M_path           []YTool.PositionXY
 }
 
-type PositionXY struct {
-	M_x float64
-	M_y float64
-}
-
-func (p PositionXY) String() string {
-	return fmt.Sprintf("[x:%v|y:%v]", p.M_x, p.M_y)
-}
-
-func (p *PositionXY) IsSame(rhs_ PositionXY) bool {
-	if math.Abs(p.M_x-rhs_.M_x) > 0.0001 {
-		return false
-	}
-	if math.Abs(p.M_y-rhs_.M_y) > 0.0001 {
-		return false
-	}
-	return true
-}
-
-func (p *PositionXY) DistancePosition(rhs_ PositionXY) *PositionXY {
-	_pos := &PositionXY{}
-	_pos.M_x = rhs_.M_x - p.M_x
-	_pos.M_y = rhs_.M_y - p.M_y
-	return _pos
-}
-
-func (p PositionXY) Distance(rhs_ PositionXY) float64 {
-	_dx := math.Abs(p.M_x - rhs_.M_x)
-	_dy := math.Abs(p.M_y - rhs_.M_y)
-	return math.Sqrt(_dx*_dx + _dy*_dy)
-}
 
 type C2SUserMove struct {
-	M_pos PositionXY
+	M_pos YTool.PositionXY
 }
 
 type S2C_MOVE struct {
@@ -73,7 +41,7 @@ type S2CMapDeleteUser struct {
 }
 type S2C_MapAStarNodeUpdate struct {
 	M_uid  uint64
-	M_path []PositionXY
+	M_path []YTool.PositionXY
 }
 
 type C2S_Login struct {
@@ -99,7 +67,7 @@ type S2C_AllSyncMapInfo struct {
 
 type C2S_UserMove struct {
 	M_tar_map_uid uint64
-	M_pos         PositionXY
+	M_pos         YTool.PositionXY
 }
 
 type MapLoad struct {
