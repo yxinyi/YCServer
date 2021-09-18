@@ -5,9 +5,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Util"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
@@ -19,7 +21,6 @@ import (
 const (
 	ScreenWidth  = 1280
 	ScreenHeight = 720
-	gridSize     = 10
 	userGridSize = 5
 )
 
@@ -54,7 +55,7 @@ func NewMapMazeInfo(msg_ *Msg.S2C_AllSyncMapInfo) *MapMazeInfo {
 	_info.Rectangle = YTool.NewRectangle()
 	_up_down_offset := int(msg_.M_map_uid>>32&0xFFFFFFFF) - 0x7FFFFFFF
 	_left_right_offset := int(msg_.M_map_uid&0xFFFFFFFF) - 0x7FFFFFFF
-
+	
 	_left_up := &YTool.PositionXY{
 		M_x: float64(_left_right_offset) * msg_.M_width,
 		M_y: float64(_up_down_offset) * msg_.M_height,
@@ -99,7 +100,7 @@ func (m *Map) Init() {
 			m.AddNewUser(_it)
 		}
 	})
-
+	
 	/*	_msg_count := int32(0)
 		go func() {
 			_ticker := time.NewTicker(time.Second)
@@ -110,7 +111,7 @@ func (m *Map) Init() {
 					atomic.StoreInt32(&_msg_count, 0)
 				}
 			}
-
+	
 		}()*/
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2CMapUpdateUser) {
 		//atomic.AddInt32(&_msg_count, 1)
@@ -123,7 +124,7 @@ func (m *Map) Init() {
 			m.DeleteUser(_it.M_uid)
 		}
 	})
-
+	
 	/*	YNet.Register(Msg.MsgID_S2CUserMove, m.UserMove)
 		YNet.Register(Msg.MSG_S2C_MAP_FULL_SYNC, func(msg_ Msg.S2CMapFullSync, _ YNet.Session) {
 			for _, _it := range msg_.M_user {
@@ -134,7 +135,7 @@ func (m *Map) Init() {
 			for _, _it := range msg_.M_user {
 				m.AddNewUser(_it)
 			}
-
+	
 		})
 		YNet.Register(Msg.MSG_S2C_MAP_UPDATE_USER, func(msg_ Msg.S2CMapUpdateUser, _ YNet.Session) {
 			for _, _it := range msg_.M_user {
@@ -168,7 +169,7 @@ func (m *Map) AddNewUser(user_data_ Msg.UserData) {
 var g_slope string
 
 func (m *Map) UpdateUser(user_data_ Msg.UserData) {
-
+	
 	if g_main_uid == user_data_.M_uid {
 		g_slope = fmt.Sprintf("%.2f", (user_data_.M_pos.M_y-m.m_user_list[user_data_.M_uid].M_pos.M_y)/(user_data_.M_pos.M_x-m.m_user_list[user_data_.M_uid].M_pos.M_x))
 	}
@@ -177,6 +178,10 @@ func (m *Map) UpdateUser(user_data_ Msg.UserData) {
 
 func (m *Map) UserMove(msg_ Msg.S2C_MOVE, _ YNet.Session) {
 	m.m_user_list[msg_.M_uid] = msg_.M_data
+}
+
+func (m *Map) MainMapID() uint64 {
+	return m.m_user_list[g_main_uid].M_current_map_id
 }
 
 func (m *Map) MainPos() YTool.PositionXY {
@@ -188,12 +193,12 @@ func (m *Map) Update() {
 		_tar_x, _tar_y := ebiten.CursorPosition()
 		_x_diff := float64(_tar_x) - g_center_pos.M_x
 		_y_diff := float64(_tar_y) - g_center_pos.M_y
-
+		
 		_fix_tar_pos := &YTool.PositionXY{
 			m.MainPos().M_x + _x_diff,
 			m.MainPos().M_y + _y_diff,
 		}
-
+		
 		_tar_map := uint64(0)
 		for _, _map_it := range g_map_maze_info {
 			if _map_it.IsInsidePoint(_fix_tar_pos) {
@@ -201,15 +206,15 @@ func (m *Map) Update() {
 				break
 			}
 		}
-
+		
 		_msg := Msg.C2S_UserMove{
 			_tar_map,
 			*_fix_tar_pos,
 		}
-		fmt.Printf("[%v]", _msg.M_tar_map_uid)
+		//fmt.Printf("[%v]", _msg.M_tar_map_uid)
 		g_client_cnn.SendJson(_msg)
 	}
-
+	
 	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
 		switch ebiten.MaxTPS() {
 		case 30:
@@ -223,7 +228,7 @@ func (m *Map) Update() {
 		case 150:
 			ebiten.SetMaxTPS(30)
 		}
-
+		
 	}
 }
 
@@ -236,9 +241,9 @@ func (m *Map) InViewRange(pos YTool.PositionXY) bool {
 }
 
 func (m *Map) PosConvert(pos YTool.PositionXY) YTool.PositionXY {
-
+	
 	_main_user_pos := m.MainPos()
-
+	
 	_x_diff := g_center_pos.M_x - _main_user_pos.M_x
 	_y_diff := g_center_pos.M_y - _main_user_pos.M_y
 	pos.M_x += _x_diff
@@ -247,23 +252,50 @@ func (m *Map) PosConvert(pos YTool.PositionXY) YTool.PositionXY {
 }
 
 func (m *Map) Draw(screen *ebiten.Image) {
-
+	
 	for _, _map_it := range g_map_maze_info {
-		/*		_up_down_offset := int(_map_it.M_msg.M_map_uid>>32&0xFFFFFFFF) - 0x7FFFFFFF
-				_left_right_offset := int(_map_it.M_msg.M_map_uid&0xFFFFFFFF) - 0x7FFFFFFF
-				_oringin_pos := YTool.PositionXY{
-					M_x: float64(_left_right_offset) * _map_it.M_msg.M_width,
-					M_y: float64(_up_down_offset) * _map_it.M_msg.M_height,
-				}
-				_grid_size := _map_it.M_msg.M_height / float64(len(_map_it.M_msg.M_maze))*/
-
-		//_grid_size := _map_it.M_msg.M_height / float64(len(_map_it.M_msg.M_maze))
+		//fmt.Printf("[%v] \n",_map_it.LeftUp.String())
 		for _row_idx_it, _row_it := range _map_it.M_msg.M_maze {
 			_row_idx := _row_idx_it
 			for _col_idx_it, _block_val := range _row_it {
 				_col_idx := _col_idx_it
 				if _block_val != 0 {
+					
 					_block_pos := YTool.PositionXY{float64(_col_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_x, float64(_row_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_y}
+					if m.MainMapID() != _map_it.M_msg.M_map_uid {
+						_up_down_offset, _left_right_offset := Util.MapOffDiff(m.MainMapID(), _map_it.M_msg.M_map_uid)
+						if _left_right_offset > 0 {
+							for _idx := 0; _idx <= _left_right_offset; _idx++ {
+								_map_info, exists := g_map_maze_info[m.MainMapID()+uint64(_idx)]
+								if exists {
+									_block_pos.M_x -= _map_info.M_grid_size * _map_info.M_msg.M_overlap
+								}
+							}
+						} else if _left_right_offset < 0 {
+							for _idx := _left_right_offset; _idx <= 0; _idx++ {
+								_map_info, exists := g_map_maze_info[m.MainMapID()-uint64(math.Abs(float64(_idx)))]
+								if exists {
+									_block_pos.M_x += _map_info.M_grid_size * _map_info.M_msg.M_overlap
+								}
+							}
+						}
+						if _up_down_offset > 0 {
+							for _idx := 0; _idx <= _up_down_offset; _idx++ {
+								_map_info, exists := g_map_maze_info[m.MainMapID()+uint64(_idx<<32)]
+								if exists {
+									_block_pos.M_y -= _map_info.M_grid_size * (_map_info.M_msg.M_overlap)
+								}
+							}
+						} else if _up_down_offset < 0 {
+							for _idx := _up_down_offset; _idx <= 0; _idx++ {
+								_map_info, exists := g_map_maze_info[m.MainMapID()-uint64(math.Abs(float64(_idx<<32)))]
+								if exists {
+									_block_pos.M_y += _map_info.M_grid_size * (_map_info.M_msg.M_overlap)
+								}
+							}
+						}
+					}
+					
 					if !m.InViewRange(_block_pos) {
 						continue
 					}
@@ -279,7 +311,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
-
+	gridSize := float64(10)
 	for _, it := range m.m_user_list {
 		for _, path_it := range it.M_path {
 			if !m.InViewRange(path_it) {
@@ -289,7 +321,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			ebitenutil.DrawRect(screen, _path_pos.M_x, _path_pos.M_y, gridSize, gridSize, color.RGBA{0xff, 0x00, 0x00, 0xff})
 		}
 	}
-
+	
 	for _, path_it := range g_main_path_node {
 		if !m.InViewRange(path_it) {
 			continue
@@ -297,7 +329,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 		_path_pos := m.PosConvert(path_it)
 		ebitenutil.DrawRect(screen, _path_pos.M_x, _path_pos.M_y, gridSize, gridSize, color.RGBA{0xff, 0x00, 0x00, 0xff})
 	}
-
+	
 	for _uid_it, it := range m.m_user_list {
 		if !m.InViewRange(it.M_pos) {
 			continue
@@ -305,7 +337,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 		/*		if m.m_user_list[_uid_it].M_pos.Distance(it.M_pos) > 100 {
 				panic("1")
 			}*/
-
+		
 		if g_main_uid == _uid_it {
 			//detailStr := fmt.Sprintf("%.2f,%.2f", it.M_pos.M_x, it.M_pos.M_y)
 			//text.Draw(screen, detailStr, uiFont, int(it.M_pos.M_x), int(it.M_pos.M_y+20), color.White)
@@ -319,6 +351,22 @@ func (m *Map) Draw(screen *ebiten.Image) {
 			//ebitenutil.DrawRect(screen, it.M_pos.M_x+(gridSize-userGridSize)/2, it.M_pos.M_y+(gridSize-userGridSize)/2, userGridSize, userGridSize, color.RGBA{0x80, 0xa0, 0xc0, 0xff})
 		}
 	}
-
+	
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("MAX: %d\nTPS: %0.2f\nFPS: %0.2f", ebiten.MaxTPS(), ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("MAX: %d\nTPS: %0.2f\nFPS: %0.2f", ebiten.MaxTPS(), ebiten.CurrentTPS(), ebiten.CurrentFPS()))
+	
+	{
+		detailStr := fmt.Sprintf("%d,%d", 100, 100)
+		text.Draw(screen, detailStr, uiFont, int(100), int(100), color.White)
+	}
+	{
+		detailStr := fmt.Sprintf("%d,%d", 400, 100)
+		text.Draw(screen, detailStr, uiFont, int(400), int(100), color.White)
+	}
+	{
+		detailStr := fmt.Sprintf("%d,%d", 100, 400)
+		text.Draw(screen, detailStr, uiFont, int(100), int(400), color.White)
+	}
+	
 }

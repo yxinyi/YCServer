@@ -16,10 +16,11 @@ type MapNotifyMsg struct {
 type Info struct {
 	YModule.BaseInter
 	M_user_pool    map[uint64]*UserManager.User
-	//m_msg_notify   map[uint64]*MapNotifyMsg
 	m_map_uid      uint64
 	m_width        float64
 	m_height       float64
+	m_gird_size    float64
+	m_overlap      int
 	m_row_grid_max int
 	m_col_grid_max int //
 	m_go_astar     *YPathFinding.AStarManager
@@ -30,4 +31,6 @@ type Info struct {
 	m_down_right_pos YTool.PositionXY
 	
 	m_neighbor_uid map[uint64]struct{}
+	//m_msg_notify   map[uint64]*MapNotifyMsg
+	
 }

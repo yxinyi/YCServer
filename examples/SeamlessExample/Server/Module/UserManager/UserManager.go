@@ -42,6 +42,19 @@ func (i *Info) RPC_UserChangeCurrentMap(s_, map_uid_ uint64) {
 	}
 }
 
+func (i *Info) RPC_UserStartSwitchMap(user_uid_ uint64) {
+	_user := i.M_user_pool[user_uid_]
+	if _user != nil {
+		_user.M_map_swtich_state = CONST_MAP_SWITCHING
+	}
+}
+func (i *Info) RPC_UserFinishSwitchMap(user_uid_ uint64) {
+	_user := i.M_user_pool[user_uid_]
+	if _user != nil {
+		_user.M_map_swtich_state = CONST_MAP_SWITCH_NONE
+	}
+}
+
 func (i *Info) MSG_C2S_FirstEnterMap(s_ uint64, msg_ Msg.C2S_FirstEnterMap) {
 
 	_user := i.M_user_pool[s_]

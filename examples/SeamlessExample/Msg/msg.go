@@ -16,7 +16,6 @@ type UserData struct {
 	M_path           []YTool.PositionXY
 }
 
-
 type C2SUserMove struct {
 	M_pos YTool.PositionXY
 }
@@ -59,10 +58,12 @@ type S2C_FirstEnterMap struct {
 }
 
 type S2C_AllSyncMapInfo struct {
-	M_map_uid uint64
-	M_maze    [][]float64
-	M_height  float64
-	M_width   float64
+	M_map_uid   uint64
+	M_maze      [][]float64
+	M_height    float64
+	M_width     float64
+	M_overlap   float64
+	M_gird_size float64
 }
 
 type C2S_UserMove struct {
