@@ -215,7 +215,7 @@ func (i *Info) GetAgent() YMsg.Agent {
 	return _info
 }
 
-func (i *Info) String() string {
+func (i *Info) DebugString() string {
 	return fmt.Sprintf("[%v:%v:%v]", i.M_name, i.M_module_uid, i.M_node_id)
 }
 

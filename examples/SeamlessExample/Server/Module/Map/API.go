@@ -13,18 +13,17 @@ func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	i.M_user_pool[user_.M_uid] = &user_
 	user_.M_speed = 100
 	user_.M_view_range = 100
-	
+
 	i.randPosition(&user_)
 	i.Info.SendNetMsgJson(user_.M_session_id, Msg.S2C_FirstEnterMap{
 		user_.ToClientJson(),
 	})
-	
+
 	i.RPC_SyncMapInfoToClient(user_.M_session_id)
-	
+
 	//负载均衡同步
 	i.NotifyMapLoad()
 }
-
 
 func (i *Info) RPC_SyncMapInfoToClient(s_ uint64) {
 	i.Info.SendNetMsgJson(s_, Msg.S2C_AllSyncMapInfo{
@@ -45,25 +44,32 @@ func (i *Info) RPC_UserQuitMap(user_ UserManager.User) {
 }
 
 func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
-	
+
 	//如果目标坐标不是当前地图坐标,则表示发生了跨地图寻路的情况
 	if m.m_map_uid != msg_.M_tar_map_uid {
 		//直接寻路到临近节点,如果是斜向节点,则寻路到方向临近的方向2格的位置,然后进行交接
-		
+
 	}
-	
+
 	msg_.M_pos.M_x = float64(int(msg_.M_pos.M_x))
 	msg_.M_pos.M_y = float64(int(msg_.M_pos.M_y))
 	if m.m_go_astar.IsBlock(m.PosConvertIdx(msg_.M_pos)) {
 		return
 	}
+	if m.isGhostUser(user_uid_) {
+		return
+	}
+
 	_user, exists := m.M_user_pool[user_uid_]
 	if !exists {
 		return
 	}
-	ylog.Info("[RPC_UserMove] tar [%v]", msg_.M_pos.String())
+	if _user.M_map_swtich_state == UserManager.CONST_MAP_SWITCHING {
+		return
+	}
+	ylog.Info("[RPC_UserMove] tar [%v]", msg_.M_pos.DebugString())
 	_user.MoveTarget(msg_.M_pos)
-	
+
 	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path_ []int) {
 		_user, exists := m.M_user_pool[_user.M_uid]
 		if !exists {
@@ -77,12 +83,12 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
 			return
 		}
 		_path_idx := m.IdxListConvertPosList(path_)
-		
+
 		_path_pos := make([]YTool.PositionXY, 0, len(path_))
 		for _, _it := range path_ {
 			_path_pos = append(_path_pos, m.IdxConvertPos(_it))
 		}
-		
+
 		_user.MoveQueue(_path_idx)
 		m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_MapAStarNodeUpdate{
 			_user.M_uid,
@@ -106,7 +112,7 @@ func (m *Info) RPC_RegisterNeighborMap(neighbor_map_list_ []uint64) {
 			for _col_idx := _col_start_index; _col_idx < _col_end_index; _col_idx++ {
 				_row_line_info := make([]float64, _row_end_index-_row_start_index+1)
 				_row_set_idx := 0
-				for _row_idx := _row_start_index ; _row_idx < _row_end_index; _row_idx++ {
+				for _row_idx := _row_start_index; _row_idx < _row_end_index; _row_idx++ {
 					_row_line_info[_row_set_idx] = m.m_go_astar.GetMaze()[_col_idx][_row_idx]
 					_row_set_idx++
 				}
@@ -129,21 +135,35 @@ func (m *Info) RPC_SyncOverlapBlock(overlap_map_info_ [][]float64, over_map_uid_
 		}
 		_col_get_idx++
 	}
-	
-	for _,_it := range m.M_user_pool{
+
+	for _, _it := range m.M_user_pool {
 		m.RPC_SyncMapInfoToClient(_it.M_session_id)
 	}
 }
 func (i *Info) RPC_UserSwitchMap(user_uid_ uint64) {
 	_user := i.M_user_pool[user_uid_]
 	_user.M_current_map = i.m_map_uid
-	
-	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_uid_,_user.M_current_map)
-	i.Info.RPCCall("UserManager", 0, "UserFinishSwitchMap",user_uid_)
-	i.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_FirstEnterMap{
+//	_user.ClearPathNode()
+	ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
+	_user.M_next_path.M_x = i.m_up_left_pos.M_x + i.m_width - float64(i.m_overlap)*i.m_gird_size - 10
+	_user.M_pos.M_x = _user.M_next_path.M_x - float64(i.m_overlap)*i.m_gird_size
+	_user.M_pos.M_y = _user.M_next_path.M_y
+
+	_user.M_map_swtich_state = UserManager.CONST_MAP_SWITCH_NONE
+	{
+		_update_msg := Msg.S2CMapUpdateUser{
+			M_user: make([]Msg.UserData, 0),
+		}
+		_update_msg.M_user = append(_update_msg.M_user, _user.ToClientJson())
+		i.SendNetMsgJson(_user.M_session_id, _update_msg)
+	}
+	ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
+	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_uid_, _user.M_current_map)
+	i.Info.RPCCall("UserManager", 0, "UserFinishSwitchMap", user_uid_)
+
+	/*	i.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_FirstEnterMap{
 		_user.ToClientJson(),
-	})
-	//i.RPC_SyncMapInfoToClient(_user.M_session_id)
+	})*/
 }
 func (m *Info) RPC_SyncGhostUser(user_ UserManager.User) {
 	_, exists := m.M_user_pool[user_.M_uid]
@@ -151,6 +171,5 @@ func (m *Info) RPC_SyncGhostUser(user_ UserManager.User) {
 		m.RPC_SyncMapInfoToClient(user_.M_session_id)
 	}
 	m.M_user_pool[user_.M_uid] = &user_
-	ylog.Info("在地图[%v]主地图[%v]坐标[%v]",m.m_map_uid,user_.M_current_map,user_.M_pos.String())
-	//m.Info.RPCCall("Map", m.m_map_uid, "SyncMapInfoToClient", _it.M_session_id)
+	//ylog.Info("在地图[%v]主地图[%v]坐标[%v]",m.m_map_uid,user_.M_current_map,user_.M_pos.DebugString())
 }

@@ -28,7 +28,7 @@ type C2S_net_msg struct {
 	M_net_msg    *YNet.NetMsgPack
 }
 
-func (m *S2S_rpc_msg) String() string {
+func (m *S2S_rpc_msg) DebugString() string {
 	return fmt.Sprintf("Tar [%v:%v:%v] Func [%v]", m.M_tar.M_node_id, m.M_tar.M_uid, m.M_tar.M_name, m.M_func_name)
 }
 

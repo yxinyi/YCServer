@@ -13,6 +13,7 @@ import (
 type Inter interface {
 	GetInfo() *Info
 	Init()
+	Loop_1(time time.Time)
 	Loop_10(time time.Time)
 	Loop_100(time time.Time)
 	Close()
@@ -23,6 +24,7 @@ type BaseInter struct {
 }
 
 func (b *BaseInter) GetInfo() *Info          { return b.Info }
+func (b *BaseInter) Loop_1(time time.Time)  {}
 func (b *BaseInter) Loop_10(time time.Time)  {}
 func (b *BaseInter) Loop_100(time time.Time) {}
 func (b *BaseInter) Init()                   {}

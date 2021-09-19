@@ -14,7 +14,7 @@ func NewPositionXY() *PositionXY {
 	return &PositionXY{}
 }
 
-func (xy PositionXY) String() string {
+func (xy PositionXY) DebugString() string {
 	return fmt.Sprintf("M_x:%02f,M_y:%02f", xy.M_x, xy.M_y)
 }
 

@@ -21,7 +21,7 @@ type PositionXY struct {
 	M_y float64
 }
 
-func (p PositionXY) String() string {
+func (p PositionXY) DebugString() string {
 	return fmt.Sprintf("[x:%v|y:%v]", p.M_x, p.M_y)
 }
 

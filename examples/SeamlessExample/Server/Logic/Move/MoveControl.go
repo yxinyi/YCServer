@@ -27,16 +27,21 @@ func (c *MoveControl) CanToNextPath() bool {
 	return true
 }
 
-func (c *MoveControl) String() string {
+func (c *MoveControl) DebugString() string {
 	_str := ""
 	if c.m_path_queue == nil {
 		return _str
 	}
 	for _idx := 0; _idx < c.m_path_queue.Length(); _idx++ {
-		_str += c.m_path_queue.Get(_idx).(YTool.PositionXY).String()
+		_str += c.m_path_queue.Get(_idx).(YTool.PositionXY).DebugString()
 	}
 	
 	return _str
+}
+
+
+func (c *MoveControl) ClearPathNode(){
+	c.m_path_cache = c.m_path_cache[:0]
 }
 
 func (c *MoveControl) GetPathNode() []YTool.PositionXY {

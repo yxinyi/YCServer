@@ -106,7 +106,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, tar_pos_ Msg.PositionXY) {
 	if !exists {
 		return
 	}
-	ylog.Info("[RPC_UserMove] tar [%v]", tar_pos_.String())
+	ylog.Info("[RPC_UserMove] tar [%v]", tar_pos_.DebugString())
 	_user.MoveTarget(tar_pos_)
 	
 	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path_ []int) {

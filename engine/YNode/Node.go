@@ -71,7 +71,7 @@ func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) {
 	{
 		_, exists := obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid]
 		if !exists {
-			ylog.Erro("[YNode:dispatchRpc] [%v] miss uid ", msg_.String())
+			ylog.Erro("[YNode:dispatchRpc] [%v] miss uid ", msg_.DebugString())
 			return
 		}
 	}
@@ -89,14 +89,18 @@ func (n *Info) close() {
 func (n *Info) startModule(module_ YModule.Inter) {
 	_100_last_print_time := time.Now().Unix()
 	_10_last_print_time := time.Now().Unix()
+	_1_last_print_time := time.Now().Unix()
 	_100_fps_count := 0
 	_10_fps_count := 0
-	
+	_1_fps_count := 0
+
 	///////////
 	
 	_100_fps_timer := time.NewTicker(time.Millisecond * 10)
 	defer _100_fps_timer.Stop()
 	_10_fps_timer := time.NewTicker(time.Millisecond * 100)
+	defer _10_fps_timer.Stop()
+	_1_fps_timer := time.NewTicker(time.Millisecond * 1000)
 	defer _10_fps_timer.Stop()
 	for {
 		select {
@@ -124,7 +128,21 @@ func (n *Info) startModule(module_ YModule.Inter) {
 				_10_last_print_time = _time.Unix()
 				_10_fps_count = 0
 			}
+		case _time := <-_1_fps_timer.C:
+			_1_fps_count++
+			module_.Loop_1(_time)
+			if (_time.Unix() - _1_last_print_time) >= 60 {
+				_second_fps := _1_fps_count/int(_time.Unix()-_1_last_print_time)
+				if _second_fps < 1 {
+					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _1_fps_count/int(_time.Unix()-_1_last_print_time))
+				}
+
+				_1_last_print_time = _time.Unix()
+				_1_fps_count = 0
+			}
 		}
+
+
 		
 	}
 }

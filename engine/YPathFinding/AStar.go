@@ -244,10 +244,10 @@ func (a *AStar) checkLinePassDDA(st_, ed_ *blockPos) bool {
 		m_y float64
 	}
 	
-	ylog.Info("######################")
+	//ylog.Info("######################")
 	_func := func (pos_1_,pos_2_ pos)bool{
 		
-		ylog.Info("pos_1_[%v]pos_2_[%v]",pos_1_,pos_2_)
+		//ylog.Info("pos_1_[%v]pos_2_[%v]",pos_1_,pos_2_)
 		var _len float64
 		var _inc_x float64
 		var _inc_y float64
@@ -263,7 +263,7 @@ func (a *AStar) checkLinePassDDA(st_, ed_ *blockPos) bool {
 		_x := pos_1_.m_x
 		_y := pos_1_.m_y
 		for _i := float64(1); _i <= _len; _i++ {
-			ylog.Info("_x[%v]_y[%v]",_x,_y)
+			//ylog.Info("_x[%v]_y[%v]",_x,_y)
 			if a.GridIsBlock(int(_x), int(_y)) {
 				return false
 			}
