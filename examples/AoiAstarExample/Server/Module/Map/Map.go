@@ -223,7 +223,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 				float64(rand.Int31n(ScreenWidth)),
 				float64(rand.Int31n(ScreenHeight)),
 			}
-			for m.m_go_astar.IsBlock(m.PosConvertIdx(_pos)) {
+			for m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(_pos)) {
 				_pos = YMsg.PositionXY{
 					float64(rand.Int31n(ScreenWidth)),
 					float64(rand.Int31n(ScreenHeight)),
@@ -231,7 +231,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 			}
 			_it.MoveTarget(_pos)
 			_go_search[_user_id] = struct{}{}
-			m.m_go_astar.Search(m.PosConvertIdx(_it.M_pos), m.PosConvertIdx(_pos), func(path []int) {
+			m.m_go_astar.Search(m.MapPosConvertMapIdx(_it.M_pos), m.MapPosConvertMapIdx(_pos), func(path []int) {
 				delete(_go_search, _user_id)
 				_user, exists := m.m_user_list[_user_id]
 				if !exists {

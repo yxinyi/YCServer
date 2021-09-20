@@ -14,7 +14,7 @@ func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	user_.M_speed = 100
 	user_.M_view_range = 100
 
-	i.randPosition(&user_)
+	i.randPos(&user_)
 	i.Info.SendNetMsgJson(user_.M_session_id, Msg.S2C_FirstEnterMap{
 		user_.ToClientJson(),
 	})
@@ -29,9 +29,9 @@ func (i *Info) RPC_SyncMapInfoToClient(s_ uint64) {
 	i.Info.SendNetMsgJson(s_, Msg.S2C_AllSyncMapInfo{
 		i.m_map_uid,
 		i.m_go_astar.GetMaze(),
-		i.m_height,
-		i.m_width,
-		float64(i.m_overlap),
+		i.m_vaild_height,
+		i.m_vaild_width,
+		float64(i.m_overlap_count),
 		i.m_gird_size,
 	})
 }
@@ -53,7 +53,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
 
 	msg_.M_pos.M_x = float64(int(msg_.M_pos.M_x))
 	msg_.M_pos.M_y = float64(int(msg_.M_pos.M_y))
-	if m.m_go_astar.IsBlock(m.PosConvertIdx(msg_.M_pos)) {
+	if m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(msg_.M_pos)) {
 		return
 	}
 	if m.isGhostUser(user_uid_) {
@@ -70,7 +70,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
 	ylog.Info("[RPC_UserMove] tar [%v]", msg_.M_pos.DebugString())
 	_user.MoveTarget(msg_.M_pos)
 
-	m.m_go_astar.Search(m.PosConvertIdx(_user.M_pos), m.PosConvertIdx(_user.M_tar), func(path_ []int) {
+	m.m_go_astar.Search(m.MapPosConvertMapIdx(_user.M_pos), m.MapPosConvertMapIdx(_user.M_tar), func(path_ []int) {
 		_user, exists := m.M_user_pool[_user.M_uid]
 		if !exists {
 			return
@@ -78,7 +78,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
 		if len(path_) == 0 {
 			return
 		}
-		_target_indx := m.PosConvertIdx(_user.M_tar)
+		_target_indx := m.MapPosConvertMapIdx(_user.M_tar)
 		if path_[len(path_)-1] != _target_indx {
 			return
 		}
@@ -86,7 +86,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, msg_ Msg.C2S_UserMove) {
 
 		_path_pos := make([]YTool.PositionXY, 0, len(path_))
 		for _, _it := range path_ {
-			_path_pos = append(_path_pos, m.IdxConvertPos(_it))
+			_path_pos = append(_path_pos, m.MapIdxConvertMapPos(_it))
 		}
 
 		_user.MoveQueue(_path_idx)
@@ -106,7 +106,7 @@ func (m *Info) RPC_RegisterNeighborMap(neighbor_map_list_ []uint64) {
 			//暂时固定发送10行
 			var _sync_map_info [][]float64
 			_sync_line_count := 10
-			_col_start_index, _col_end_index, _row_start_index, _row_end_index := m.MapSyncOverlapColRowRange(_map_id, _sync_line_count)
+			_col_start_index, _col_end_index, _row_start_index, _row_end_index := m.MapSyncOverlapColRowRange(_map_id)
 			_sync_map_info = make([][]float64, _col_end_index-_col_start_index+1)
 			_col_set_idx := 0
 			for _col_idx := _col_start_index; _col_idx < _col_end_index; _col_idx++ {
@@ -125,7 +125,7 @@ func (m *Info) RPC_RegisterNeighborMap(neighbor_map_list_ []uint64) {
 }
 
 func (m *Info) RPC_SyncOverlapBlock(overlap_map_info_ [][]float64, over_map_uid_ uint64, over_map_line_ int) {
-	_col_start_index, _col_end_index, _row_start_index, _row_end_index := m.MapSetOverlapColRowRange(over_map_uid_, over_map_line_)
+	_col_start_index, _col_end_index, _row_start_index, _row_end_index := m.MapSetOverlapColRowRange(over_map_uid_)
 	_col_get_idx := 0
 	for _col_idx := _col_start_index; _col_idx < _col_end_index; _col_idx++ {
 		_row_get_idx := 0
@@ -144,9 +144,10 @@ func (i *Info) RPC_UserSwitchMap(user_uid_ uint64) {
 	_user := i.M_user_pool[user_uid_]
 	_user.M_current_map = i.m_map_uid
 //	_user.ClearPathNode()
-	ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
-	_user.M_next_path.M_x = i.m_up_left_pos.M_x + i.m_width - float64(i.m_overlap)*i.m_gird_size - 10
-	_user.M_pos.M_x = _user.M_next_path.M_x - float64(i.m_overlap)*i.m_gird_size
+	//ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
+	//_user.M_next_path.M_x = i.m_up_left_pos.M_x + i.m_vaild_width - float64(i.m_overlap)*i.m_gird_size - 10
+	//_user.M_pos.M_x = _user.M_next_path.M_x - float64(i.m_overlap)*i.m_gird_size
+	_user.M_pos.M_x = _user.M_next_path.M_x
 	_user.M_pos.M_y = _user.M_next_path.M_y
 
 	_user.M_map_swtich_state = UserManager.CONST_MAP_SWITCH_NONE
@@ -157,7 +158,7 @@ func (i *Info) RPC_UserSwitchMap(user_uid_ uint64) {
 		_update_msg.M_user = append(_update_msg.M_user, _user.ToClientJson())
 		i.SendNetMsgJson(_user.M_session_id, _update_msg)
 	}
-	ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
+	//ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), i.m_up_left_pos.DebugString())
 	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_uid_, _user.M_current_map)
 	i.Info.RPCCall("UserManager", 0, "UserFinishSwitchMap", user_uid_)
 

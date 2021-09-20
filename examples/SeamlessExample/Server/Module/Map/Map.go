@@ -30,11 +30,16 @@ import (
 */
 
 const (
-	ScreenWidth          = 800
-	ScreenHeight         = 800
-	OverlapSize          = 10
-	MazeGridSize float64 = 10
+	VAILD_MAP_WIDTH  float64 = 800
+	VAILD_MAP_HEIGHT float64 = 800
+	OVERLAP_SIZE     float64 = 10
+	MAZE_GRID_SIZE   float64 = 10
 )
+
+/*
+MapPos是按 OriginPos算的
+CliPos是按 VaildPos算的
+*/
 
 func init() {
 	YNode.RegisterToFactory("NewMap", NewInfo)
@@ -48,50 +53,64 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 }
 
 func (m *Info) InitMazeMap() {
-	_maze := make([][]float64, m.m_row_grid_max)
-	for _row_idx := 0; _row_idx < m.m_row_grid_max; _row_idx++ {
-		_tmp_col := make([]float64, m.m_col_grid_max)
-		_maze[_row_idx] = _tmp_col
-		if _row_idx < int(m.m_overlap) || _row_idx >= m.m_row_grid_max-int(m.m_overlap) {
-			continue
-		}
-		for _col_idx := int(m.m_overlap); _col_idx < m.m_col_grid_max-int(m.m_overlap); _col_idx++ {
+	_maze := make([][]float64, int(m.m_total_col_grid))
+	for _col_idx := 0; _col_idx < int(m.m_total_col_grid); _col_idx++ {
+		_tmp_col := make([]float64, int(m.m_total_row_grid))
+		_maze[_col_idx] = _tmp_col
+	}
 
-			if rand.Int31n(100)%100 > 80 {
-				_tmp_col[_col_idx] = 100000
+	for _col_idx := int(m.m_overlap_count); _col_idx < int(m.m_vaild_col_grid); _col_idx++ {
+		for _row_idx := int(m.m_overlap_count); _row_idx < int(m.m_vaild_row_grid); _row_idx++ {
+			if rand.Int31n(100)%100 > 70 {
+				_maze[_col_idx][_row_idx] = 100000
 			} else {
-				_tmp_col[_col_idx] = 0
+				_maze[_col_idx][_row_idx] = 0
 			}
 		}
 	}
+
 	m.m_go_astar.Init(_maze)
 }
-func (m *Info) PosConvertIdx(pos_ YTool.PositionXY) int {
-	pos_.M_x -= m.m_up_left_pos.M_x
-	pos_.M_y -= m.m_up_left_pos.M_y
-	return int(pos_.M_y/m.m_gird_size)*m.m_row_grid_max + int(pos_.M_x/m.m_gird_size)
+
+func (m *Info) ClientPosConvertMapPos(pos_ YTool.PositionXY) YTool.PositionXY {
+	pos_.M_x += m.m_overlap_length
+	pos_.M_y += m.m_overlap_length
+	return pos_
+}
+func (m *Info) MapPosConvertClientPos(pos_ YTool.PositionXY) YTool.PositionXY {
+	pos_.M_x -= m.m_overlap_length
+	pos_.M_y -= m.m_overlap_length
+	return pos_
 }
 
-func (m *Info) IdxConvertPos(idx_ int) YTool.PositionXY {
+func (m *Info) MapPosConvertMapIdx(pos_ YTool.PositionXY) int {
+	return int(pos_.M_y/m.m_gird_size)*int(m.m_total_row_grid) + int(pos_.M_x/m.m_gird_size)
+}
+
+func (m *Info) MapIdxConvertMapPos(idx_ int) YTool.PositionXY {
 	_pos := YTool.PositionXY{}
-	_cur_col := idx_ % m.m_col_grid_max
-	_cur_row := idx_ / m.m_col_grid_max
-	_pos.M_x = float64(_cur_col)*MazeGridSize + m.m_up_left_pos.M_x // + (MazeGridSize / 2)
-	_pos.M_y = float64(_cur_row)*MazeGridSize + m.m_up_left_pos.M_y // + (MazeGridSize / 2)
+
+	_cur_row := idx_ % int(m.m_total_col_grid)
+	_cur_col := idx_ / int(m.m_total_col_grid)
+
+	_pos.M_x = float64(_cur_row)*m.m_gird_size + m.m_origin_up_left_pos.M_x
+	_pos.M_y = float64(_cur_col)*m.m_gird_size + m.m_origin_up_left_pos.M_y
+
 	return _pos
 }
-func (m *Info) randPosition(u_ *UserManager.User) {
+
+func (m *Info) randPos(u_ *UserManager.User) {
 	tmpPos := YTool.PositionXY{}
-	/*	tmpPos.M_x = float64((int32(m.m_width / 2)))
-		tmpPos.M_y = float64((int32(m.m_height / 2)))*/
-	tmpPos.M_x = float64(rand.Int31n(int32(m.m_width-float64(m.m_overlap)*m.m_gird_size*2))) + float64(m.m_overlap)*m.m_gird_size
-	tmpPos.M_y = float64(rand.Int31n(int32(m.m_height-float64(m.m_overlap)*m.m_gird_size*2))) + float64(m.m_overlap)*m.m_gird_size
+
+	tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
+	tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
+
 	for {
-		if !m.m_go_astar.IsBlock(m.PosConvertIdx(tmpPos)) {
+		if !m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(tmpPos)) {
 			break
 		}
-		tmpPos.M_x = float64(rand.Int31n(int32(m.m_width-float64(m.m_overlap)*m.m_gird_size*2))) + float64(m.m_overlap)*m.m_gird_size
-		tmpPos.M_y = float64(rand.Int31n(int32(m.m_height-float64(m.m_overlap)*m.m_gird_size*2))) + float64(m.m_overlap)*m.m_gird_size
+		tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
+		tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
 	}
 	u_.M_pos = tmpPos
 	u_.M_tar = tmpPos
@@ -103,41 +122,76 @@ func (m *Info) ObjCount() uint32 {
 func (m *Info) IdxListConvertPosList(idx_list_ []int) *YTool.Queue {
 	_pos_queue := YTool.NewQueue()
 	for _, _it := range idx_list_ {
-		_pos_queue.Add(m.IdxConvertPos(_it))
+		_pos_queue.Add(m.MapIdxConvertMapPos(_it))
 	}
 	return _pos_queue
 }
 
-func (m *Info) InitBoundPos() {
-	_up_down_offset := int(m.m_map_uid>>32&0xFFFFFFFF) - 0x7FFFFFFF
-	_left_right_offset := int(m.m_map_uid&0xFFFFFFFF) - 0x7FFFFFFF
+func (m *Info) InitOffset() {
+	m.m_up_down_offset, m.m_left_right_offset = Util.MapOffDiff(0x7FFFFFFF, m.m_map_uid)
+}
 
-	m.m_up_left_pos = YTool.PositionXY{
-		M_x: float64(_left_right_offset) * m.m_width,
-		M_y: float64(_up_down_offset) * m.m_height,
+func (m *Info) InitBoundPos() {
+	{
+		m.m_origin_up_left_pos = YTool.PositionXY{
+			M_x: float64(m.m_up_down_offset) * m.m_vaild_width,
+			M_y: float64(m.m_left_right_offset) * m.m_vaild_height,
+		}
+		m.m_origin_up_right_pos = YTool.PositionXY{
+			M_x: m.m_origin_up_left_pos.M_x + m.m_total_width,
+			M_y: m.m_origin_up_left_pos.M_y,
+		}
+		m.m_origin_down_left_pos = YTool.PositionXY{
+			M_x: m.m_origin_up_left_pos.M_x,
+			M_y: m.m_origin_up_left_pos.M_y + m.m_total_height,
+		}
+		m.m_origin_down_right_pos = YTool.PositionXY{
+			M_x: m.m_origin_up_left_pos.M_x + m.m_total_width,
+			M_y: m.m_origin_up_left_pos.M_y + m.m_total_height,
+		}
 	}
-	m.m_up_right_pos = m.m_up_left_pos
-	m.m_up_right_pos.M_x += m.m_width
-	m.m_down_left_pos = m.m_up_left_pos
-	m.m_down_left_pos.M_y += m.m_height
-	m.m_down_right_pos = m.m_down_left_pos
-	m.m_down_right_pos.M_x += m.m_width
+	{
+		m.m_vaild_up_left_pos = YTool.PositionXY{
+			M_x: m.m_origin_up_left_pos.M_x + m.m_overlap_length,
+			M_y: m.m_origin_up_left_pos.M_y + m.m_overlap_length,
+		}
+		m.m_vaild_up_right_pos = YTool.PositionXY{
+			M_x: m.m_vaild_up_left_pos.M_x + m.m_vaild_width,
+			M_y: m.m_vaild_up_left_pos.M_y,
+		}
+		m.m_vaild_down_left_pos = YTool.PositionXY{
+			M_x: m.m_vaild_up_left_pos.M_x,
+			M_y: m.m_vaild_up_left_pos.M_y + m.m_vaild_height,
+		}
+		m.m_vaild_down_right_pos = YTool.PositionXY{
+			M_x: m.m_vaild_up_left_pos.M_x + m.m_vaild_width,
+			M_y: m.m_vaild_up_left_pos.M_y + m.m_vaild_height,
+		}
+	}
 }
 
 func newMazeMap(uid_ uint64) *Info {
 	_maze_map := &Info{
-		m_map_uid:      uid_,
-		M_user_pool:    make(map[uint64]*UserManager.User),
-		m_neighbor_uid: make(map[uint64]struct{}),
-		m_go_astar:     YPathFinding.NewAStarManager(),
-		m_overlap:      OverlapSize,
-		m_col_grid_max: int(float64(ScreenHeight)/MazeGridSize) + OverlapSize*2,
-		m_row_grid_max: int(float64(ScreenWidth)/MazeGridSize) + OverlapSize*2,
+		m_map_uid:       uid_,
+		M_user_pool:     make(map[uint64]*UserManager.User),
+		m_neighbor_uid:  make(map[uint64]struct{}),
+		m_go_astar:      YPathFinding.NewAStarManager(),
+		m_gird_size:     MAZE_GRID_SIZE,
+		m_overlap_count: OVERLAP_SIZE,
 	}
-	_maze_map.m_gird_size = MazeGridSize
-	_maze_map.m_height = float64(_maze_map.m_col_grid_max) * MazeGridSize
-	_maze_map.m_width = float64(_maze_map.m_row_grid_max) * MazeGridSize
 
+	_maze_map.m_overlap_length = OVERLAP_SIZE * _maze_map.m_gird_size
+	_maze_map.m_vaild_row_grid = VAILD_MAP_WIDTH / _maze_map.m_gird_size
+	_maze_map.m_vaild_col_grid = VAILD_MAP_HEIGHT / _maze_map.m_gird_size
+	_maze_map.m_total_row_grid = _maze_map.m_vaild_row_grid + _maze_map.m_overlap_count*2
+	_maze_map.m_total_col_grid = _maze_map.m_vaild_col_grid + _maze_map.m_overlap_count*2
+
+	_maze_map.m_vaild_width = _maze_map.m_vaild_row_grid * _maze_map.m_gird_size
+	_maze_map.m_vaild_height = _maze_map.m_vaild_col_grid * _maze_map.m_gird_size
+	_maze_map.m_total_width = _maze_map.m_total_row_grid * _maze_map.m_gird_size
+	_maze_map.m_total_height = _maze_map.m_total_col_grid * _maze_map.m_gird_size
+
+	_maze_map.InitOffset()
 	_maze_map.InitBoundPos()
 	_maze_map.InitMazeMap()
 
@@ -157,51 +211,39 @@ func (i *Info) isGhostUser(user_uid_ uint64) bool {
 
 func (i *Info) InOverlapRange(user *UserManager.User) []bool {
 	_side_arr := make([]bool, 4)
-	_overlap_size := i.m_gird_size * float64(i.m_overlap)
 
-	/*	if user.M_pos.M_y-i.m_up_left_pos.M_y < i.m_gird_size*float64(i.m_overlap) {
-			_side_arr[0] = true
-		}
-		if i.m_down_left_pos.M_y-user.M_pos.M_y < i.m_gird_size*float64(i.m_overlap) {
-			_side_arr[1] = true
-		}
-
-
-
-		if i.m_up_right_pos.M_x-user.M_pos.M_x  < i.m_gird_size*float64(i.m_overlap) {
-			_side_arr[3] = true
-		}
-
-	*/
-	if user.M_pos.M_y > i.m_up_left_pos.M_y && user.M_pos.M_y < i.m_up_left_pos.M_y+_overlap_size {
+	if user.M_pos.M_y > i.m_origin_up_left_pos.M_y && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y {
 		_side_arr[0] = true
 	}
-	if user.M_pos.M_y > i.m_down_left_pos.M_y-_overlap_size && user.M_pos.M_y < i.m_down_left_pos.M_y {
+	if user.M_pos.M_y > i.m_vaild_down_left_pos.M_y && user.M_pos.M_y < i.m_origin_down_left_pos.M_y {
 		_side_arr[1] = true
 	}
-	if user.M_pos.M_x > i.m_up_left_pos.M_x && user.M_pos.M_x < i.m_up_left_pos.M_x+_overlap_size {
+	if user.M_pos.M_x > i.m_origin_up_left_pos.M_x && user.M_pos.M_x < i.m_vaild_up_left_pos.M_x {
 		_side_arr[2] = true
 	}
-	if user.M_pos.M_x > i.m_up_right_pos.M_x -  _overlap_size&& user.M_pos.M_x < i.m_up_right_pos.M_x {
+	if user.M_pos.M_x > i.m_vaild_up_right_pos.M_x && user.M_pos.M_x < i.m_origin_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
+
 	return _side_arr
 }
 
 func (i *Info) InCloseSide(user *UserManager.User) []bool {
 	_side_arr := make([]bool, 4)
-	_overlap_size := i.m_gird_size * float64(i.m_overlap)
 
-	if user.M_pos.M_y > i.m_up_left_pos.M_y+_overlap_size && user.M_pos.M_y < i.m_up_left_pos.M_y+_overlap_size*2 {
+	if user.M_pos.M_y > i.m_vaild_up_left_pos.M_y && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y+i.m_overlap_length {
 		_side_arr[0] = true
 	}
-	if user.M_pos.M_y > i.m_down_left_pos.M_y-_overlap_size*2 && user.M_pos.M_y < i.m_down_left_pos.M_y-_overlap_size {
+
+	if user.M_pos.M_y > i.m_vaild_up_left_pos.M_y-i.m_overlap_length && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y {
 		_side_arr[1] = true
 	}
-	if user.M_pos.M_x > i.m_up_left_pos.M_x+_overlap_size && user.M_pos.M_x < i.m_up_left_pos.M_x+_overlap_size*2 {
+
+	if user.M_pos.M_x > i.m_vaild_up_left_pos.M_x && user.M_pos.M_x < i.m_vaild_up_left_pos.M_x+i.m_overlap_length {
 		_side_arr[2] = true
 	}
-	if user.M_pos.M_x > i.m_up_right_pos.M_x-_overlap_size*2 && user.M_pos.M_x < i.m_up_right_pos.M_x-_overlap_size {
+
+	if user.M_pos.M_x > i.m_vaild_up_right_pos.M_x-i.m_overlap_length && user.M_pos.M_x < i.m_vaild_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
 
@@ -293,111 +335,112 @@ func (i *Info) NotifyMapLoad() {
 	})
 }
 
-func (m *Info) MapSyncOverlapColRowRange(offset_map_uid_ uint64, sync_line_count_ int) (int, int, int, int) {
+func (m *Info) MapSyncOverlapColRowRange(offset_map_uid_ uint64) (int, int, int, int) {
 	_offset_direction := Util.MapOffsetMask(m.m_map_uid, offset_map_uid_)
-	_sync_line_cnt := sync_line_count_
-	_col_start_index := 0
-	_col_end_index := 0
-	_row_start_index := 0
-	_row_end_index := 0
+	_col_start_index := float64(0)
+	_col_end_index := float64(0)
+	_row_start_index := float64(0)
+	_row_end_index := float64(0)
 	switch _offset_direction {
 	case Util.CONST_MAP_OFFSET_LEFT_UP:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_overlap + _sync_line_cnt
-		_row_start_index = m.m_overlap
-		_row_end_index = m.m_overlap + _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_UP:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_overlap + _sync_line_cnt
-		_row_start_index = m.m_overlap
-		_row_end_index = m.m_row_grid_max - _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_RIGHT_UP:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_overlap + _sync_line_cnt
-		_row_start_index = m.m_row_grid_max - _sync_line_cnt*2
-		_row_end_index = m.m_row_grid_max - _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_LEFT:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_col_grid_max - m.m_overlap
-		_row_start_index = m.m_overlap
-		_row_end_index = m.m_overlap + _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_RIGHT:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_col_grid_max - m.m_overlap
-		_row_start_index = m.m_row_grid_max - _sync_line_cnt*2
-		_row_end_index = m.m_row_grid_max - _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_LEFT_DOWN:
-		_col_start_index = m.m_col_grid_max - m.m_overlap*2
-		_col_end_index = m.m_col_grid_max - m.m_overlap
-		_row_start_index = m.m_overlap
-		_row_end_index = m.m_overlap + _sync_line_cnt
-	case Util.CONST_MAP_OFFSET_DOWN:
-		_col_start_index = m.m_col_grid_max - m.m_overlap*2
-		_col_end_index = m.m_col_grid_max - m.m_overlap
-		_row_start_index = m.m_overlap
-		_row_end_index = m.m_row_grid_max - _sync_line_cnt
+		_col_start_index = m.m_overlap_count
+		_col_end_index = _col_start_index + m.m_overlap_count
+		_row_start_index = m.m_overlap_count
+		_row_end_index = _row_start_index + m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_RIGHT_DOWN:
-		_col_start_index = m.m_col_grid_max - m.m_overlap*2
-		_col_end_index = m.m_col_grid_max - m.m_overlap
-		_row_start_index = m.m_row_grid_max - _sync_line_cnt*2
-		_row_end_index = m.m_row_grid_max - _sync_line_cnt
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count*2
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count*2
+		_row_end_index = m.m_total_row_grid - m.m_overlap_count
+	case Util.CONST_MAP_OFFSET_UP:
+		_col_start_index = m.m_overlap_count
+		_col_end_index = _col_start_index + m.m_overlap_count
+		_row_start_index = m.m_overlap_count
+		_row_end_index = _row_start_index + m.m_vaild_row_grid
+	case Util.CONST_MAP_OFFSET_DOWN:
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count*2
+		_row_start_index = m.m_overlap_count
+		_row_end_index = _row_start_index + m.m_vaild_row_grid
+	case Util.CONST_MAP_OFFSET_LEFT:
+		_col_start_index = m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count
+		_row_start_index = m.m_overlap_count
+		_row_end_index = _row_start_index + m.m_overlap_count
+	case Util.CONST_MAP_OFFSET_RIGHT:
+		_col_start_index = m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count*2
+		_row_end_index = m.m_total_row_grid - m.m_overlap_count
+	case Util.CONST_MAP_OFFSET_RIGHT_UP:
+		_col_start_index = m.m_overlap_count
+		_col_end_index = _col_start_index + m.m_overlap_count
+
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count*2
+		_row_end_index = m.m_total_row_grid - m.m_overlap_count
+	case Util.CONST_MAP_OFFSET_LEFT_DOWN:
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count*2
+
+		_row_start_index = m.m_overlap_count
+		_row_end_index = _row_start_index + m.m_overlap_count
 	default:
 		panic("bug")
 	}
 
-	return _col_start_index, _col_end_index, _row_start_index, _row_end_index
+	return int(_col_start_index), int(_col_end_index), int(_row_start_index), int(_row_end_index)
 }
 
-func (m *Info) MapSetOverlapColRowRange(offset_map_uid_ uint64, sync_line_count_ int) (int, int, int, int) {
+func (m *Info) MapSetOverlapColRowRange(offset_map_uid_ uint64) (int, int, int, int) {
 	_offset_direction := Util.MapOffsetMask(m.m_map_uid, offset_map_uid_)
-	_col_start_index := 0
-	_col_end_index := 0
-	_row_start_index := 0
-	_row_end_index := 0
+	_col_start_index := float64(0)
+	_col_end_index := float64(0)
+	_row_start_index := float64(0)
+	_row_end_index := float64(0)
 	switch _offset_direction {
 	case Util.CONST_MAP_OFFSET_LEFT_UP:
 		_col_start_index = 0
-		_col_end_index = sync_line_count_
+		_col_end_index = m.m_overlap_count
 		_row_start_index = 0
-		_row_end_index = sync_line_count_
+		_row_end_index = m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_UP:
 		_col_start_index = 0
-		_col_end_index = sync_line_count_
-		_row_start_index = sync_line_count_
-		_row_end_index = m.m_row_grid_max - sync_line_count_
+		_col_end_index = m.m_overlap_count
+		_row_start_index = m.m_overlap_count
+		_row_end_index = m.m_total_row_grid - m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_RIGHT_UP:
 		_col_start_index = 0
-		_col_end_index = sync_line_count_
-		_row_start_index = m.m_row_grid_max - sync_line_count_
-		_row_end_index = m.m_row_grid_max
+		_col_end_index = m.m_overlap_count
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count
+		_row_end_index = m.m_total_row_grid
 	case Util.CONST_MAP_OFFSET_LEFT:
-		_col_start_index = sync_line_count_
-		_col_end_index = m.m_col_grid_max - sync_line_count_
+		_col_start_index = m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count
 		_row_start_index = 0
-		_row_end_index = sync_line_count_
+		_row_end_index = m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_RIGHT:
-		_col_start_index = m.m_overlap
-		_col_end_index = m.m_col_grid_max - sync_line_count_
-		_row_start_index = m.m_row_grid_max - sync_line_count_
-		_row_end_index = m.m_row_grid_max
+		_col_start_index = m.m_overlap_count
+		_col_end_index = m.m_total_col_grid - m.m_overlap_count
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count
+		_row_end_index = m.m_total_row_grid
 	case Util.CONST_MAP_OFFSET_LEFT_DOWN:
-		_col_start_index = m.m_col_grid_max - sync_line_count_
-		_col_end_index = m.m_col_grid_max
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid
 		_row_start_index = 0
-		_row_end_index = sync_line_count_
+		_row_end_index = m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_DOWN:
-		_col_start_index = m.m_col_grid_max - sync_line_count_
-		_col_end_index = m.m_col_grid_max
-		_row_start_index = sync_line_count_
-		_row_end_index = m.m_row_grid_max - sync_line_count_
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid
+		_row_start_index = m.m_overlap_count
+		_row_end_index = m.m_total_row_grid - m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_RIGHT_DOWN:
-		_col_start_index = m.m_col_grid_max - sync_line_count_
-		_col_end_index = m.m_col_grid_max
-		_row_start_index = m.m_row_grid_max - sync_line_count_
-		_row_end_index = m.m_row_grid_max
+		_col_start_index = m.m_total_col_grid - m.m_overlap_count
+		_col_end_index = m.m_total_col_grid
+		_row_start_index = m.m_total_row_grid - m.m_overlap_count
+		_row_end_index = m.m_total_row_grid
 	default:
 		panic("bug")
 	}
 
-	return _col_start_index, _col_end_index, _row_start_index, _row_end_index
+	return int(_col_start_index), int(_col_end_index), int(_row_start_index), int(_row_end_index)
 }

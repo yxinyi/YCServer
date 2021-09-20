@@ -17,20 +17,30 @@ type Info struct {
 	YModule.BaseInter
 	M_user_pool    map[uint64]*UserManager.User
 	m_map_uid      uint64
-	m_width        float64
-	m_height       float64
-	m_gird_size    float64
-	m_overlap      int
-	m_row_grid_max int
-	m_col_grid_max int //
 	m_go_astar     *YPathFinding.AStarManager
-	
-	m_up_left_pos    YTool.PositionXY
-	m_up_right_pos   YTool.PositionXY
-	m_down_left_pos  YTool.PositionXY
-	m_down_right_pos YTool.PositionXY
-	
 	m_neighbor_uid map[uint64]struct{}
-	//m_msg_notify   map[uint64]*MapNotifyMsg
-	
+
+	m_gird_size float64
+
+	m_vaild_up_left_pos     YTool.PositionXY
+	m_vaild_up_right_pos    YTool.PositionXY
+	m_vaild_down_left_pos   YTool.PositionXY
+	m_vaild_down_right_pos  YTool.PositionXY
+	m_origin_up_left_pos    YTool.PositionXY
+	m_origin_up_right_pos   YTool.PositionXY
+	m_origin_down_left_pos  YTool.PositionXY
+	m_origin_down_right_pos YTool.PositionXY
+	m_vaild_width           float64
+	m_vaild_height          float64
+	m_total_width           float64
+	m_total_height          float64
+	m_vaild_row_grid        float64
+	m_vaild_col_grid        float64
+	m_total_row_grid        float64
+	m_total_col_grid        float64
+	m_overlap_count         float64
+	m_overlap_length        float64
+
+	m_up_down_offset    int
+	m_left_right_offset int
 }
