@@ -157,6 +157,7 @@ func (i *Info) isGhostUser(user_uid_ uint64) bool {
 
 func (i *Info) InOverlapRange(user *UserManager.User) []bool {
 	_side_arr := make([]bool, 4)
+	_overlap_size := i.m_gird_size * float64(i.m_overlap)
 
 	/*	if user.M_pos.M_y-i.m_up_left_pos.M_y < i.m_gird_size*float64(i.m_overlap) {
 			_side_arr[0] = true
@@ -172,33 +173,36 @@ func (i *Info) InOverlapRange(user *UserManager.User) []bool {
 		}
 
 	*/
-	if i.m_up_left_pos.M_x < user.M_pos.M_x && user.M_pos.M_x < i.m_up_left_pos.M_x+i.m_gird_size*float64(i.m_overlap) {
+	if user.M_pos.M_y > i.m_up_left_pos.M_y && user.M_pos.M_y < i.m_up_left_pos.M_y+_overlap_size {
+		_side_arr[0] = true
+	}
+	if user.M_pos.M_y > i.m_down_left_pos.M_y-_overlap_size && user.M_pos.M_y < i.m_down_left_pos.M_y {
+		_side_arr[1] = true
+	}
+	if user.M_pos.M_x > i.m_up_left_pos.M_x && user.M_pos.M_x < i.m_up_left_pos.M_x+_overlap_size {
 		_side_arr[2] = true
 	}
-
+	if user.M_pos.M_x > i.m_up_right_pos.M_x -  _overlap_size&& user.M_pos.M_x < i.m_up_right_pos.M_x {
+		_side_arr[3] = true
+	}
 	return _side_arr
 }
 
 func (i *Info) InCloseSide(user *UserManager.User) []bool {
 	_side_arr := make([]bool, 4)
-	/*
-		if user.M_pos.M_y-i.m_up_left_pos.M_y <= i.m_gird_size*float64(i.m_overlap)*2 {
-			_side_arr[0] = true
-		}
-		if i.m_down_left_pos.M_y-user.M_pos.M_y <= i.m_gird_size*float64(i.m_overlap)*2 {
-			_side_arr[1] = true
-		}
+	_overlap_size := i.m_gird_size * float64(i.m_overlap)
 
-		if user.M_pos.M_x-i.m_up_left_pos.M_x <= i.m_gird_size*float64(i.m_overlap)*2 {
-			_side_arr[2] = true
-		}
-
-		if i.m_up_right_pos.M_x-user.M_pos.M_x <= i.m_gird_size*float64(i.m_overlap)*2 {
-			_side_arr[3] = true
-		}
-	*/
-	if i.m_up_left_pos.M_x+i.m_gird_size*float64(i.m_overlap) < user.M_pos.M_x && user.M_pos.M_x < i.m_up_left_pos.M_x+i.m_gird_size*float64(i.m_overlap)*2 {
+	if user.M_pos.M_y > i.m_up_left_pos.M_y+_overlap_size && user.M_pos.M_y < i.m_up_left_pos.M_y+_overlap_size*2 {
+		_side_arr[0] = true
+	}
+	if user.M_pos.M_y > i.m_down_left_pos.M_y-_overlap_size*2 && user.M_pos.M_y < i.m_down_left_pos.M_y-_overlap_size {
+		_side_arr[1] = true
+	}
+	if user.M_pos.M_x > i.m_up_left_pos.M_x+_overlap_size && user.M_pos.M_x < i.m_up_left_pos.M_x+_overlap_size*2 {
 		_side_arr[2] = true
+	}
+	if user.M_pos.M_x > i.m_up_right_pos.M_x-_overlap_size*2 && user.M_pos.M_x < i.m_up_right_pos.M_x-_overlap_size {
+		_side_arr[3] = true
 	}
 
 	return _side_arr

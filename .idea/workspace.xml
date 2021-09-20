@@ -3,19 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Info.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YModule/Module.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YModule/Module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YMsg/in_msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YMsg/in_msg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YPathFinding/AStar.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YPathFinding/AStar.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YTool/position.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YTool/position.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Msg/msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Msg/msg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Logic/Move/MoveControl.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Logic/Move/MoveControl.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Client/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Client/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
