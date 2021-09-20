@@ -47,7 +47,8 @@ type C2S_Login struct {
 }
 
 type S2C_Login struct {
-	M_data UserData
+	M_main_uid uint64
+	//M_data UserData
 }
 
 type C2S_FirstEnterMap struct {

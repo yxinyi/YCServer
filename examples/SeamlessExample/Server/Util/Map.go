@@ -39,7 +39,9 @@ func GetRoundNeighborMapIDList(map_uid_ uint64) []uint64 {
 }
 
 func MapOffDiff(cent_map_, offset_map_ uint64) (int, int) {
-	_up_down_offset := int(offset_map_>>32&0xFFFFFFFF) - int(cent_map_>>32&0xFFFFFFFF)
+	_offset_up_down := int(offset_map_>>32)&0xFFFFFFFF
+	_cent_up_down := int(cent_map_>>32)&0xFFFFFFFF
+	_up_down_offset := _offset_up_down - _cent_up_down
 	_left_right_offset := int(offset_map_&0xFFFFFFFF) - int(cent_map_&0xFFFFFFFF)
 	return _up_down_offset, _left_right_offset
 }

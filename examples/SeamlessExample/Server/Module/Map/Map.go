@@ -99,18 +99,18 @@ func (m *Info) MapIdxConvertMapPos(idx_ int) YTool.PositionXY {
 	return _pos
 }
 
-func (m *Info) randPos(u_ *UserManager.User) {
+func (m *Info) randPos(u_ *User) {
 	tmpPos := YTool.PositionXY{}
 
 	tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
-	tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
+	tmpPos.M_y = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
 
 	for {
 		if !m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(tmpPos)) {
 			break
 		}
 		tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
-		tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
+		tmpPos.M_y = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
 	}
 	u_.M_pos = tmpPos
 	u_.M_tar = tmpPos
@@ -128,7 +128,7 @@ func (m *Info) IdxListConvertPosList(idx_list_ []int) *YTool.Queue {
 }
 
 func (m *Info) InitOffset() {
-	m.m_up_down_offset, m.m_left_right_offset = Util.MapOffDiff(0x7FFFFFFF, m.m_map_uid)
+	m.m_up_down_offset, m.m_left_right_offset = Util.MapOffDiff(0x7FFFFFFF<<32|0x7FFFFFFF, m.m_map_uid)
 }
 
 func (m *Info) InitBoundPos() {
@@ -173,7 +173,7 @@ func (m *Info) InitBoundPos() {
 func newMazeMap(uid_ uint64) *Info {
 	_maze_map := &Info{
 		m_map_uid:       uid_,
-		M_user_pool:     make(map[uint64]*UserManager.User),
+		M_user_pool:     make(map[uint64]*User),
 		m_neighbor_uid:  make(map[uint64]struct{}),
 		m_go_astar:      YPathFinding.NewAStarManager(),
 		m_gird_size:     MAZE_GRID_SIZE,
@@ -198,73 +198,73 @@ func newMazeMap(uid_ uint64) *Info {
 	return _maze_map
 }
 
-func (i *Info) Init() {
-	i.Info.Init(i)
+func (m *Info) Init() {
+	m.Info.Init(m)
 
 	//负载均衡同步
-	i.NotifyMapLoad()
+	m.NotifyMapLoad()
 }
 
-func (i *Info) isGhostUser(user_uid_ uint64) bool {
-	return i.m_map_uid != i.M_user_pool[user_uid_].M_current_map
+func (m *Info) isGhostUser(user_uid_ uint64) bool {
+	return m.m_map_uid != m.M_user_pool[user_uid_].M_current_map
 }
 
-func (i *Info) InOverlapRange(user *UserManager.User) []bool {
+func (m *Info) InOverlapRange(user *User) []bool {
 	_side_arr := make([]bool, 4)
 
-	if user.M_pos.M_y > i.m_origin_up_left_pos.M_y && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y {
+	if user.M_pos.M_y > m.m_origin_up_left_pos.M_y && user.M_pos.M_y < m.m_vaild_up_left_pos.M_y {
 		_side_arr[0] = true
 	}
-	if user.M_pos.M_y > i.m_vaild_down_left_pos.M_y && user.M_pos.M_y < i.m_origin_down_left_pos.M_y {
+	if user.M_pos.M_y > m.m_vaild_down_left_pos.M_y && user.M_pos.M_y < m.m_origin_down_left_pos.M_y {
 		_side_arr[1] = true
 	}
-	if user.M_pos.M_x > i.m_origin_up_left_pos.M_x && user.M_pos.M_x < i.m_vaild_up_left_pos.M_x {
+	if user.M_pos.M_x > m.m_origin_up_left_pos.M_x && user.M_pos.M_x < m.m_vaild_up_left_pos.M_x {
 		_side_arr[2] = true
 	}
-	if user.M_pos.M_x > i.m_vaild_up_right_pos.M_x && user.M_pos.M_x < i.m_origin_up_right_pos.M_x {
+	if user.M_pos.M_x > m.m_vaild_up_right_pos.M_x && user.M_pos.M_x < m.m_origin_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
 
 	return _side_arr
 }
 
-func (i *Info) InCloseSide(user *UserManager.User) []bool {
+func (m *Info) InCloseSide(user *User) []bool {
 	_side_arr := make([]bool, 4)
 
-	if user.M_pos.M_y > i.m_vaild_up_left_pos.M_y && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y+i.m_overlap_length {
+	if user.M_pos.M_y > m.m_vaild_up_left_pos.M_y && user.M_pos.M_y < m.m_vaild_up_left_pos.M_y+m.m_overlap_length {
 		_side_arr[0] = true
 	}
 
-	if user.M_pos.M_y > i.m_vaild_up_left_pos.M_y-i.m_overlap_length && user.M_pos.M_y < i.m_vaild_up_left_pos.M_y {
+	if user.M_pos.M_y > m.m_vaild_up_left_pos.M_y-m.m_overlap_length && user.M_pos.M_y < m.m_vaild_up_left_pos.M_y {
 		_side_arr[1] = true
 	}
 
-	if user.M_pos.M_x > i.m_vaild_up_left_pos.M_x && user.M_pos.M_x < i.m_vaild_up_left_pos.M_x+i.m_overlap_length {
+	if user.M_pos.M_x > m.m_vaild_up_left_pos.M_x && user.M_pos.M_x < m.m_vaild_up_left_pos.M_x+m.m_overlap_length {
 		_side_arr[2] = true
 	}
 
-	if user.M_pos.M_x > i.m_vaild_up_right_pos.M_x-i.m_overlap_length && user.M_pos.M_x < i.m_vaild_up_right_pos.M_x {
+	if user.M_pos.M_x > m.m_vaild_up_right_pos.M_x-m.m_overlap_length && user.M_pos.M_x < m.m_vaild_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
 
 	return _side_arr
 }
 
-func (i *Info) UserSwitchMap(user_ *UserManager.User, tar_map_ uint64) {
+func (m *Info) UserSwitchMap(user_ *User, tar_map_ uint64) {
 	if user_.M_map_swtich_state == UserManager.CONST_MAP_SWITCHING {
 		return
 	}
 	user_.M_map_swtich_state = UserManager.CONST_MAP_SWITCHING
 	user_.M_current_map = tar_map_
-	i.Info.RPCCall("UserManager", 0, "UserStartSwitchMap", user_.M_uid, func() {
+	m.Info.RPCCall("UserManager", 0, "UserStartSwitchMap", user_.M_uid, func() {
 		user_.M_current_map = tar_map_
-		i.Info.RPCCall("Map", tar_map_, "SyncGhostUser", *user_)
+		m.Info.RPCCall("Map", tar_map_, "SyncGhostUser", *user_)
 	}).AfterRPC("Map", tar_map_, "UserSwitchMap", user_.M_uid)
 }
 
-func (i *Info) Loop_100(time_ time.Time) {
-	for _, _it := range i.M_user_pool {
-		if i.isGhostUser(_it.M_uid) {
+func (m *Info) Loop_100(time_ time.Time) {
+	for _, _it := range m.M_user_pool {
+		if m.isGhostUser(_it.M_uid) {
 			continue
 		}
 		if _it.M_map_swtich_state == UserManager.CONST_MAP_SWITCHING {
@@ -272,15 +272,15 @@ func (i *Info) Loop_100(time_ time.Time) {
 		}
 		//ylog.Info("user[%v]pos[%v]", _it.M_uid, _it.M_pos.DebugString())
 		if _it.MoveUpdate(time_) {
-			//ylog.Info("在地图[%v]主地图[%v]坐标[%v]",i.m_map_uid,_it.M_current_map,_it.M_pos.DebugString())
+			//ylog.Info("在地图[%v]主地图[%v]坐标[%v]",m.m_map_uid,_it.M_current_map,_it.M_pos.DebugString())
 			//如果靠近则直接通知
-			//ylog.Info("user[%v]pos[%v]left up pos[%v] over lap range [%v]",_it.M_uid,_it.M_pos.DebugString(),i.m_up_left_pos.DebugString(),i.m_up_left_pos.M_x+i.m_gird_size*float64(i.m_overlap))
+			//ylog.Info("user[%v]pos[%v]left up pos[%v] over lap range [%v]",_it.M_uid,_it.M_pos.DebugString(),m.m_up_left_pos.DebugString(),m.m_up_left_pos.M_x+m.m_gird_size*float64(m.m_overlap))
 			//ylog.Info("user[%v]pos[%v]", _it.M_uid, _it.M_pos.DebugString())
-			_switch_tar_map_offset := i.InOverlapRange(_it)
+			_switch_tar_map_offset := m.InOverlapRange(_it)
 			if _switch_tar_map_offset[0] || _switch_tar_map_offset[1] || _switch_tar_map_offset[2] || _switch_tar_map_offset[3] {
-				_tar_map_uid := uint64(i.m_map_uid)
+				_tar_map_uid := uint64(m.m_map_uid)
 				if _switch_tar_map_offset[0] {
-					_tar_map_uid = i.m_map_uid - (1 << 32)
+					_tar_map_uid = m.m_map_uid - (1 << 32)
 					if _switch_tar_map_offset[2] {
 						_tar_map_uid--
 
@@ -288,7 +288,7 @@ func (i *Info) Loop_100(time_ time.Time) {
 						_tar_map_uid++
 					}
 				} else if _switch_tar_map_offset[1] {
-					_tar_map_uid = i.m_map_uid + (1 << 32)
+					_tar_map_uid = m.m_map_uid + (1 << 32)
 					if _switch_tar_map_offset[2] {
 						_tar_map_uid--
 
@@ -302,36 +302,36 @@ func (i *Info) Loop_100(time_ time.Time) {
 					_tar_map_uid++
 				}
 				ylog.Info("地图[%v] pos[%v]side[%v]start switch", _it.M_current_map, _it.M_pos.DebugString(), _switch_tar_map_offset)
-				i.UserSwitchMap(_it, _tar_map_uid)
+				m.UserSwitchMap(_it, _tar_map_uid)
 				continue
 			}
-			_neighbor_list := Util.GetTarSideNeighborMapIDList(i.InCloseSide(_it), i.m_map_uid)
+			_neighbor_list := Util.GetTarSideNeighborMapIDList(m.InCloseSide(_it), m.m_map_uid)
 			for _, _neighbor_it := range _neighbor_list {
-				_, exists := i.m_neighbor_uid[_neighbor_it]
+				_, exists := m.m_neighbor_uid[_neighbor_it]
 				if exists {
-					i.Info.RPCCall("Map", _neighbor_it, "SyncGhostUser", *_it)
+					m.Info.RPCCall("Map", _neighbor_it, "SyncGhostUser", *_it)
 
 				} else {
-					i.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
+					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
 				}
 			}
 			{
 				_update_msg := Msg.S2CMapUpdateUser{
 					M_user: make([]Msg.UserData, 0),
 				}
-				_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson())
-				i.SendNetMsgJson(_it.M_session_id, _update_msg)
+				_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson(m))
+				m.SendNetMsgJson(_it.M_session_id, _update_msg)
 			}
 		}
 	}
 
-	i.m_go_astar.Update()
+	m.m_go_astar.Update()
 }
 
-func (i *Info) NotifyMapLoad() {
-	i.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
-		i.M_module_uid,
-		uint32(len(i.M_user_pool)),
+func (m *Info) NotifyMapLoad() {
+	m.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
+		m.M_module_uid,
+		uint32(len(m.M_user_pool)),
 	})
 }
 

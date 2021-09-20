@@ -9,7 +9,6 @@ import (
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Util"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
@@ -89,8 +88,8 @@ func (m *Map) Init() {
 		g_map_maze_info[msg_.M_map_uid] = NewMapMazeInfo(&msg_)
 	})
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2C_Login) {
-		g_main_uid = msg_.M_data.M_uid
-		m.AddNewUser(msg_.M_data)
+		g_main_uid = msg_.M_main_uid
+		//m.AddNewUser(msg_.M_data)
 	})
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2C_MapAStarNodeUpdate) {
 		g_main_path_node = msg_.M_path
@@ -228,7 +227,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 				if _block_val != 0 {
 					_block_pos := YTool.PositionXY{float64(_col_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_x, float64(_row_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_y}
 
-					if m.MainMapID() != _map_it.M_msg.M_map_uid {
+/*					if m.MainMapID() != _map_it.M_msg.M_map_uid {
 						_up_down_offset, _left_right_offset := Util.MapOffDiff(m.MainMapID(), _map_it.M_msg.M_map_uid)
 						if _left_right_offset > 0 {
 							for _idx := 0; _idx <= _left_right_offset; _idx++ {
@@ -260,7 +259,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 								}
 							}
 						}
-					}
+					}*/
 
 					if !m.InViewRange(_block_pos) {
 						continue

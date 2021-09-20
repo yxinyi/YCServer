@@ -31,7 +31,8 @@ func (i *Info) MSG_C2S_Login(s_ uint64, msg_ Msg.C2S_Login) {
 		i.M_user_pool[s_] = NewUser(s_, s_)
 	}
 	i.Info.SendNetMsgJson(s_, Msg.S2C_Login{
-		i.M_user_pool[s_].ToClientJson(),
+		//i.M_user_pool[s_].ToClientJson(nil),
+		M_main_uid: s_,
 	})
 }
 

@@ -4,7 +4,9 @@ import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	move "github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Logic/Move"
+	"time"
 )
 
 type MapNotifyMsg struct {
@@ -13,9 +15,35 @@ type MapNotifyMsg struct {
 	m_delete map[uint64]struct{}
 }
 
+type User struct {
+	M_uid              uint64
+	M_current_map      uint64
+	M_session_id       uint64
+	M_map_swtich_state uint32
+	move.MoveControl
+}
+
+func (u *User) MoveUpdate(time_ time.Time) bool {
+	return u.MoveControl.MoveUpdate(time_)
+}
+
+func (u *User) CanToNextPath() bool {
+	return u.MoveControl.CanToNextPath()
+}
+
+func (u *User) ToClientJson(map_ *Info) Msg.UserData {
+	_user_msg := Msg.UserData{
+		M_uid: u.M_uid,
+	}
+	if map_ != nil {
+		_user_msg.M_pos = map_.MapPosConvertClientPos(u.M_pos)
+	}
+	return _user_msg
+}
+
 type Info struct {
 	YModule.BaseInter
-	M_user_pool    map[uint64]*UserManager.User
+	M_user_pool    map[uint64]*User
 	m_map_uid      uint64
 	m_go_astar     *YPathFinding.AStarManager
 	m_neighbor_uid map[uint64]struct{}
