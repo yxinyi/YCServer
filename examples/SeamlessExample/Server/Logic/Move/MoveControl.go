@@ -6,7 +6,8 @@ import (
 )
 
 type MoveControl struct {
-	M_pos            YTool.PositionXY
+	M_server_pos     YTool.PositionXY
+	M_client_pos     YTool.PositionXY
 	M_tar            YTool.PositionXY
 	M_next_path      YTool.PositionXY
 	m_path_queue     *YTool.Queue
@@ -23,7 +24,7 @@ func (c *MoveControl) CanToNextPath() bool {
 	if c.m_path_queue.Length() == 0 {
 		return false
 	}
-	
+
 	return true
 }
 
@@ -35,12 +36,11 @@ func (c *MoveControl) DebugString() string {
 	for _idx := 0; _idx < c.m_path_queue.Length(); _idx++ {
 		_str += c.m_path_queue.Get(_idx).(YTool.PositionXY).DebugString()
 	}
-	
+
 	return _str
 }
 
-
-func (c *MoveControl) ClearPathNode(){
+func (c *MoveControl) ClearPathNode() {
 	c.m_path_cache = c.m_path_cache[:0]
 }
 
@@ -60,7 +60,7 @@ func (c *MoveControl) MoveQueue(path_queue_ *YTool.Queue) {
 		_path_node = append(_path_node, c.m_path_queue.Get(_idx).(YTool.PositionXY))
 	}
 	c.m_path_cache = _path_node
-	
+
 }
 func (c *MoveControl) MoveTarget(tar_ YTool.PositionXY) {
 	c.M_tar = tar_
@@ -70,33 +70,33 @@ func (c *MoveControl) MoveUpdate(time_ time.Time) bool {
 	defer func() {
 		c.m_last_move_time = time_
 	}()
-	
-	if c.M_pos.IsSame(c.M_tar) {
+
+	if c.M_server_pos.IsSame(c.M_tar) {
 		return false
 	}
-	
-	if c.M_pos.IsSame(c.M_next_path) {
+
+	if c.M_server_pos.IsSame(c.M_next_path) {
 		if !c.CanToNextPath() {
 			return false
 		}
 		c.toNextPath()
 	}
-	
-	_distance := c.M_pos.Distance(c.M_next_path)
-	
+
+	_distance := c.M_server_pos.Distance(c.M_next_path)
+
 	_interval_time := time_.Sub(c.m_last_move_time).Seconds()
 	_this_move_distance := _interval_time * c.M_speed
-	
+
 	if _distance < _this_move_distance {
-		c.M_pos = c.M_next_path
+		c.M_server_pos = c.M_next_path
 		return true
 	}
 	_precent := _this_move_distance / _distance
-	
-	_distance_pos := c.M_pos.GetOffset(c.M_next_path)
-	
-	c.M_pos.M_x += _distance_pos.M_x * _precent
-	c.M_pos.M_y += _distance_pos.M_y * _precent
-	
+
+	_distance_pos := c.M_server_pos.GetOffset(c.M_next_path)
+
+	c.M_server_pos.M_x += _distance_pos.M_x * _precent
+	c.M_server_pos.M_y += _distance_pos.M_y * _precent
+
 	return true
 }

@@ -20,7 +20,7 @@ func (m *Info) RPC_UserEnterMap(user_ UserManager.User) {
 
 	m.randPos(_user)
 	m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_FirstEnterMap{
-		_user.ToClientJson(m),
+		_user.ToClientJson(),
 	})
 
 	m.RPC_SyncMapInfoToClient(_user.M_session_id)
@@ -40,10 +40,10 @@ func (m *Info) RPC_SyncMapInfoToClient(s_ uint64) {
 	}
 
 	_col_loop := 0
-	for _col_idx := int(m.m_overlap_count); _col_idx < int(m.m_vaild_col_grid); _col_idx++ {
+	for _col_idx := int(m.m_overlap_count); _col_idx < int(m.m_overlap_count+m.m_vaild_col_grid); _col_idx++ {
 		_msg.M_maze[_col_loop] = make([]float64,  int(m.m_vaild_row_grid))
 		_row_loop := 0
-		for _row_idx := int(m.m_overlap_count); _row_idx < int(m.m_vaild_row_grid); _row_idx++ {
+		for _row_idx := int(m.m_overlap_count); _row_idx < int(m.m_overlap_count+m.m_vaild_row_grid); _row_idx++ {
 			_msg.M_maze[_col_loop][_row_loop] = m.m_go_astar.GetMaze()[_col_idx][_row_idx]
 			_row_loop++
 		}
@@ -64,12 +64,6 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, move_msg_ Msg.C2S_UserMove) {
 
 	_map_pos := m.ClientPosConvertMapPos(move_msg_.M_pos)
 
-	//如果目标坐标不是当前地图坐标,则表示发生了跨地图寻路的情况
-	if m.m_map_uid != move_msg_.M_tar_map_uid {
-		//直接寻路到临近节点,如果是斜向节点,则寻路到方向临近的方向2格的位置,然后进行交接
-
-	}
-
 	_map_pos.M_x = float64(int(_map_pos.M_x))
 	_map_pos.M_y = float64(int(_map_pos.M_y))
 	if m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(_map_pos)) {
@@ -89,7 +83,7 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, move_msg_ Msg.C2S_UserMove) {
 	ylog.Info("[RPC_UserMove] tar [%v]", _map_pos.DebugString())
 	_user.MoveTarget(_map_pos)
 
-	m.m_go_astar.Search(m.MapPosConvertMapIdx(_user.M_pos), m.MapPosConvertMapIdx(_user.M_tar), func(path_ []int) {
+	m.m_go_astar.Search(m.MapPosConvertMapIdx(_user.M_server_pos), m.MapPosConvertMapIdx(_user.M_tar), func(path_ []int) {
 		_user, exists := m.M_user_pool[_user.M_uid]
 		if !exists {
 			return
@@ -166,19 +160,20 @@ func (m *Info) RPC_SyncOverlapBlock(overlap_map_info_ [][]float64, over_map_uid_
 func (m *Info) RPC_UserSwitchMap(user_uid_ uint64) {
 	_user := m.M_user_pool[user_uid_]
 	_user.M_current_map = m.m_map_uid
-	//	_user.ClearPathNode()
+	_user.ClearPathNode()
 	//ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), m.m_up_left_pos.DebugString())
 	//_user.M_next_path.M_x = m.m_up_left_pos.M_x + m.m_vaild_width - float64(m.m_overlap)*m.m_gird_size - 10
 	//_user.M_pos.M_x = _user.M_next_path.M_x - float64(m.m_overlap)*m.m_gird_size
-	_user.M_pos.M_x = _user.M_next_path.M_x
-	_user.M_pos.M_y = _user.M_next_path.M_y
+	_user.M_server_pos.M_x = _user.M_next_path.M_x
+	_user.M_server_pos.M_y = _user.M_next_path.M_y
+	_user.M_client_pos = m.MapPosConvertClientPos(_user.M_server_pos)
 
 	_user.M_map_swtich_state = UserManager.CONST_MAP_SWITCH_NONE
 	{
 		_update_msg := Msg.S2CMapUpdateUser{
 			M_user: make([]Msg.UserData, 0),
 		}
-		_update_msg.M_user = append(_update_msg.M_user, _user.ToClientJson(m))
+		_update_msg.M_user = append(_update_msg.M_user, _user.ToClientJson())
 		m.SendNetMsgJson(_user.M_session_id, _update_msg)
 	}
 	//ylog.Info("UserSwitchMap user pos[%v] up_left_pos[%v]", _user.M_pos.DebugString(), m.m_up_left_pos.DebugString())

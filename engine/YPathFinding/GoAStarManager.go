@@ -26,6 +26,7 @@ func (a *aStarCallbackMsg) Init(uid_ uint32, st_, ed_ int, search_path_ []int) {
 type aStarCallback func([]int)
 
 type AStarManager struct {
+	M_map_uid uint64
 	m_maze  [][]float64
 	m_queue *YTool.SyncQueue
 

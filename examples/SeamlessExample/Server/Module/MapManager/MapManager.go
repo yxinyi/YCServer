@@ -57,7 +57,7 @@ func (i *Info) RPC_FirstEnterMap(user_ UserManager.User) {
 	if len(i.M_map_pool) == 0 {
 		i.RegisterModule("NewMap", FirstMapUID)
 	}
-	
+
 	i.Info.RPCCall("Map", FirstMapUID, "UserEnterMap", user_)
 	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
 }
@@ -67,7 +67,8 @@ func (i *Info) RPC_CreateMap(map_uid_ uint64) {
 	if exists {
 		return
 	}
-	
+	i.M_map_pool[map_uid_] = Msg.MapLoad{}
+
 	i.RegisterModule("NewMap", map_uid_)
 	{
 		_round_list := Util.GetRoundNeighborMapIDList(map_uid_)
@@ -81,6 +82,6 @@ func (i *Info) RPC_CreateMap(map_uid_ uint64) {
 		}
 		i.Info.RPCCall("Map", map_uid_, "RegisterNeighborMap", _exists_round)
 	}
-	
+
 	//RegisterNeighborMap
 }

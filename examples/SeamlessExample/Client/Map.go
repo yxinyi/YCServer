@@ -9,6 +9,7 @@ import (
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Util"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/image/font/opentype"
@@ -52,8 +53,7 @@ func NewMapMazeInfo(msg_ *Msg.S2C_AllSyncMapInfo) *MapMazeInfo {
 	_info := &MapMazeInfo{}
 	_info.M_msg = msg_
 	_info.Rectangle = YTool.NewRectangle()
-	_up_down_offset := int(msg_.M_map_uid>>32&0xFFFFFFFF) - 0x7FFFFFFF
-	_left_right_offset := int(msg_.M_map_uid&0xFFFFFFFF) - 0x7FFFFFFF
+	_up_down_offset, _left_right_offset := Util.MapOffDiff(0x7FFFFFFF<<32|0x7FFFFFFF, msg_.M_map_uid)
 
 	_left_up := &YTool.PositionXY{
 		M_x: float64(_left_right_offset) * msg_.M_width,
@@ -164,12 +164,6 @@ func (m *Map) Update() {
 		}
 
 		_tar_map := uint64(0)
-		for _, _map_it := range g_map_maze_info {
-			if _map_it.IsInsidePoint(_fix_tar_pos) {
-				_tar_map = _map_it.M_msg.M_map_uid
-				break
-			}
-		}
 
 		_msg := Msg.C2S_UserMove{
 			_tar_map,
@@ -218,7 +212,7 @@ func (m *Map) PosConvert(pos YTool.PositionXY) YTool.PositionXY {
 func (m *Map) Draw(screen *ebiten.Image) {
 	//fmt.Printf("[%v] [%v]\n", m.MainMapID(), m.MainPos().DebugString())
 	_is_show := 0
-	_show_pos :=  YTool.PositionXY{}
+	_show_pos := YTool.PositionXY{}
 	for _, _map_it := range g_map_maze_info {
 		for _row_idx_it, _row_it := range _map_it.M_msg.M_maze {
 			_row_idx := _row_idx_it
@@ -226,46 +220,11 @@ func (m *Map) Draw(screen *ebiten.Image) {
 				_col_idx := _col_idx_it
 				if _block_val != 0 {
 					_block_pos := YTool.PositionXY{float64(_col_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_x, float64(_row_idx)*_map_it.M_grid_size + _map_it.LeftUp.M_y}
-
-/*					if m.MainMapID() != _map_it.M_msg.M_map_uid {
-						_up_down_offset, _left_right_offset := Util.MapOffDiff(m.MainMapID(), _map_it.M_msg.M_map_uid)
-						if _left_right_offset > 0 {
-							for _idx := 0; _idx <= _left_right_offset; _idx++ {
-								_map_info, exists := g_map_maze_info[m.MainMapID()+uint64(_idx)]
-								if exists {
-									_block_pos.M_x -= _map_info.M_grid_size * _map_info.M_msg.M_overlap
-								}
-							}
-						} else if _left_right_offset < 0 {
-							for _idx := _left_right_offset; _idx <= 0; _idx++ {
-								_map_info, exists := g_map_maze_info[m.MainMapID()-uint64(math.Abs(float64(_idx)))]
-								if exists {
-									_block_pos.M_x += _map_info.M_grid_size * _map_info.M_msg.M_overlap
-								}
-							}
-						}
-						if _up_down_offset > 0 {
-							for _idx := 0; _idx <= _up_down_offset; _idx++ {
-								_map_info, exists := g_map_maze_info[m.MainMapID()+uint64(_idx<<32)]
-								if exists {
-									_block_pos.M_y -= _map_info.M_grid_size * (_map_info.M_msg.M_overlap)
-								}
-							}
-						} else if _up_down_offset < 0 {
-							for _idx := _up_down_offset; _idx <= 0; _idx++ {
-								_map_info, exists := g_map_maze_info[m.MainMapID()-uint64(math.Abs(float64(_idx<<32)))]
-								if exists {
-									_block_pos.M_y += _map_info.M_grid_size * (_map_info.M_msg.M_overlap)
-								}
-							}
-						}
-					}*/
-
 					if !m.InViewRange(_block_pos) {
 						continue
 					}
 					_block_pos = m.PosConvert(_block_pos)
-					if _map_it.M_msg.M_map_uid == 9223372034707292159 && _is_show ==  0{
+					if _map_it.M_msg.M_map_uid == 9223372034707292159 && _is_show == 0 {
 						_is_show = 1
 						_show_pos = _block_pos
 					}
@@ -324,7 +283,7 @@ func (m *Map) Draw(screen *ebiten.Image) {
 		}
 	}
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("MAX: %d\nTPS: %0.2f\nFPS: %0.2f \nCM[%v]\nPOS[%v] \nFP[%v]", ebiten.MaxTPS(), ebiten.CurrentTPS(), ebiten.CurrentFPS(), m.MainMapID(), m.MainPos().DebugString(),_show_pos.DebugString()))
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("MAX: %d\nTPS: %0.2f\nFPS: %0.2f \nCM[%v]\nPOS[%v] \nFP[%v]", ebiten.MaxTPS(), ebiten.CurrentTPS(), ebiten.CurrentFPS(), m.MainMapID(), m.MainPos().DebugString(), _show_pos.DebugString()))
 
 	{
 		detailStr := fmt.Sprintf("%d,%d", 100, 100)

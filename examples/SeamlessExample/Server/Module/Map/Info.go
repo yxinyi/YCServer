@@ -31,12 +31,11 @@ func (u *User) CanToNextPath() bool {
 	return u.MoveControl.CanToNextPath()
 }
 
-func (u *User) ToClientJson(map_ *Info) Msg.UserData {
+func (u *User) ToClientJson() Msg.UserData {
 	_user_msg := Msg.UserData{
-		M_uid: u.M_uid,
-	}
-	if map_ != nil {
-		_user_msg.M_pos = map_.MapPosConvertClientPos(u.M_pos)
+		M_uid:            u.M_uid,
+		M_current_map_id: u.M_current_map,
+		M_pos:            u.M_client_pos,
 	}
 	return _user_msg
 }
