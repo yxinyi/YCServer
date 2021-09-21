@@ -53,8 +53,8 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 }
 
 func (m *Info) InitMazeMap() {
-	_maze := make([][]float64, int(m.m_total_col_grid+m.m_overlap_count))
-	for _col_idx := 0; _col_idx < int(m.m_total_col_grid+m.m_overlap_count); _col_idx++ {
+	_maze := make([][]float64, int(m.m_total_col_grid))
+	for _col_idx := 0; _col_idx < int(m.m_total_col_grid); _col_idx++ {
 		_tmp_col := make([]float64, int(m.m_total_row_grid))
 		_maze[_col_idx] = _tmp_col
 	}
