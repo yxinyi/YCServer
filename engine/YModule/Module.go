@@ -117,7 +117,7 @@ func (i *Info) msgUnmarshalParamList(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 	}
 	
 	if len(_func.M_param) != len(msg.M_func_parameter) {
-		ylog.Erro("[%v]RPC param count err right [%v] err [%v]", msg.M_tar.M_name, len(_func.M_param), len(msg.M_func_parameter))
+		ylog.Erro("[%v]RPC [%v]param count err right [%v] err [%v]", msg.M_tar.M_name,msg.M_func_name, len(_func.M_param), len(msg.M_func_parameter))
 		return nil
 	}
 	return i.paramUnmarshalWithTypeSlice(msg.M_func_parameter, _func.M_param)

@@ -35,7 +35,7 @@ func (u *User) ToClientJson() Msg.UserData {
 	_user_msg := Msg.UserData{
 		M_uid:            u.M_uid,
 		M_current_map_id: u.M_current_map,
-		M_pos:            u.M_client_pos,
+		M_pos:            u.M_pos,
 	}
 	return _user_msg
 }

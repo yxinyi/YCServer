@@ -57,21 +57,10 @@ func (i *Info) RPC_UserFinishSwitchMap(user_uid_ uint64) {
 }
 
 func (i *Info) MSG_C2S_FirstEnterMap(s_ uint64, msg_ Msg.C2S_FirstEnterMap) {
-
 	_user := i.M_user_pool[s_]
 	if _user != nil {
 		i.Info.RPCCall("MapManager", 0, "FirstEnterMap", *_user)
 	}
-
-	/*	func(tar_map_ uint64) {
-			_user := i.M_user_pool[s_]
-			if _user != nil {
-				_user.M_current_map = tar_map_
-				i.Info.RPCCall("Map", tar_map_, "UserEnterMap", *_user)
-			}
-
-		}
-	*/
 }
 
 func (i *Info) MSG_C2S_UserMove(s_ uint64, msg_ Msg.C2S_UserMove) {
@@ -83,15 +72,3 @@ func (i *Info) MSG_C2S_UserMove(s_ uint64, msg_ Msg.C2S_UserMove) {
 	i.Info.RPCCall("Map", _user.M_current_map, "UserMove", _user.M_uid, msg_)
 }
 
-/*YNet.Register(YMsg.MsgID_C2SUserMove, func (msg_ Msg.C2SUserMove, s_ YNet.Session) {
-	_user := user.G_user_manager.FindUser(s_.GetUID())
-	if _user == nil {
-		return
-	}
-	_user_map := mgr.FindMap(_user.M_current_map)
-	if _user_map == nil {
-		return
-	}
-	_user_map.UserMove(_user, msg_.M_pos)
-
-})*/

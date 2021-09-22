@@ -421,13 +421,17 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 	//能否直连判断
 	_start_block_pos := 0
 	_last_block_pos := 1
+	if len(before_path_) > 1{
+		_start_block_pos = 1
+		_last_block_pos = 2
+	}
 	_best_pos := _last_block_pos
-	/*for _start_block_pos < len(before_path_){
 	
-	}*/
+	
 	_final_path = append(_final_path, before_path_[_start_block_pos])
+	
 	for _last_block_pos < len(before_path_) {
-		ylog.Info("[start:%v:%v] [last:%v:%v]", _start_block_pos, before_path_[_start_block_pos].m_index, _last_block_pos, before_path_[_last_block_pos].m_index)
+		//ylog.Info("[start:%v:%v] [last:%v:%v]", _start_block_pos, before_path_[_start_block_pos].m_index, _last_block_pos, before_path_[_last_block_pos].m_index)
 		for ; _last_block_pos < len(before_path_); _last_block_pos++ {
 			_start_pos := before_path_[_start_block_pos]
 			_last_pos := before_path_[_last_block_pos]
@@ -441,33 +445,8 @@ func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
 		_last_block_pos = _start_block_pos + 1
 	}
 	
-	//_final_path = append(_final_path, before_path_[len(before_path_)-1])
 	return _final_path
 }
-
-/*func (a *AStar) forceConn(before_path_ []*blockPos) []*blockPos {
-	_final_path := make([]*blockPos, 0)
-	if len(before_path_) == 0 {
-		return _final_path
-	}
-	//能否直连判断
-	_last_block_pos := 2
-
-	for _idx := 1; _idx < len(before_path_);  {
-		if !a.checkLinePass(before_path_[_idx], before_path_[_last_block_pos]) {
-			_final_path = append(_final_path, before_path_[_idx-1])
-			_idx = _idx - 1
-
-			_last_block_pos = _idx
-		}else{
-			_idx++
-		}
-	}
-
-	_final_path = append(_final_path, before_path_[len(before_path_)-1])
-	return _final_path
-}*/
-
 func (a *AStar) pathToBetter(before_path_ []int) []int {
 	_after_path := make([]int, 0)
 	if before_path_ == nil || len(before_path_) == 0 {

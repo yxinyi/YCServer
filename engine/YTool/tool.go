@@ -58,3 +58,10 @@ func GetFuncInTypeList(func_ reflect.Value)[]reflect.Type{
 	}
 	return ret_list
 }
+
+func GetSetUint32Diff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
+	for _it := range rhs_ {
+		delete(lhs_, _it)
+	}
+	return lhs_
+}

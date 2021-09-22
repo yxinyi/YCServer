@@ -24,7 +24,7 @@ type BaseInter struct {
 }
 
 func (b *BaseInter) GetInfo() *Info          { return b.Info }
-func (b *BaseInter) Loop_1(time time.Time)  {}
+func (b *BaseInter) Loop_1(time time.Time)   {}
 func (b *BaseInter) Loop_10(time time.Time)  {}
 func (b *BaseInter) Loop_100(time time.Time) {}
 func (b *BaseInter) Init()                   {}
@@ -153,6 +153,9 @@ func (cmd *RPCCommand) ToRPCMsg() *YMsg.S2S_rpc_msg {
 
 func (list *RPCCommandList) AppendCmdObj(cmd *RPCCommand) *RPCCommandList {
 	cmd.M_uid = list.M_uid
+	if len(list.m_command_list) == 0 {
+		cmd.M_need_back = true
+	}
 	list.m_command_list = append(list.m_command_list, cmd)
 	return list
 }
@@ -180,7 +183,7 @@ func (list *RPCCommandList) popMsg() *YMsg.S2S_rpc_msg {
 	_cur_cmd := list.getCurCmd()
 	_rpc_msg := _cur_cmd.ToRPCMsg()
 	_rpc_msg.M_need_back = true
-	if uint32(len(list.m_command_list)-1) == list.M_cur_idx {
+	if list.isOver() {
 		if !_cur_cmd.M_back_func.IsValid() {
 			_rpc_msg.M_need_back = false
 		}

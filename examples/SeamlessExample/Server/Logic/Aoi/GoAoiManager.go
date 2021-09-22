@@ -2,7 +2,7 @@ package aoi
 
 import (
 	"github.com/yxinyi/YCServer/engine/YTool"
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
 )
 
 type GoAoiMoveCallBack func(notify_, action_ uint64)
@@ -17,8 +17,10 @@ const (
 
 type GoAoiObj struct {
 	M_uid uint64
-	Msg.PositionXY
+	M_current_index uint32
+	YTool.PositionXY
 	M_view_range float64
+	M_dirty bool
 }
 
 type GoAoiAction struct {
@@ -129,7 +131,7 @@ func (mgr *GoAoiManager) Move(move_ GoAoiObj, pos_ Msg.PositionXY) {
 		_enter_cell.EnterCell(move_)
 		
 	}
-	_enter_cell := getDiff(_new_round_arr, _old_round_arr)
+	_enter_cell := YTool.GetSetUint32Diff(_new_round_arr, _old_round_arr)
 	for _it := range _enter_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
@@ -137,7 +139,7 @@ func (mgr *GoAoiManager) Move(move_ GoAoiObj, pos_ Msg.PositionXY) {
 		}
 	}
 	
-	_update_cell := getDiff(_new_round_arr, _enter_cell)
+	_update_cell := YTool.GetSetUint32Diff(_new_round_arr, _enter_cell)
 	for _it := range _update_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
@@ -148,7 +150,7 @@ func (mgr *GoAoiManager) Move(move_ GoAoiObj, pos_ Msg.PositionXY) {
 		_quit_cell := mgr.m_aoi_list[mgr.M_current_index[move_.M_uid]]
 		_quit_cell.QuitCell(move_)
 	}
-	_quit_cell := getDiff(_old_round_arr, _new_round_arr)
+	_quit_cell := YTool.GetSetUint32Diff(_old_round_arr, _new_round_arr)
 	for _it := range _quit_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {

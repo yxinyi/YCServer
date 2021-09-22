@@ -20,7 +20,7 @@ import (
  │   │0 1 2 3 4 5 6 7│8 9│0 1│2 3 4 5 6 7 8 9│   │
  │   │               │   │   │               │   │
  │   │               │   │   │               │   │
- │   │      1        │ A │ B │      2        │   │
+ │   │      1        │ 2 │ 1 │      2        │   │
  │   │               │   │   │               │   │
  │   │               │   │   │               │   │
  │   │               │   │   │               │   │
@@ -30,16 +30,12 @@ import (
 */
 
 const (
-	VAILD_MAP_WIDTH  float64 = 800
-	VAILD_MAP_HEIGHT float64 = 800
-	OVERLAP_SIZE     float64 = 10
+	VAILD_MAP_WIDTH  float64 = 500
+	VAILD_MAP_HEIGHT float64 = 500
+	OVERLAP_SIZE     float64 = 50
 	MAZE_GRID_SIZE   float64 = 10
 )
 
-/*
-MapPos是按 OriginPos算的
-CliPos是按 VaildPos算的
-*/
 
 func init() {
 	YNode.RegisterToFactory("NewMap", NewInfo)
@@ -58,7 +54,7 @@ func (m *Info) InitMazeMap() {
 		_tmp_col := make([]float64, int(m.m_total_row_grid))
 		_maze[_col_idx] = _tmp_col
 	}
-
+	
 	for _col_idx := int(m.m_overlap_count); _col_idx < int(m.m_vaild_col_grid+m.m_overlap_count); _col_idx++ {
 		for _row_idx := int(m.m_overlap_count); _row_idx < int(m.m_vaild_row_grid+m.m_overlap_count); _row_idx++ {
 			if rand.Int31n(100)%100 > 90 {
@@ -72,36 +68,25 @@ func (m *Info) InitMazeMap() {
 	m.m_go_astar.Init(_maze)
 }
 
-func (m *Info) ClientPosConvertMapPos(pos_ YTool.PositionXY) YTool.PositionXY {
-	pos_.M_x += m.m_overlap_length
-	pos_.M_y += m.m_overlap_length
-	return pos_
-}
-func (m *Info) MapPosConvertClientPos(pos_ YTool.PositionXY) YTool.PositionXY {
-	pos_.M_x -= m.m_overlap_length
-	pos_.M_y -= m.m_overlap_length
-	return pos_
-}
-
 func (m *Info) MapPosConvertMapIdx(pos_ YTool.PositionXY) int {
 	_diff_y := (pos_.M_y - m.m_origin_up_left_pos.M_y)
 	_diff_col := int(_diff_y / m.m_gird_size)
 	_col_start := _diff_col * int(m.m_total_row_grid)
 	_diff_x := (pos_.M_x - m.m_origin_up_left_pos.M_x)
 	_diff_row := int(_diff_x / m.m_gird_size)
-
+	
 	return int(_col_start + _diff_row)
 }
 
 func (m *Info) MapIdxConvertMapPos(idx_ int) YTool.PositionXY {
 	_pos := YTool.PositionXY{}
-
+	
 	_cur_row := idx_ % int(m.m_total_col_grid)
 	_cur_col := idx_ / int(m.m_total_col_grid)
-
+	
 	_pos.M_x = float64(_cur_row)*m.m_gird_size + m.m_origin_up_left_pos.M_x
 	_pos.M_y = float64(_cur_col)*m.m_gird_size + m.m_origin_up_left_pos.M_y
-
+	
 	return _pos
 }
 
@@ -110,7 +95,7 @@ func (m *Info) randPos(u_ *User) {
 	/*
 		tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
 		tmpPos.M_y = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
-
+	
 		for {
 			if !m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(tmpPos)) {
 				break
@@ -118,8 +103,7 @@ func (m *Info) randPos(u_ *User) {
 			tmpPos.M_x = float64(rand.Int31n(int32(m.m_total_width))) + m.m_origin_up_left_pos.M_x
 			tmpPos.M_y = float64(rand.Int31n(int32(m.m_total_height))) + m.m_origin_up_left_pos.M_y
 		}*/
-	u_.M_server_pos = tmpPos
-	u_.M_client_pos = m.MapPosConvertClientPos(u_.M_server_pos)
+	u_.M_pos = tmpPos
 	u_.M_tar = tmpPos
 }
 func (m *Info) ObjCount() uint32 {
@@ -175,7 +159,7 @@ func (m *Info) InitBoundPos() {
 			M_y: m.m_origin_up_left_pos.M_y + m.m_total_height,
 		}
 	}
-
+	
 }
 
 func newMazeMap(uid_ uint64) *Info {
@@ -187,28 +171,28 @@ func newMazeMap(uid_ uint64) *Info {
 		m_gird_size:     MAZE_GRID_SIZE,
 		m_overlap_count: OVERLAP_SIZE,
 	}
-
+	
 	_maze_map.m_overlap_length = OVERLAP_SIZE * _maze_map.m_gird_size
 	_maze_map.m_vaild_row_grid = VAILD_MAP_WIDTH / _maze_map.m_gird_size
 	_maze_map.m_vaild_col_grid = VAILD_MAP_HEIGHT / _maze_map.m_gird_size
 	_maze_map.m_total_row_grid = _maze_map.m_vaild_row_grid + _maze_map.m_overlap_count*2
 	_maze_map.m_total_col_grid = _maze_map.m_vaild_col_grid + _maze_map.m_overlap_count*2
-
+	
 	_maze_map.m_vaild_width = _maze_map.m_vaild_row_grid * _maze_map.m_gird_size
 	_maze_map.m_vaild_height = _maze_map.m_vaild_col_grid * _maze_map.m_gird_size
 	_maze_map.m_total_width = _maze_map.m_total_row_grid * _maze_map.m_gird_size
 	_maze_map.m_total_height = _maze_map.m_total_col_grid * _maze_map.m_gird_size
-
+	
 	_maze_map.InitOffset()
 	_maze_map.InitBoundPos()
 	_maze_map.InitMazeMap()
-
+	
 	return _maze_map
 }
 
 func (m *Info) Init() {
 	m.Info.Init(m)
-
+	
 	//负载均衡同步
 	m.NotifyMapLoad()
 }
@@ -219,42 +203,42 @@ func (m *Info) isGhostUser(user_uid_ uint64) bool {
 
 func (m *Info) InOverlapRange(user *User) []bool {
 	_side_arr := make([]bool, 4)
-
-	if user.M_client_pos.M_y > m.m_origin_up_left_pos.M_y && user.M_client_pos.M_y < m.m_vaild_up_left_pos.M_y {
+	
+	if user.M_pos.M_y > m.m_origin_up_left_pos.M_y && user.M_pos.M_y < m.m_vaild_up_left_pos.M_y {
 		_side_arr[0] = true
 	}
-	if user.M_client_pos.M_y > m.m_vaild_down_left_pos.M_y && user.M_client_pos.M_y < m.m_origin_down_left_pos.M_y {
+	if user.M_pos.M_y > m.m_vaild_down_left_pos.M_y && user.M_pos.M_y < m.m_origin_down_left_pos.M_y {
 		_side_arr[1] = true
 	}
-	if user.M_client_pos.M_x > m.m_origin_up_left_pos.M_x && user.M_client_pos.M_x < m.m_vaild_up_left_pos.M_x {
+	if user.M_pos.M_x > m.m_origin_up_left_pos.M_x && user.M_pos.M_x < m.m_vaild_up_left_pos.M_x {
 		_side_arr[2] = true
 	}
-	if user.M_client_pos.M_x > m.m_vaild_up_right_pos.M_x && user.M_client_pos.M_x < m.m_origin_up_right_pos.M_x {
+	if user.M_pos.M_x > m.m_vaild_up_right_pos.M_x && user.M_pos.M_x < m.m_origin_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
-
+	
 	return _side_arr
 }
 
 func (m *Info) InCloseSide(user *User) []bool {
 	_side_arr := make([]bool, 4)
-
-	if user.M_client_pos.M_y > m.m_vaild_up_left_pos.M_y && user.M_client_pos.M_y < m.m_vaild_up_left_pos.M_y+m.m_overlap_length {
+	
+	if user.M_pos.M_y > m.m_vaild_up_left_pos.M_y && user.M_pos.M_y < m.m_vaild_up_left_pos.M_y+m.m_overlap_length {
 		_side_arr[0] = true
 	}
-
-	if user.M_client_pos.M_y > m.m_vaild_down_left_pos.M_y-m.m_overlap_length && user.M_client_pos.M_y < m.m_vaild_down_left_pos.M_y {
+	
+	if user.M_pos.M_y > m.m_vaild_down_left_pos.M_y-m.m_overlap_length && user.M_pos.M_y < m.m_vaild_down_left_pos.M_y {
 		_side_arr[1] = true
 	}
-
-	if user.M_client_pos.M_x > m.m_vaild_up_left_pos.M_x && user.M_client_pos.M_x < m.m_vaild_up_left_pos.M_x+m.m_overlap_length {
+	
+	if user.M_pos.M_x > m.m_vaild_up_left_pos.M_x && user.M_pos.M_x < m.m_vaild_up_left_pos.M_x+m.m_overlap_length {
 		_side_arr[2] = true
 	}
-
-	if user.M_client_pos.M_x > m.m_vaild_up_right_pos.M_x-m.m_overlap_length && user.M_client_pos.M_x < m.m_vaild_up_right_pos.M_x {
+	
+	if user.M_pos.M_x > m.m_vaild_up_right_pos.M_x-m.m_overlap_length && user.M_pos.M_x < m.m_vaild_up_right_pos.M_x {
 		_side_arr[3] = true
 	}
-
+	
 	return _side_arr
 }
 
@@ -264,17 +248,10 @@ func (m *Info) UserSwitchMap(user_ *User, tar_map_ uint64) {
 	}
 	user_.M_map_swtich_state = UserManager.CONST_MAP_SWITCHING
 	user_.M_current_map = tar_map_
-	m.Info.RPCCall("UserManager", 0, "UserStartSwitchMap", user_.M_uid, func() {
-		user_.M_current_map = tar_map_
-		m.Info.RPCCall("Map", tar_map_, "SyncGhostUser", *user_)
-	}).AfterRPC("Map", tar_map_, "UserSwitchMap", user_.M_uid)
+	m.Info.RPCCall("UserManager", 0, "UserStartSwitchMap", user_.M_uid,
+	).AfterRPC("Map", tar_map_, "UserConvertToThisMap", user_.M_uid)
 }
 
-func (m *Info) MoveUpdate(user_ *User, time_ time.Time) bool {
-	_ret := user_.MoveUpdate(time_)
-	user_.M_client_pos = m.MapPosConvertClientPos(user_.M_server_pos)
-	return _ret
-}
 
 func (m *Info) Loop_100(time_ time.Time) {
 	for _, _it := range m.M_user_pool {
@@ -284,12 +261,7 @@ func (m *Info) Loop_100(time_ time.Time) {
 		if _it.M_map_swtich_state == UserManager.CONST_MAP_SWITCHING {
 			continue
 		}
-		//ylog.Info("user[%v]pos[%v]", _it.M_uid, _it.M_pos.DebugString())
-		if m.MoveUpdate(_it, time_) {
-			//ylog.Info("在地图[%v]主地图[%v]坐标[%v]",m.m_map_uid,_it.M_current_map,_it.M_pos.DebugString())
-			//如果靠近则直接通知
-			//ylog.Info("user[%v]pos[%v]left up pos[%v] over lap range [%v]",_it.M_uid,_it.M_pos.DebugString(),m.m_up_left_pos.DebugString(),m.m_up_left_pos.M_x+m.m_gird_size*float64(m.m_overlap))
-			//ylog.Info("user[%v]pos[%v]", _it.M_uid, _it.M_pos.DebugString())
+		if _it.MoveUpdate(time_) {
 			_switch_tar_map_offset := m.InOverlapRange(_it)
 			if _switch_tar_map_offset[0] || _switch_tar_map_offset[1] || _switch_tar_map_offset[2] || _switch_tar_map_offset[3] {
 				_tar_map_uid := uint64(m.m_map_uid)
@@ -297,7 +269,7 @@ func (m *Info) Loop_100(time_ time.Time) {
 					_tar_map_uid = m.m_map_uid - (1 << 32)
 					if _switch_tar_map_offset[2] {
 						_tar_map_uid--
-
+						
 					} else if _switch_tar_map_offset[3] {
 						_tar_map_uid++
 					}
@@ -305,17 +277,17 @@ func (m *Info) Loop_100(time_ time.Time) {
 					_tar_map_uid = m.m_map_uid + (1 << 32)
 					if _switch_tar_map_offset[2] {
 						_tar_map_uid--
-
+						
 					} else if _switch_tar_map_offset[3] {
 						_tar_map_uid++
 					}
 				} else if _switch_tar_map_offset[2] {
 					_tar_map_uid--
-
+					
 				} else if _switch_tar_map_offset[3] {
 					_tar_map_uid++
 				}
-				ylog.Info("地图[%v] pos[%v]side[%v]start switch", _it.M_current_map, _it.M_client_pos.DebugString(), _switch_tar_map_offset)
+				ylog.Info("地图[%v] pos[%v]side[%v]start switch", _it.M_current_map, _it.M_pos.DebugString(), _switch_tar_map_offset)
 				m.UserSwitchMap(_it, _tar_map_uid)
 				continue
 			}
@@ -324,7 +296,7 @@ func (m *Info) Loop_100(time_ time.Time) {
 				_, exists := m.m_neighbor_uid[_neighbor_it]
 				if exists {
 					m.Info.RPCCall("Map", _neighbor_it, "SyncGhostUser", *_it)
-
+					
 				} else {
 					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
 				}
@@ -338,7 +310,7 @@ func (m *Info) Loop_100(time_ time.Time) {
 			}
 		}
 	}
-
+	
 	m.m_go_astar.Update()
 }
 
@@ -389,19 +361,19 @@ func (m *Info) MapSyncOverlapColRowRange(offset_map_uid_ uint64) (int, int, int,
 	case Util.CONST_MAP_OFFSET_RIGHT_UP:
 		_col_start_index = m.m_overlap_count
 		_col_end_index = _col_start_index + m.m_overlap_count
-
+		
 		_row_start_index = m.m_total_row_grid - m.m_overlap_count*2
 		_row_end_index = m.m_total_row_grid - m.m_overlap_count
 	case Util.CONST_MAP_OFFSET_LEFT_DOWN:
 		_col_start_index = m.m_total_col_grid - m.m_overlap_count*2
 		_col_end_index = m.m_total_col_grid - m.m_overlap_count
-
+		
 		_row_start_index = m.m_overlap_count
 		_row_end_index = _row_start_index + m.m_overlap_count
 	default:
 		panic("bug")
 	}
-
+	
 	return int(_col_start_index), int(_col_end_index), int(_row_start_index), int(_row_end_index)
 }
 
@@ -455,6 +427,6 @@ func (m *Info) MapSetOverlapColRowRange(offset_map_uid_ uint64) (int, int, int, 
 	default:
 		panic("bug")
 	}
-
+	
 	return int(_col_start_index), int(_col_end_index), int(_row_start_index), int(_row_end_index)
 }

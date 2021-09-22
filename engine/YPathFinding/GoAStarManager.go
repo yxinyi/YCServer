@@ -27,11 +27,11 @@ type aStarCallback func([]int)
 
 type AStarManager struct {
 	M_map_uid uint64
-	m_maze  [][]float64
-	m_queue *YTool.SyncQueue
-
+	m_maze    [][]float64
+	m_queue   *YTool.SyncQueue
+	
 	m_cache_path map[uint64][]int
-
+	
 	m_call_back_idx uint32
 	m_call_back     map[uint32]aStarCallback
 }
@@ -53,19 +53,25 @@ func (mgr *AStarManager) Init(maze_ [][]float64) {
 }
 
 func (mgr *AStarManager) IsBlock(index_ int) bool {
-	_row := index_ / len(mgr.m_maze[0])
-	_col := index_ % len(mgr.m_maze[0])
-	return mgr.m_maze[_row][_col] != 0
+	_col := index_ / len(mgr.m_maze[0])
+	_row := index_ % len(mgr.m_maze[0])
+	if _col < 0 || _col > len(mgr.m_maze)-1 {
+		return false
+	}
+	if _row < 0 || _row > len(mgr.m_maze[0])-1 {
+		return false
+	}
+	return mgr.m_maze[_col][_row] != 0
 }
 
 func (mgr *AStarManager) Search(st_, ed_ int, cb_ aStarCallback) {
 	ylog.Info("[%v:%v]", st_, ed_)
-/*	_cache_path, exists := mgr.m_cache_path[uint64(st_)<<32|uint64(ed_)]
-	if exists {
-		cb_(_cache_path)
-		return append(_final_path, before_path_[_loop_idx])
-	}*/
-
+	/*	_cache_path, exists := mgr.m_cache_path[uint64(st_)<<32|uint64(ed_)]
+		if exists {
+			cb_(_cache_path)
+			return append(_final_path, before_path_[_loop_idx])
+		}*/
+	
 	_tmp_idx := mgr.m_call_back_idx
 	mgr.m_call_back_idx++
 	mgr.m_call_back[_tmp_idx] = cb_
@@ -86,12 +92,12 @@ func (mgr *AStarManager) Update() {
 		}
 		_msg := mgr.m_queue.Pop().(*aStarCallbackMsg)
 		mgr.m_call_back[_msg.m_uid](_msg.m_search_path)
-/*		ylog.Info("###### [%v:%v]", _msg.m_st, _msg.m_ed)
-		mgr.m_cache_path[uint64(_msg.m_st)<<32|uint64(_msg.m_ed)] = _msg.m_search_path
-		for _idx, _path_node_it := range _msg.m_search_path {
-			mgr.m_cache_path[uint64(_path_node_it)<<32|uint64(_msg.m_ed)] = _msg.m_search_path[_idx:]
-		}
-*/
+		/*		ylog.Info("###### [%v:%v]", _msg.m_st, _msg.m_ed)
+				mgr.m_cache_path[uint64(_msg.m_st)<<32|uint64(_msg.m_ed)] = _msg.m_search_path
+				for _idx, _path_node_it := range _msg.m_search_path {
+					mgr.m_cache_path[uint64(_path_node_it)<<32|uint64(_msg.m_ed)] = _msg.m_search_path[_idx:]
+				}
+		*/
 		delete(mgr.m_call_back, _msg.m_uid)
 	}
 }

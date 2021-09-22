@@ -1,7 +1,7 @@
 package aoi
 
 import (
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/engine/YTool"
 )
 
 type AoiMoveCallBack func(move_, tar_ uint64)
@@ -45,7 +45,7 @@ func (mgr *AoiManager) Init(add_watch_call_ AoiAddWatch, move_call_ AoiMoveCallB
 	}
 }
 
-func getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
+/*func getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
 	_ret := make(map[uint32]struct{})
 	for _it := range lhs_ {
 		_ret[_it] = struct{}{}
@@ -55,9 +55,9 @@ func getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]stru
 	}
 	
 	return _ret
-}
+}*/
 
-func (mgr *AoiManager) Enter(enter_ uint64, pos_ Msg.PositionXY) {
+func (mgr *AoiManager) Enter(enter_ uint64, pos_ YTool.PositionXY) {
 	_current_index := mgr.CalcIndex(pos_)
 	_cell := mgr.m_aoi_list[_current_index]
 	_cell.enterCell(enter_)
@@ -71,7 +71,7 @@ func (mgr *AoiManager) Enter(enter_ uint64, pos_ Msg.PositionXY) {
 	mgr.M_current_index[enter_] = _current_index
 }
 
-func (mgr *AoiManager) Quit(quit_ uint64, pos_ Msg.PositionXY) {
+func (mgr *AoiManager) Quit(quit_ uint64, pos_ YTool.PositionXY) {
 	_current_index := mgr.CalcIndex(pos_)
 	_cell := mgr.m_aoi_list[_current_index]
 	_cell.quitCell(quit_)
@@ -85,7 +85,7 @@ func (mgr *AoiManager) Quit(quit_ uint64, pos_ Msg.PositionXY) {
 	delete(mgr.M_current_index, quit_)
 }
 
-func (mgr *AoiManager) Move(move_ uint64, pos_ Msg.PositionXY) {
+func (mgr *AoiManager) Move(move_ uint64, pos_ YTool.PositionXY) {
 	
 	_old_round_arr := mgr.getOldRoundBlock(move_)
 	
@@ -97,7 +97,7 @@ func (mgr *AoiManager) Move(move_ uint64, pos_ Msg.PositionXY) {
 		_enter_cell.enterCell(move_)
 		
 	}
-	_enter_cell := getDiff(_new_round_arr, _old_round_arr)
+	_enter_cell := YTool.GetSetUint32Diff(_new_round_arr, _old_round_arr)
 	for _it := range _enter_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
@@ -105,7 +105,7 @@ func (mgr *AoiManager) Move(move_ uint64, pos_ Msg.PositionXY) {
 		}
 	}
 	
-	_update_cell := getDiff(_new_round_arr, _enter_cell)
+	_update_cell := YTool.GetSetUint32Diff(_new_round_arr, _enter_cell)
 	for _it := range _update_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
@@ -116,7 +116,7 @@ func (mgr *AoiManager) Move(move_ uint64, pos_ Msg.PositionXY) {
 		_quit_cell := mgr.m_aoi_list[mgr.M_current_index[move_]]
 		_quit_cell.quitCell(move_)
 	}
-	_quit_cell := getDiff(_old_round_arr, _new_round_arr)
+	_quit_cell := YTool.GetSetUint32Diff(_old_round_arr, _new_round_arr)
 	for _it := range _quit_cell {
 		_cell, exists := mgr.m_aoi_list[_it]
 		if exists {
@@ -127,7 +127,7 @@ func (mgr *AoiManager) Move(move_ uint64, pos_ Msg.PositionXY) {
 	
 }
 
-func (mgr *AoiManager) CalcIndex(xy_ Msg.PositionXY) uint32 {
+func (mgr *AoiManager) CalcIndex(xy_ YTool.PositionXY) uint32 {
 	return mgr.buildIndex(uint32(xy_.M_x/mgr.m_block_width), uint32(xy_.M_y/mgr.m_block_height))
 }
 

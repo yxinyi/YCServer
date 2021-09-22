@@ -2,58 +2,62 @@ package aoi
 
 import (
 	"github.com/yxinyi/YCServer/engine/YTool"
+	"time"
 )
 
-type GoNGAoiMoveCallBack func(notify_ uint64, action_ map[uint64]struct{})
-type GoNGAoiEnterCallBack func(notify_ uint64, action_ map[uint64]struct{})
-type GoNGAoiQuitCallBack func(notify_ uint64, action_ map[uint64]struct{})
+type GoTowerAoiMoveCallBack func(notify_ uint64, action_ map[uint64]struct{})
+type GoTowerAoiEnterCallBack func(notify_ uint64, action_ map[uint64]struct{})
+type GoTowerAoiQuitCallBack func(notify_ uint64, action_ map[uint64]struct{})
 
-type GoNGAoiAction struct {
+type GoTowerAoiOutAction struct {
 	m_action     uint32
 	m_notify_obj uint64
 	m_action_obj map[uint64]struct{}
 }
 
-type GoNGInAoiAction struct {
+type GoTowerAoiInAction struct {
 	m_action uint32
 	m_obj    GoAoiObj
 }
-type GoNineGirdAoiManager struct {
+
+type GoTowerAoiCellManager struct {
 	M_height         float64
 	M_width          float64
-	m_aoi_list       map[uint32]*GoNineGirdAoiCell
-	M_current_index  map[uint64]uint32
+	m_aoi_list       map[uint32]*GoTowerAoiCell
+	m_obj_copy       map[uint64]*GoAoiObj
 	m_block_height   float64
 	m_block_width    float64
 	m_block_size     float64
-	m_obj_copy       map[uint64]*GoAoiObj
-	M_quit_callback  GoNGAoiQuitCallBack
-	M_move_callback  GoNGAoiMoveCallBack
-	M_enter_callback GoNGAoiEnterCallBack
-	M_action_out_    *YTool.SyncQueue
-	m_action_in      chan GoNGInAoiAction
+	M_quit_callback  GoTowerAoiQuitCallBack
+	M_move_callback  GoTowerAoiMoveCallBack
+	M_enter_callback GoTowerAoiEnterCallBack
+	M_action_out     *YTool.SyncQueue //GoTowerAoiOutAction
+	m_action_in      *YTool.SyncQueue //GoTowerAoiInAction
+	M_stop           chan struct{}
 }
 
-func NewGoNineGirdAoiCellManager(width_, height_, block_size_ float64) *GoNineGirdAoiManager {
-	_mgr := &GoNineGirdAoiManager{
-		m_aoi_list:      make(map[uint32]*GoNineGirdAoiCell),
-		M_current_index: make(map[uint64]uint32),
-		M_action_out_:   YTool.NewSyncQueue(),
-		m_action_in:     make(chan GoNGInAoiAction, 100),
-		m_obj_copy:      make(map[uint64]*GoAoiObj),
+func NewGoTowerAoiCellManager(width_, height_, block_size_ float64) *GoTowerAoiCellManager {
+	_mgr := &GoTowerAoiCellManager{
+		m_aoi_list:   make(map[uint32]*GoTowerAoiCell),
+		M_action_out: YTool.NewSyncQueue(),
+		m_action_in:  YTool.NewSyncQueue(),
+		m_obj_copy:   make(map[uint64]*GoAoiObj),
+		M_stop:       make(chan struct{}),
 	}
+	
 	_mgr.M_height = height_
 	_mgr.M_width = width_
-	_mgr.m_block_height = height_ / block_size_
-	_mgr.m_block_width = width_ / block_size_
 	_mgr.m_block_size = block_size_
 	return _mgr
 }
 
-func (mgr *GoNineGirdAoiManager) Init(move_call_ GoNGAoiMoveCallBack, enter_call_ GoNGAoiEnterCallBack, quit_call_ GoNGAoiQuitCallBack) {
+func (mgr *GoTowerAoiCellManager) Init(move_call_ GoTowerAoiMoveCallBack, enter_call_ GoTowerAoiEnterCallBack, quit_call_ GoTowerAoiQuitCallBack) {
+	mgr.m_block_height = mgr.M_height / mgr.m_block_size
+	mgr.m_block_width = mgr.M_width / mgr.m_block_size
+	
 	for _row_idx := uint32(0); _row_idx < uint32(mgr.m_block_size); _row_idx++ {
 		for _col_idx := uint32(0); _col_idx < uint32(mgr.m_block_size); _col_idx++ {
-			_cell := NewGoNineGirdAoiCell()
+			_cell := NewGoTowerAoiCell()
 			mgr.m_aoi_list[mgr.buildIndex(_row_idx, _col_idx)] = _cell
 		}
 	}
@@ -61,23 +65,32 @@ func (mgr *GoNineGirdAoiManager) Init(move_call_ GoNGAoiMoveCallBack, enter_call
 	mgr.M_enter_callback = enter_call_
 	mgr.M_quit_callback = quit_call_
 	go func() {
+		_ticker := time.NewTicker(time.Millisecond * 100)
 		for {
 			select {
-			case _action_obj := <-mgr.m_action_in:
-				switch _action_obj.m_action {
-				case GO_AOI_ACTION_ENTER:
-					mgr.enter(_action_obj.m_obj)
-				case GO_AOI_ACTION_UPDATE:
-					mgr.move(_action_obj.m_obj)
-				case GO_AOI_ACTION_QUIT:
-					mgr.quit(_action_obj.m_obj)
+			case <-_ticker.C:
+				for {
+					if mgr.m_action_in.Len() == 0 {
+						break
+					}
+					_obj_action := mgr.m_action_in.Pop().(*GoTowerAoiInAction)
+					switch _obj_action.m_action {
+					case GO_AOI_ACTION_ENTER:
+						mgr.enter(_obj_action.m_obj)
+					case GO_AOI_ACTION_UPDATE:
+						mgr.move(_obj_action.m_obj)
+					case GO_AOI_ACTION_QUIT:
+						mgr.quit(_obj_action.m_obj)
+					}
 				}
+			case <-mgr.M_stop:
+				return
 			}
 		}
 	}()
 }
 
-func (mgr *GoNineGirdAoiManager) getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
+func (mgr *GoTowerAoiCellManager) getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
 	_ret := make(map[uint32]struct{})
 	for _it := range lhs_ {
 		_ret[_it] = struct{}{}
@@ -89,15 +102,11 @@ func (mgr *GoNineGirdAoiManager) getDiff(lhs_ map[uint32]struct{}, rhs_ map[uint
 	return _ret
 }
 
-func (mgr *GoNineGirdAoiManager) FindObj(uid_ uint64) *GoAoiObj {
+func (mgr *GoTowerAoiCellManager) FindObj(uid_ uint64) *GoAoiObj {
 	return mgr.m_obj_copy[uid_]
 }
 
-func (obj *GoAoiObj) InViewRange(rhs_ *GoAoiObj) bool {
-	return obj.PositionXY.Distance(rhs_.PositionXY) < obj.M_view_range
-}
-
-func (mgr *GoNineGirdAoiManager) getObjNotInViewRangeMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
+func (mgr *GoTowerAoiCellManager) getObjNotInViewRangeMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
 	_enter_sync_list := make(map[uint64]map[uint64]struct{})
 	_cell := mgr.m_aoi_list[cell_index_]
 	if _cell == nil {
@@ -127,7 +136,7 @@ func (mgr *GoNineGirdAoiManager) getObjNotInViewRangeMap(obj_ *GoAoiObj, cell_in
 	return _enter_sync_list
 }
 
-func (mgr *GoNineGirdAoiManager) getObjMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
+func (mgr *GoTowerAoiCellManager) getObjMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
 	_enter_sync_list := make(map[uint64]map[uint64]struct{})
 	_cell := mgr.m_aoi_list[cell_index_]
 	if _cell == nil {
@@ -157,14 +166,14 @@ func (mgr *GoNineGirdAoiManager) getObjMap(obj_ *GoAoiObj, cell_index_ uint32) m
 	return _enter_sync_list
 }
 
-func (mgr *GoNineGirdAoiManager) getObjInViewRangeMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
+func (mgr *GoTowerAoiCellManager) getObjInViewRangeMap(obj_ *GoAoiObj, cell_index_ uint32) map[uint64]map[uint64]struct{} {
 	_enter_sync_list := make(map[uint64]map[uint64]struct{})
 	_cell := mgr.m_aoi_list[cell_index_]
 	if _cell == nil {
 		return _enter_sync_list
 	}
 	for _it := range _cell.GetWatch() {
-
+		
 		_tmp_obj := mgr.FindObj(_it)
 		if _tmp_obj != nil {
 			if obj_.InViewRange(_tmp_obj) {
@@ -188,12 +197,12 @@ func (mgr *GoNineGirdAoiManager) getObjInViewRangeMap(obj_ *GoAoiObj, cell_index
 	return _enter_sync_list
 }
 
-func (mgr *GoNineGirdAoiManager) Update() {
+func (mgr *GoTowerAoiCellManager) Update() {
 	for {
-		if mgr.M_action_out_.Len() == 0 {
+		if mgr.M_action_out.Len() == 0 {
 			break
 		}
-		_act := mgr.M_action_out_.Pop().(GoNGAoiAction)
+		_act := mgr.M_action_out.Pop().(GoNGAoiAction)
 		switch _act.m_action {
 		case GO_AOI_ACTION_ENTER:
 			mgr.M_enter_callback(_act.m_notify_obj, _act.m_action_obj)
@@ -205,9 +214,9 @@ func (mgr *GoNineGirdAoiManager) Update() {
 	}
 	
 }
-func (mgr *GoNineGirdAoiManager) sendOutUpdateAction(map_ map[uint64]map[uint64]struct{}) {
+func (mgr *GoTowerAoiCellManager) sendOutUpdateAction(map_ map[uint64]map[uint64]struct{}) {
 	for _key, _set_it := range map_ {
-		mgr.M_action_out_.Add(GoNGAoiAction{
+		mgr.M_action_out.Add(&GoTowerAoiOutAction{
 			GO_AOI_ACTION_UPDATE,
 			_key,
 			_set_it,
@@ -215,7 +224,7 @@ func (mgr *GoNineGirdAoiManager) sendOutUpdateAction(map_ map[uint64]map[uint64]
 	}
 }
 
-func (mgr *GoNineGirdAoiManager) updateCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
+func (mgr *GoTowerAoiCellManager) updateCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
 	{
 		_enter_map_sync := make(map[uint64]map[uint64]struct{})
 		for _it := range cell_set_ {
@@ -233,16 +242,16 @@ func (mgr *GoNineGirdAoiManager) updateCell(enter_ *GoAoiObj, cell_set_ map[uint
 	
 }
 
-func (mgr *GoNineGirdAoiManager) sendOutEnterAction(map_ map[uint64]map[uint64]struct{}) {
+func (mgr *GoTowerAoiCellManager) sendOutEnterAction(map_ map[uint64]map[uint64]struct{}) {
 	for _key, _set_it := range map_ {
-		mgr.M_action_out_.Add(GoNGAoiAction{
+		mgr.M_action_out.Add(&GoTowerAoiOutAction{
 			GO_AOI_ACTION_ENTER,
 			_key,
 			_set_it,
 		})
 	}
 }
-func (mgr *GoNineGirdAoiManager) enterCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
+func (mgr *GoTowerAoiCellManager) enterCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
 	_enter_map_sync := make(map[uint64]map[uint64]struct{})
 	for _it := range cell_set_ {
 		_enter_map_sync = YTool.Uint64MapUint64SetMerge(_enter_map_sync, mgr.getObjInViewRangeMap(enter_, _it))
@@ -250,30 +259,18 @@ func (mgr *GoNineGirdAoiManager) enterCell(enter_ *GoAoiObj, cell_set_ map[uint3
 	mgr.sendOutEnterAction(_enter_map_sync)
 }
 
-func (mgr *GoNineGirdAoiManager) Enter(enter_ GoAoiObj) {
-	mgr.m_action_in <- GoNGInAoiAction{
-		GO_AOI_ACTION_ENTER,
-		enter_,
-	}
-}
-func (mgr *GoNineGirdAoiManager) enter(enter_ GoAoiObj, ) {
-	_current_index := mgr.CalcIndex(enter_.PositionXY)
-	_round_arr := mgr.getRoundBlock(_current_index)
-	mgr.enterCell(&enter_, _round_arr)
-	mgr.m_aoi_list[_current_index].Watch(enter_.M_uid)
-	mgr.m_obj_copy[enter_.M_uid] = &enter_
-	mgr.M_current_index[enter_.M_uid] = _current_index
-}
-func (mgr *GoNineGirdAoiManager) sendOutQuitAction(map_ map[uint64]map[uint64]struct{}) {
+
+
+func (mgr *GoTowerAoiCellManager) sendOutQuitAction(map_ map[uint64]map[uint64]struct{}) {
 	for _key, _set_it := range map_ {
-		mgr.M_action_out_.Add(GoNGAoiAction{
+		mgr.M_action_out.Add(&GoTowerAoiOutAction{
 			GO_AOI_ACTION_QUIT,
 			_key,
 			_set_it,
 		})
 	}
 }
-func (mgr *GoNineGirdAoiManager) quitCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
+func (mgr *GoTowerAoiCellManager) quitCell(enter_ *GoAoiObj, cell_set_ map[uint32]struct{}) {
 	_quit_map_sync := make(map[uint64]map[uint64]struct{})
 	for _it := range cell_set_ {
 		_quit_map_sync = YTool.Uint64MapUint64SetMerge(_quit_map_sync, mgr.getObjMap(enter_, _it))
@@ -281,71 +278,23 @@ func (mgr *GoNineGirdAoiManager) quitCell(enter_ *GoAoiObj, cell_set_ map[uint32
 	mgr.sendOutQuitAction(_quit_map_sync)
 }
 
-func (mgr *GoNineGirdAoiManager) Quit(quit_ GoAoiObj) {
-	mgr.m_action_in <- GoNGInAoiAction{
-		GO_AOI_ACTION_QUIT,
-		quit_,
-	}
-}
-func (mgr *GoNineGirdAoiManager) quit(quit_ GoAoiObj) {
-	_current_index := mgr.CalcIndex(quit_.PositionXY)
-	
-	_round_arr := mgr.getRoundBlock(_current_index)
-	mgr.quitCell(&quit_, _round_arr)
-	delete(mgr.M_current_index, quit_.M_uid)
-	mgr.m_aoi_list[_current_index].Forget(quit_.M_uid)
-	delete(mgr.m_obj_copy, quit_.M_uid)
-}
 
-func (mgr *GoNineGirdAoiManager) ActionUpdate(move_ GoAoiObj) {
-	mgr.m_action_in <- GoNGInAoiAction{
-		GO_AOI_ACTION_UPDATE,
-		move_,
-	}
-}
 
-func (mgr *GoNineGirdAoiManager) move(move_ GoAoiObj) {
-	mgr.m_obj_copy[move_.M_uid] = &move_
-	_old_round_arr := mgr.getOldRoundBlock(move_.M_uid)
-	
-	_current_index := mgr.CalcIndex(move_.PositionXY)
-	_new_round_arr := mgr.getRoundBlock(_current_index)
-	
-	_enter_cell := YTool.GetSetUint32Diff(_new_round_arr, _old_round_arr)
-	mgr.enterCell(&move_, _enter_cell)
-	
-	if _current_index != mgr.M_current_index[move_.M_uid] {
-		mgr.m_aoi_list[_current_index].Watch(move_.M_uid)
-	}
-	
-	_update_cell := YTool.GetSetUint32Diff(_new_round_arr, _enter_cell)
-	mgr.updateCell(&move_, _update_cell)
-	
-	if _current_index != mgr.M_current_index[move_.M_uid] {
-		mgr.m_aoi_list[mgr.M_current_index[move_.M_uid]].Forget(move_.M_uid)
-	}
-	
-	_quit_cell := YTool.GetSetUint32Diff(_old_round_arr, _new_round_arr)
-	mgr.quitCell(&move_, _quit_cell)
-	
-	mgr.M_current_index[move_.M_uid] = _current_index
-	
-}
 
-func (mgr *GoNineGirdAoiManager) CalcIndex(xy_ YTool.PositionXY) uint32 {
+func (mgr *GoTowerAoiCellManager) CalcIndex(xy_ YTool.PositionXY) uint32 {
 	return mgr.buildIndex(uint32(xy_.M_x/mgr.m_block_width), uint32(xy_.M_y/mgr.m_block_height))
 }
 
-func (mgr *GoNineGirdAoiManager) buildIndex(col_, row_ uint32) uint32 {
+func (mgr *GoTowerAoiCellManager) buildIndex(col_, row_ uint32) uint32 {
 	return col_ + row_*uint32(mgr.m_block_size)
 }
 
-func (mgr *GoNineGirdAoiManager) getOldRoundBlock(uid_ uint64) map[uint32]struct{} {
-	_old_index := mgr.M_current_index[uid_]
+func (mgr *GoTowerAoiCellManager) getOldRoundBlock(uid_ uint64) map[uint32]struct{} {
+	_old_index := mgr.m_obj_copy[uid_].M_current_index
 	return mgr.getRoundBlock(_old_index)
 }
 
-func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]struct{} {
+func (mgr *GoTowerAoiCellManager) getRoundBlock(cent_index_ uint32) map[uint32]struct{} {
 	_ret_round := make(map[uint32]struct{})
 	_cent_idex := int(cent_index_)
 	_block_size := int(mgr.m_block_size)
@@ -408,4 +357,66 @@ func (mgr *GoNineGirdAoiManager) getRoundBlock(cent_index_ uint32) map[uint32]st
 	}
 	
 	return _ret_round
+}
+
+func (mgr *GoTowerAoiCellManager) enter(enter_ GoAoiObj, ) {
+	enter_.M_current_index = mgr.CalcIndex(enter_.PositionXY)
+	_round_arr := mgr.getRoundBlock(enter_.M_current_index)
+	mgr.enterCell(&enter_, _round_arr)
+	mgr.m_aoi_list[enter_.M_current_index].Watch(enter_.M_uid)
+	mgr.m_obj_copy[enter_.M_uid] = &enter_
+}
+
+func (mgr *GoTowerAoiCellManager) move(move_ GoAoiObj) {
+	mgr.m_obj_copy[move_.M_uid] = &move_
+	_old_round_arr := mgr.getOldRoundBlock(move_.M_uid)
+	
+	_current_index := mgr.CalcIndex(move_.PositionXY)
+	_new_round_arr := mgr.getRoundBlock(_current_index)
+	
+	_enter_cell := YTool.GetSetUint32Diff(_new_round_arr, _old_round_arr)
+	mgr.enterCell(&move_, _enter_cell)
+	
+	if _current_index != mgr.m_obj_copy[move_.M_uid].M_current_index {
+		mgr.m_aoi_list[_current_index].Watch(move_.M_uid)
+	}
+	
+	_update_cell := YTool.GetSetUint32Diff(_new_round_arr, _enter_cell)
+	mgr.updateCell(&move_, _update_cell)
+	
+	if _current_index != mgr.m_obj_copy[move_.M_uid].M_current_index {
+		mgr.m_aoi_list[mgr.m_obj_copy[move_.M_uid].M_current_index].Forget(move_.M_uid)
+	}
+	
+	_quit_cell := YTool.GetSetUint32Diff(_old_round_arr, _new_round_arr)
+	mgr.quitCell(&move_, _quit_cell)
+	
+	mgr.m_obj_copy[move_.M_uid].M_current_index = _current_index
+	
+}
+func (mgr *GoTowerAoiCellManager) quit(quit_ GoAoiObj) {
+	_current_index := mgr.CalcIndex(quit_.PositionXY)
+	_round_arr := mgr.getRoundBlock(_current_index)
+	mgr.quitCell(&quit_, _round_arr)
+	mgr.m_aoi_list[_current_index].Forget(quit_.M_uid)
+	delete(mgr.m_obj_copy, quit_.M_uid)
+}
+
+func (mgr *GoTowerAoiCellManager) Enter(enter_ GoAoiObj) {
+	mgr.m_action_in.Add(&GoTowerAoiInAction{
+		GO_AOI_ACTION_ENTER,
+		enter_,
+	})
+}
+func (mgr *GoTowerAoiCellManager) Quit(quit_ GoAoiObj) {
+	mgr.m_action_in.Add(&GoTowerAoiInAction{
+		GO_AOI_ACTION_QUIT,
+		quit_,
+	})
+}
+func (mgr *GoTowerAoiCellManager) ActionUpdate(move_ GoAoiObj) {
+	mgr.m_action_in.Add(&GoTowerAoiInAction{
+		GO_AOI_ACTION_UPDATE,
+		move_,
+	})
 }
