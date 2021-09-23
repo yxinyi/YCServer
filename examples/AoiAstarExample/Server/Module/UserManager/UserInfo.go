@@ -12,6 +12,7 @@ type User struct {
 	M_uid         uint64
 	M_current_map uint64
 	M_session_id  uint64
+	M_is_rotbot bool
 	move.MoveControl
 }
 

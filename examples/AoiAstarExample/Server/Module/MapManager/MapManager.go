@@ -49,21 +49,11 @@ func (i *Info) GetLeastLoadMap() uint64 {
 }
 
 const (
-	FirstMapUID = 0x7FFF<<48 | 0x7FFF<<32 | 0x7FFF<<16 | 0x7FFF
+	FirstMapUID = 1
 )
 
 
 func (i *Info) RPC_FirstEnterMap(user_ UserManager.User) {
-	if len(i.M_map_pool) == 0 {
-		i.RegisterModule("NewMap",FirstMapUID)
-	}
-	
 	i.Info.RPCCall("Map", FirstMapUID, "UserEnterMap", user_)
 	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
 }
-
-func (i *Info) RPC_CreateMap() {
-	//i.NewInfo(YNode.Obj(),1)
-}
-
-//Map.NewInfo(YNode.Obj(),1)

@@ -1,6 +1,7 @@
 package Map
 
 import (
+	aoi "github.com/yxinyi/YCServer/engine/YAoi"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
@@ -42,13 +43,14 @@ func (u *User) ToClientJson() Msg.UserData {
 
 type Info struct {
 	YModule.BaseInter
+	m_aoi *aoi.GoTowerAoiCellManager
 	M_user_pool    map[uint64]*User
 	m_map_uid      uint64
 	m_go_astar     *YPathFinding.AStarManager
 	m_neighbor_uid map[uint64]struct{}
-
+	
 	m_gird_size float64
-
+	
 	m_vaild_up_left_pos     YTool.PositionXY
 	m_vaild_up_right_pos    YTool.PositionXY
 	m_vaild_down_left_pos   YTool.PositionXY
@@ -67,7 +69,7 @@ type Info struct {
 	m_total_col_grid        float64
 	m_overlap_count         float64
 	m_overlap_length        float64
-
+	
 	m_up_down_offset    int
 	m_left_right_offset int
 }

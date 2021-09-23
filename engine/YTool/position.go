@@ -13,6 +13,12 @@ type PositionXY struct {
 func NewPositionXY() *PositionXY {
 	return &PositionXY{}
 }
+func ClonePositionXY(src_ *PositionXY) *PositionXY {
+	return &PositionXY{
+		M_x:  src_.M_x,
+		M_y:  src_.M_y,
+	}
+}
 
 func (xy PositionXY) DebugString() string {
 	return fmt.Sprintf("M_x:%02f,M_y:%02f", xy.M_x, xy.M_y)
@@ -25,7 +31,7 @@ func (xy *PositionXY) GetOffset(rhs PositionXY) *PositionXY {
 	return offset
 }
 
-func (xy *PositionXY) Distance(rhs PositionXY) float64 {
+func (xy *PositionXY) Distance(rhs *PositionXY) float64 {
 	
 	xMinusAbs := math.Abs(xy.M_x - rhs.M_x)
 	yMinusAbs := math.Abs(xy.M_y - rhs.M_y)

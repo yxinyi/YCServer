@@ -5,6 +5,7 @@ import (
 	"github.com/yxinyi/YCServer/engine/BaseModule/NetModule"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
+	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/Map"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/MapManager"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/UserManager"
 	"log"
@@ -17,7 +18,7 @@ func main() {
 	flag.Parse()
 	YNode.Register(
 		NetModule.NewInfo(YNode.Obj()),
-		/*Map.NewInfo(YNode.Obj(),1),*/
+		Map.NewInfo(YNode.Obj(),1),
 		MapManager.NewInfo(YNode.Obj()),
 		UserManager.NewInfo(YNode.Obj()),
 	)

@@ -16,11 +16,11 @@ const (
 )
 
 type GoAoiObj struct {
-	M_uid uint64
-	M_current_index uint32
+	M_uid           uint64
+	M_current_index uint64
 	YTool.PositionXY
-	M_view_range float64
-	M_dirty bool
+	M_view_range       float64
+	M_dirty            bool
 }
 
 type GoAoiAction struct {

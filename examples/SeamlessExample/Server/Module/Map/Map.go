@@ -1,6 +1,7 @@
 package Map
 
 import (
+	aoi "github.com/yxinyi/YCServer/engine/YAoi"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
@@ -30,12 +31,11 @@ import (
 */
 
 const (
-	VAILD_MAP_WIDTH  float64 = 500
-	VAILD_MAP_HEIGHT float64 = 500
+	VAILD_MAP_WIDTH  float64 = 2000
+	VAILD_MAP_HEIGHT float64 = 2000
 	OVERLAP_SIZE     float64 = 50
 	MAZE_GRID_SIZE   float64 = 10
 )
-
 
 func init() {
 	YNode.RegisterToFactory("NewMap", NewInfo)
@@ -48,6 +48,64 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 	return _info
 }
 
+func (m *Info) InitAoi() {
+	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500)
+	m.m_aoi.Init(func(aoi_msg_ map[uint64][]map[uint64]struct{}) {
+		ylog.Info("[AOI][%v]", aoi_msg_)
+		
+		for _recv_user_uid,_sync_info := range aoi_msg_{
+			_recv_user := m.M_user_pool[_recv_user_uid]
+			if _recv_user == nil{
+				continue
+			}
+			if m.isGhostUser(_recv_user_uid){
+				continue
+			}
+			
+			if len(_sync_info[aoi.ENTER]) > 0 {
+				_add_msg := Msg.S2CMapAddUser{
+					M_user: make([]Msg.UserData, 0),
+				}
+				for _add_uid_it := range _sync_info[aoi.ENTER]{
+					_add_user := m.M_user_pool[_add_uid_it]
+					if _add_user == nil{
+						continue
+					}
+					_add_msg.M_user = append(_add_msg.M_user, _add_user.ToClientJson())
+				}
+				m.SendNetMsgJson(_recv_user.M_session_id, _add_msg)
+			}
+			
+			if len(_sync_info[aoi.MOVE]) > 0 {
+				_update_msg := Msg.S2CMapUpdateUser{
+					M_user: make([]Msg.UserData, 0),
+				}
+				for _add_uid_it := range _sync_info[aoi.MOVE]{
+					_add_user := m.M_user_pool[_add_uid_it]
+					if _add_user == nil{
+						continue
+					}
+					_update_msg.M_user = append(_update_msg.M_user, _add_user.ToClientJson())
+				}
+				m.SendNetMsgJson(_recv_user.M_session_id, _update_msg)
+			}
+			
+			if len(_sync_info[aoi.QUIT]) > 0 {
+				_quit_msg := Msg.S2CMapDeleteUser{
+					M_user: make([]Msg.UserData, 0),
+				}
+				for _add_uid_it := range _sync_info[aoi.QUIT]{
+					_add_user := m.M_user_pool[_add_uid_it]
+					if _add_user == nil{
+						continue
+					}
+					_quit_msg.M_user = append(_quit_msg.M_user, _add_user.ToClientJson())
+				}
+				m.SendNetMsgJson(_recv_user.M_session_id, _quit_msg)
+			}
+		}
+	})
+}
 func (m *Info) InitMazeMap() {
 	_maze := make([][]float64, int(m.m_total_col_grid))
 	for _col_idx := 0; _col_idx < int(m.m_total_col_grid); _col_idx++ {
@@ -66,6 +124,7 @@ func (m *Info) InitMazeMap() {
 	}
 	m.m_go_astar.M_map_uid = m.m_map_uid
 	m.m_go_astar.Init(_maze)
+	
 }
 
 func (m *Info) MapPosConvertMapIdx(pos_ YTool.PositionXY) int {
@@ -186,6 +245,7 @@ func newMazeMap(uid_ uint64) *Info {
 	_maze_map.InitOffset()
 	_maze_map.InitBoundPos()
 	_maze_map.InitMazeMap()
+	_maze_map.InitAoi()
 	
 	return _maze_map
 }
@@ -252,7 +312,6 @@ func (m *Info) UserSwitchMap(user_ *User, tar_map_ uint64) {
 	).AfterRPC("Map", tar_map_, "UserConvertToThisMap", user_.M_uid)
 }
 
-
 func (m *Info) Loop_100(time_ time.Time) {
 	for _, _it := range m.M_user_pool {
 		if m.isGhostUser(_it.M_uid) {
@@ -262,6 +321,7 @@ func (m *Info) Loop_100(time_ time.Time) {
 			continue
 		}
 		if _it.MoveUpdate(time_) {
+			m.m_aoi.Move(_it.M_uid, _it.M_pos)
 			_switch_tar_map_offset := m.InOverlapRange(_it)
 			if _switch_tar_map_offset[0] || _switch_tar_map_offset[1] || _switch_tar_map_offset[2] || _switch_tar_map_offset[3] {
 				_tar_map_uid := uint64(m.m_map_uid)
@@ -301,17 +361,18 @@ func (m *Info) Loop_100(time_ time.Time) {
 					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
 				}
 			}
-			{
+/*			{
 				_update_msg := Msg.S2CMapUpdateUser{
 					M_user: make([]Msg.UserData, 0),
 				}
 				_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson())
 				m.SendNetMsgJson(_it.M_session_id, _update_msg)
-			}
+			}*/
 		}
 	}
 	
 	m.m_go_astar.Update()
+	m.m_aoi.Update()
 }
 
 func (m *Info) NotifyMapLoad() {

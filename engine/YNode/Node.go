@@ -6,6 +6,7 @@ import (
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNet"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"time"
 )
@@ -87,6 +88,13 @@ func (n *Info) close() {
 	}
 }
 func (n *Info) startModule(module_ YModule.Inter) {
+	defer func() {
+		if err := recover(); err != nil {
+			ylog.Erro("%v", err)
+			ylog.Erro("stack:%s", debug.Stack())
+		}
+	}()
+	
 	_100_last_print_time := time.Now().Unix()
 	_10_last_print_time := time.Now().Unix()
 	_1_last_print_time := time.Now().Unix()

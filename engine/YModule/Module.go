@@ -117,7 +117,7 @@ func (i *Info) msgUnmarshalParamList(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 	}
 	
 	if len(_func.M_param) != len(msg.M_func_parameter) {
-		ylog.Erro("[%v]RPC [%v]param count err right [%v] err [%v]", msg.M_tar.M_name,msg.M_func_name, len(_func.M_param), len(msg.M_func_parameter))
+		ylog.Erro("[%v]RPC [%v]param count err right [%v] err [%v]", msg.M_tar.M_name, msg.M_func_name, len(_func.M_param), len(msg.M_func_parameter))
 		return nil
 	}
 	return i.paramUnmarshalWithTypeSlice(msg.M_func_parameter, _func.M_param)
@@ -134,6 +134,9 @@ func (i *Info) call(msg_ *YMsg.S2S_rpc_msg, val_list_ []reflect.Value) []reflect
 func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 	if msg_.M_is_back {
 		_call_back_cmd_list := i.M_back_fun[msg_.M_uid]
+		if _call_back_cmd_list == nil {
+			return
+		}
 		_param_value := i.paramUnmarshalWithTypeSlice(msg_.M_func_parameter, _call_back_cmd_list.getCurCmd().M_back_param)
 		_call_back_cmd_list.call(_param_value)
 		if i.m_cb_list_cancel {
@@ -174,6 +177,7 @@ func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 }
 
 func (i *Info) Loop_Msg() {
+	
 	for {
 		if i.M_rpc_queue.Len() == 0 {
 			break

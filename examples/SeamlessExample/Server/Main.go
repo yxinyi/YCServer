@@ -17,7 +17,6 @@ func main() {
 	flag.Parse()
 	YNode.Register(
 		NetModule.NewInfo(YNode.Obj()),
-		/*Map.NewInfo(YNode.Obj(),1),*/
 		MapManager.NewInfo(YNode.Obj()),
 		UserManager.NewInfo(YNode.Obj()),
 	)

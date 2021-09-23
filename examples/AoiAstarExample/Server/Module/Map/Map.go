@@ -199,10 +199,22 @@ func (i *Info) Init() {
 	i.NotifyMapLoad()
 }
 
+func (m *Info) MapPosConvertMapIdx(pos_ Msg.PositionXY) int {
+	_diff_y := (pos_.M_y)
+	_diff_col := int(_diff_y / 10)
+	_col_start := _diff_col * m.m_row_grid_max
+	_diff_x := (pos_.M_x)
+	_diff_row := int(_diff_x) / m.m_row_grid_max
+	
+	return int(_col_start + _diff_row)
+}
+
+var _go_search = make(map[uint64]struct{})
+
 func (i *Info) Loop_100(time_ time.Time) {
 	
 	for _, _it := range i.M_user_pool {
-		//_user_id := _it.M_module_uid
+		_user_id := _it.M_uid
 		if _it.MoveUpdate(time_) {
 			//ylog.Info("MoveUpdate [%v]", time_.UnixNano())
 			i.m_go_ng_aoi.ActionUpdate(ConvertUserToAoiObj(*_it))
@@ -210,50 +222,54 @@ func (i *Info) Loop_100(time_ time.Time) {
 			if exists {
 				i.m_msg_notify[_it.M_uid].m_update[_it.M_uid] = struct{}{}
 			}
-		} /*else {
+		} else {
 			//如果没有移动,则随机新的目标点
-			if !_it.M_is_rotbot{
+			if !_it.M_is_rotbot {
 				continue
 			}
 			_, exists := _go_search[_user_id]
 			if exists {
 				continue
 			}
-			_pos := YMsg.PositionXY{
+			_pos := Msg.PositionXY{
 				float64(rand.Int31n(ScreenWidth)),
 				float64(rand.Int31n(ScreenHeight)),
 			}
-			for m.m_go_astar.IsBlock(m.MapPosConvertMapIdx(_pos)) {
-				_pos = YMsg.PositionXY{
+			for i.m_go_astar.IsBlock(i.MapPosConvertMapIdx(_pos)) {
+				_pos = Msg.PositionXY{
 					float64(rand.Int31n(ScreenWidth)),
 					float64(rand.Int31n(ScreenHeight)),
 				}
 			}
 			_it.MoveTarget(_pos)
 			_go_search[_user_id] = struct{}{}
-			m.m_go_astar.Search(m.MapPosConvertMapIdx(_it.M_pos), m.MapPosConvertMapIdx(_pos), func(path []int) {
+			i.m_go_astar.Search(i.MapPosConvertMapIdx(_it.M_pos), i.MapPosConvertMapIdx(_pos), func(path []int) {
 				delete(_go_search, _user_id)
-				_user, exists := m.m_user_list[_user_id]
+				_user, exists := i.M_user_pool[_user_id]
 				if !exists {
 					return
 				}
 				if len(path) == 0 {
 					return
 				}
-				_user.MoveQueue(m.IdxListConvertPosList(path))
-				_user.SendJson(YMsg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, YMsg.S2C_MapAStarNodeUpdate{
-					_user.GetUID(),
+				_user.MoveQueue(i.IdxListConvertPosList(path))
+				i.SendNetMsgJson(_user.M_session_id, Msg.S2C_MapAStarNodeUpdate{
+					_user.M_uid,
 					_user.GetPathNode(),
 				})
+				
 			})
-		}*/
+		}
 	}
 	
 	i.m_go_astar.Update()
 	i.m_go_ng_aoi.Update()
+
 	for _id, _it := range i.m_msg_notify {
 		_user := i.M_user_pool[_id]
-		
+		if _user.M_is_rotbot {
+			continue
+		}
 		if len(_it.m_add) > 0 {
 			_add_msg := Msg.S2CMapAddUser{
 				M_user: make([]Msg.UserData, 0),
@@ -319,7 +335,6 @@ func ConvertUserToAoiObj(user_ UserManager.User) aoi.GoAoiObj {
 func (i *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	i.M_user_pool[user_.M_uid] = &user_
 	user_.M_current_map = user_.M_uid
-	i.M_user_pool[user_.M_uid] = &user_
 	user_.M_speed = 100
 	user_.M_view_range = 100
 	_notify_msg := &MapNotifyMsg{

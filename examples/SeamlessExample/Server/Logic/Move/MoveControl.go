@@ -76,7 +76,7 @@ func (c *MoveControl) MoveUpdate(time_ time.Time) bool {
 		c.toNextPath()
 	}
 	
-	_distance := c.M_pos.Distance(c.M_next_path)
+	_distance := c.M_pos.Distance(&c.M_next_path)
 	
 	_interval_time := time_.Sub(c.M_last_move_time).Seconds()
 	_this_move_distance := _interval_time * c.M_speed

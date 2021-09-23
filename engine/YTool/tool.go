@@ -60,8 +60,22 @@ func GetFuncInTypeList(func_ reflect.Value)[]reflect.Type{
 }
 
 func GetSetUint32Diff(lhs_ map[uint32]struct{}, rhs_ map[uint32]struct{}) map[uint32]struct{} {
-	for _it := range rhs_ {
-		delete(lhs_, _it)
+	_ret_set := make(map[uint32]struct{})
+	for _it := range lhs_{
+		_ret_set[_it] = struct{}{}
 	}
-	return lhs_
+	for _it := range rhs_ {
+		delete(_ret_set, _it)
+	}
+	return _ret_set
+}
+func GetSetUint64Diff(lhs_ map[uint64]struct{}, rhs_ map[uint64]struct{}) map[uint64]struct{} {
+	_ret_set := make(map[uint64]struct{})
+	for _it := range lhs_{
+		_ret_set[_it] = struct{}{}
+	}
+	for _it := range rhs_ {
+		delete(_ret_set, _it)
+	}
+	return _ret_set
 }

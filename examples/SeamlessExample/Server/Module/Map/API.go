@@ -26,6 +26,7 @@ func (m *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	
 	m.RPC_SyncMapInfoToClient(_user.M_session_id)
 	
+	m.m_aoi.Enter(_user.M_uid, _user.M_view_range, _user.M_pos)
 	//负载均衡同步
 	m.NotifyMapLoad()
 }
@@ -168,7 +169,7 @@ func (m *Info) RPC_UserConvertToThisMap(user_uid_ uint64) {
 	}
 	m.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_uid_, _user.M_current_map)
 	m.Info.RPCCall("UserManager", 0, "UserFinishSwitchMap", user_uid_)
-
+	
 }
 func (m *Info) RPC_SyncGhostUser(user_ User) {
 	_, exists := m.M_user_pool[user_.M_uid]
