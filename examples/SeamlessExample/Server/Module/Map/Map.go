@@ -49,7 +49,7 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 }
 
 func (m *Info) InitAoi() {
-	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500)
+	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500,m.m_origin_up_left_pos)
 	m.m_aoi.Init(func(aoi_msg_ map[uint64][]map[uint64]struct{}) {
 		ylog.Info("[AOI][%v]", aoi_msg_)
 		
