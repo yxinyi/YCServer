@@ -83,7 +83,7 @@ func (mgr *GoTowerAoiCellManager) Init(notify_call_ GoTowerAoiNotifyCallBack) {
 	mgr.M_notify_callback = notify_call_
 	mgr.clearLastCache()
 	go func() {
-		_ticker := time.NewTicker(time.Millisecond * 100)
+		_ticker := time.NewTicker(time.Millisecond * 10)
 		for {
 			select {
 			case <-_ticker.C:

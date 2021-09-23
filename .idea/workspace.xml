@@ -298,11 +298,6 @@
           <line>270</line>
           <option name="timeStamp" value="89" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/engine/YAoi/GoTowerAoiManager.go</url>
-          <line>164</line>
-          <option name="timeStamp" value="97" />
-        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="DlvErrorBreakpoint" />
