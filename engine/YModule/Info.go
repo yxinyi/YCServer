@@ -54,7 +54,7 @@ type Info struct {
 	M_name       string
 	M_module_uid uint64
 	
-	M_entity_pool map[uint64]YEntity.Inter
+	M_entity_pool map[uint64]YEntity.Info
 	M_rpc_queue   *YTool.SyncQueue
 	M_net_queue   *YTool.SyncQueue
 	
@@ -116,7 +116,7 @@ func NewRPCCommandList() *RPCCommandList {
 
 func NewInfo(node_ RemoteNodeER) *Info {
 	_info := &Info{
-		M_entity_pool:  make(map[uint64]YEntity.Inter),
+		M_entity_pool:  make(map[uint64]YEntity.Info),
 		M_rpc_func_map: make(map[string]*RPCFunc),
 		M_net_func_map: make(map[string]*NetFunc),
 		M_rpc_queue:    YTool.NewSyncQueue(),

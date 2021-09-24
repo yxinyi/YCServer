@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
+	"github.com/json-iterator/go"
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
-	"github.com/yxinyi/YCServer/examples/RPCExamples/Logic/TestModule"
-	"github.com/yxinyi/YCServer/examples/RPCExamples/Logic/TestModule2"
+	"github.com/yxinyi/YCServer/examples/RPCExample/Logic/TestModule"
+	"github.com/yxinyi/YCServer/examples/RPCExample/Logic/TestModule2"
 	_ "net/http/pprof"
 )
 
@@ -22,11 +22,11 @@ func main() {
 		msg.M_tar.M_name = "TestModule"
 		msg.M_func_parameter = make([][]byte, 0)
 		{
-			_bytes, _ := json.Marshal(1)
+			_bytes, _ := jsoniter.Marshal(1)
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
 		{
-			_bytes, _ := json.Marshal("测试")
+			_bytes, _ := jsoniter.Marshal("测试")
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
 		YNode.RPCCall(msg)

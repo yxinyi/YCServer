@@ -40,7 +40,7 @@ func (c *Connect) Connect(ip_, port_ string) bool {
 /*func (c *Connect) SendMsg(msg_id_ uint32, msg_ interface{}) {
 	_net_msg := NewNetMsgPack()
 	_net_msg.M_msg_id = msg_id_
-	json_data, err := json.Marshal(msg_)
+	json_data, err := jsoniter.Marshal(msg_)
 	if err == nil {
 		_net_msg.M_msg_data = json_data
 		_net_msg.M_msg_length = uint32(len(json_data))

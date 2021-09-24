@@ -2,7 +2,7 @@ package YNet
 
 import (
 	"encoding/binary"
-	"encoding/json"
+	"github.com/json-iterator/go"
 	"io"
 	"reflect"
 	"strings"
@@ -35,7 +35,7 @@ func NewNetMsgPackWithJson(json_ interface{}) *NetMsgPack {
 	_split_idx := strings.Index(_msg_name,".")
 	_msg_name = _msg_name[_split_idx+1:]
 	_msg.M_msg_name = _msg_name
-	_byte, _err := json.Marshal(json_)
+	_byte, _err := jsoniter.Marshal(json_)
 	if _err != nil {
 		return nil
 	}

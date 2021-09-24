@@ -1,6 +1,8 @@
 package YTool
 
-import "encoding/json"
+import (
+	"github.com/json-iterator/go"
+)
 
 type Rectangle struct {
 	LeftUp    *PositionXY
@@ -38,7 +40,7 @@ func (rec *Rectangle) InitForLefUPRightDown(leftUp *PositionXY, rightDown *Posit
 }
 
 func (rec *Rectangle) DeBugString() string {
-	byte, err := json.Marshal(rec)
+	byte, err := jsoniter.Marshal(rec)
 	if err != nil {
 		return ""
 	}

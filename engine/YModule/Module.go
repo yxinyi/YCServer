@@ -1,8 +1,8 @@
 package YModule
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/json-iterator/go"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNet"
@@ -99,7 +99,7 @@ func (i *Info) paramUnmarshalWithTypeSlice(bytes_list_ [][]byte, type_list_ []re
 	_param_list := make([]reflect.Value, 0)
 	for _idx := 0; _idx < len(type_list_); _idx++ {
 		_param_val := reflect.New(type_list_[_idx]).Interface()
-		err := json.Unmarshal(bytes_list_[_idx], _param_val)
+		err := jsoniter.Unmarshal(bytes_list_[_idx], _param_val)
 		if err != nil {
 			ylog.Erro("RPC unmarshal err [%v] ", err.Error())
 			return nil
@@ -198,7 +198,7 @@ func (i *Info) Loop_Msg() {
 		}
 		
 		_json_data := reflect.New(_net_func_obj.m_msg_data).Interface()
-		err := json.Unmarshal(_msg.M_net_msg.M_msg_data, _json_data)
+		err := jsoniter.Unmarshal(_msg.M_net_msg.M_msg_data, _json_data)
 		if err != nil {
 			ylog.Erro("[%v] decode err [%v]", _msg.M_net_msg.M_msg_data, err.Error())
 			continue

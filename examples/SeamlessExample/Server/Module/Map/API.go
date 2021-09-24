@@ -17,7 +17,7 @@ func (m *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	m.M_user_pool[_user.M_uid] = _user
 	_user.M_current_map = m.m_map_uid
 	_user.M_speed = 100
-	_user.M_view_range = 100
+	_user.M_view_range = 1000
 
 	m.randPos(_user)
 	m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_FirstEnterMap{

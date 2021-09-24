@@ -1,7 +1,7 @@
 package TestModule
 
 import (
-	"encoding/json"
+	"github.com/json-iterator/go"
 	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"testing"
@@ -19,11 +19,11 @@ func TestModule(t *testing.T) {
 		msg.M_func_parameter = make([][]byte, 0)
 		{
 			
-			_bytes, _ := json.Marshal(1)
+			_bytes, _ := jsoniter.Marshal(1)
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
 		{
-			_bytes, _ := json.Marshal("123")
+			_bytes, _ := jsoniter.Marshal("123")
 			msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 		}
 		YNode.RPCCall(msg)
@@ -34,7 +34,7 @@ func TestModule(t *testing.T) {
 		msg.M_func_parameter = make([][]byte, 0)
 		{
 			
-			_bytes, _ := json.Marshal(&YMsg.TestParam{
+			_bytes, _ := jsoniter.Marshal(&YMsg.TestParam{
 				123,
 				"TESTPARAMTER",
 				[]int{
@@ -62,7 +62,7 @@ func BenchmarkModule(b_ *testing.B) {
 			msg.M_func_parameter = make([][]byte, 0)
 			{
 				
-				_bytes, _ := json.Marshal(1)
+				_bytes, _ := jsoniter.Marshal(1)
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
 			YNode.RPCCall(msg)
@@ -73,11 +73,11 @@ func BenchmarkModule(b_ *testing.B) {
 			msg.M_func_parameter = make([][]byte, 0)
 			{
 				
-				_bytes, _ := json.Marshal(1)
+				_bytes, _ := jsoniter.Marshal(1)
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
 			{
-				_bytes, _ := json.Marshal("123")
+				_bytes, _ := jsoniter.Marshal("123")
 				msg.M_func_parameter = append(msg.M_func_parameter, _bytes)
 			}
 			YNode.RPCCall(msg)
@@ -88,7 +88,7 @@ func BenchmarkModule(b_ *testing.B) {
 			msg.M_func_parameter = make([][]byte, 0)
 			{
 				
-				_bytes, _ := json.Marshal(&YMsg.TestParam{
+				_bytes, _ := jsoniter.Marshal(&YMsg.TestParam{
 					123,
 					"TESTPARAMTER",
 					[]int{

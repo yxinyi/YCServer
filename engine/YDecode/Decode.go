@@ -1,6 +1,8 @@
 package YDecode
 
-import "encoding/json"
+import (
+	"github.com/json-iterator/go"
+)
 
 const (
 	DECODE_TYPE_JSON uint32 = 0
@@ -20,10 +22,10 @@ func init() {
 type Json struct{}
 
 func (j *Json) Marshal(val interface{}) ([]byte, error) {
-	return json.Marshal(val)
+	return jsoniter.Marshal(val)
 }
 func (j *Json) Unmarshal(data_ []byte, val_ interface{}) error {
-	return json.Unmarshal(data_, val_)
+	return jsoniter.Unmarshal(data_, val_)
 }
 
 func Marshal(type_ uint32,val interface{} )([]byte, error){

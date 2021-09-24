@@ -11,7 +11,7 @@ const (
 )
 
 type User struct {
-	YEntity.BaseInfo
+	YEntity.Info
 	M_uid         uint64
 	M_current_map uint64
 	M_session_id  uint64

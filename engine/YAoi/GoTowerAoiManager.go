@@ -29,21 +29,21 @@ type GoTowerAoiInAction struct {
 
 type GoTowerAoiCellManager struct {
 	m_left_up_pos YTool.PositionXY
-
+	
 	M_height     float64
 	M_width      float64
 	m_tower_list map[uint64]*AoiTower
 	m_obj_copy   map[uint64]*GoTowerAoiObj
-
+	
 	M_notify_callback GoTowerAoiNotifyCallBack
-
+	
 	M_action_out       *YTool.SyncQueue //GoTowerAoiOutAction
 	m_action_in        *YTool.SyncQueue //GoTowerAoiInAction
 	M_stop             chan struct{}
 	M_tower_view_range float64
 	M_tower_col_max    int
 	M_tower_row_max    int
-
+	
 	m_last_notify_msg_cache map[uint64][]map[uint64]struct{}
 }
 
@@ -55,7 +55,7 @@ func NewGoTowerAoiCellManager(width_, height_, tower_view_range_ float64, left_u
 		m_obj_copy:   make(map[uint64]*GoTowerAoiObj),
 		M_stop:       make(chan struct{}),
 	}
-
+	
 	_mgr.M_height = height_
 	_mgr.M_width = width_
 	_mgr.m_left_up_pos = left_up_pos_
@@ -66,7 +66,7 @@ func NewGoTowerAoiCellManager(width_, height_, tower_view_range_ float64, left_u
 func (mgr *GoTowerAoiCellManager) Init(notify_call_ GoTowerAoiNotifyCallBack) {
 	mgr.M_tower_col_max = int(mgr.M_width / mgr.M_tower_view_range)
 	mgr.M_tower_row_max = int(mgr.M_height / mgr.M_tower_view_range)
-
+	
 	for _row_idx := uint32(0); _row_idx < uint32(mgr.M_tower_row_max); _row_idx++ {
 		for _col_idx := uint32(0); _col_idx < uint32(mgr.M_tower_col_max); _col_idx++ {
 			_cell := NewGoTowerAoiCell()
@@ -79,7 +79,7 @@ func (mgr *GoTowerAoiCellManager) Init(notify_call_ GoTowerAoiNotifyCallBack) {
 			mgr.m_tower_list[_cell.m_index] = _cell
 		}
 	}
-
+	
 	mgr.M_notify_callback = notify_call_
 	mgr.clearLastCache()
 	go func() {
@@ -125,7 +125,7 @@ func (mgr *GoTowerAoiCellManager) Update() {
 //通知当前正在监视该塔的所有玩家
 func (mgr *GoTowerAoiCellManager) enterTower(enter_ *GoTowerAoiObj, tower_index_ uint64) {
 	_enter_map_sync := make(map[uint64]map[uint64]struct{})
-
+	
 	_tower_info := mgr.m_tower_list[tower_index_]
 	if _tower_info == nil {
 		return
@@ -147,7 +147,7 @@ func (mgr *GoTowerAoiCellManager) enterTower(enter_ *GoTowerAoiObj, tower_index_
 		}
 		_enter_map_sync[_watch_objs.M_uid][enter_.M_uid] = struct{}{}
 	}
-
+	
 	mgr.sendOutEnterAction(_enter_map_sync)
 }
 
@@ -159,7 +159,7 @@ func (mgr *GoTowerAoiCellManager) watchTower(enter_ *GoTowerAoiObj, tower_index_
 		if _tower_info != nil {
 			_tower_info.AddWatch(enter_.M_uid)
 		}
-
+		
 		enter_.M_watch_tower_list[_idx_it] = struct{}{}
 		for _obj_it := range _tower_info.GetObjs() {
 			_, _exists := enter_.M_watch_list[_obj_it]
@@ -174,7 +174,7 @@ func (mgr *GoTowerAoiCellManager) watchTower(enter_ *GoTowerAoiObj, tower_index_
 			_watch_sync[enter_.M_uid][_obj_it] = struct{}{}
 		}
 	}
-
+	
 	mgr.sendOutEnterAction(_watch_sync)
 }
 
@@ -192,21 +192,31 @@ func (mgr *GoTowerAoiCellManager) buildIndex(row_, col_ uint32) uint64 {
 
 func (mgr *GoTowerAoiCellManager) GetRangeTower(center_pos_ *YTool.PositionXY, view_range_ float64) map[uint64]struct{} {
 	_tower_list := make(map[uint64]struct{})
-
-	_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x, center_pos_.M_y)] = struct{}{}
-	if center_pos_.M_x > view_range_ {
-		_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x-view_range_, center_pos_.M_y)] = struct{}{}
-	}
-	if center_pos_.M_x+view_range_ < mgr.M_width {
-		_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x+view_range_, center_pos_.M_y)] = struct{}{}
-	}
+	
+	//_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x, center_pos_.M_y)] = struct{}{}
+	_row_start := uint32(0)
+	_row_end := uint32(mgr.M_height/ mgr.M_tower_view_range)
+	_col_start := uint32(0)
+	_col_end := uint32(mgr.M_width/ mgr.M_tower_view_range)
 	if center_pos_.M_y > view_range_ {
-		_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x, center_pos_.M_y-view_range_)] = struct{}{}
+		_row_start = uint32((center_pos_.M_y - view_range_) / mgr.M_tower_view_range)
 	}
 	if center_pos_.M_y+view_range_ < mgr.M_height {
-		_tower_list[mgr.CalcIndexWithXY(center_pos_.M_x, center_pos_.M_y+view_range_)] = struct{}{}
+		_row_start = uint32((center_pos_.M_y - view_range_) / mgr.M_tower_view_range)
 	}
-
+	if center_pos_.M_x > view_range_ {
+		_col_start = uint32((center_pos_.M_x-view_range_) / mgr.M_tower_view_range)
+	}
+	if center_pos_.M_x+view_range_ < mgr.M_width {
+		_col_end = uint32((center_pos_.M_x+view_range_) / mgr.M_tower_view_range)
+	}
+	
+	for ;_row_start < _row_end;_row_start++{
+		for _col_idx := _col_start;_col_idx < _col_end;_col_idx++{
+			_tower_list[mgr.buildIndex(_row_start, _col_idx)] = struct{}{}
+		}
+	}
+	
 	return _tower_list
 }
 
@@ -221,7 +231,7 @@ func (mgr *GoTowerAoiCellManager) enter(enter_action_ *GoTowerAoiInAction) {
 	_aoi_obj.M_uid = enter_action_.m_obj_uid
 	_aoi_obj.PositionXY = mgr.convertLocalPos(YTool.ClonePositionXY(&enter_action_.m_pos))
 	_aoi_obj.M_view_range = enter_action_.m_view_range
-
+	
 	_aoi_obj.M_current_index = mgr.CalcIndex(_aoi_obj.PositionXY)
 	_range_tower_list := mgr.GetRangeTower(_aoi_obj.PositionXY, _aoi_obj.M_view_range)
 	mgr.watchTower(_aoi_obj, _range_tower_list)
@@ -235,9 +245,9 @@ func (mgr *GoTowerAoiCellManager) move(move_action_ *GoTowerAoiInAction) {
 		ylog.Erro("aoi mis [%v]", move_action_.m_obj_uid)
 		return
 	}
-
+	
 	_aoi_obj.PositionXY = mgr.convertLocalPos(&move_action_.m_pos)
-
+	
 	_current_index := _aoi_obj.M_current_index
 	_new_index := mgr.CalcIndex(_aoi_obj.PositionXY)
 	if _current_index != _new_index {
@@ -263,9 +273,9 @@ func (mgr *GoTowerAoiCellManager) move(move_action_ *GoTowerAoiInAction) {
 		}
 		mgr.sendOutUpdateAction(_move_sync)
 	}
-
+	
 	_new_watch_tower_list := mgr.GetRangeTower(&move_action_.m_pos, _aoi_obj.M_view_range)
-
+	
 	_enter_tower := YTool.GetSetUint64Diff(_new_watch_tower_list, _aoi_obj.M_watch_tower_list)
 	if len(_enter_tower) > 0 {
 		mgr.watchTower(_aoi_obj, _enter_tower)
@@ -274,7 +284,7 @@ func (mgr *GoTowerAoiCellManager) move(move_action_ *GoTowerAoiInAction) {
 	if len(_quit_tower) > 0 {
 		mgr.removeWatchTower(_aoi_obj, _quit_tower)
 	}
-
+	
 }
 
 func (mgr *GoTowerAoiCellManager) removeWatchTower(quit_ *GoTowerAoiObj, quit_tower_ map[uint64]struct{}) {
@@ -292,11 +302,11 @@ func (mgr *GoTowerAoiCellManager) removeWatchTower(quit_ *GoTowerAoiObj, quit_to
 				_quit_sync[quit_.M_uid] = make(map[uint64]struct{})
 			}
 			_quit_sync[quit_.M_uid][_obj_uid_it] = struct{}{}
-
+			
 			delete(quit_.M_watch_list, _obj_uid_it)
 		}
 	}
-
+	
 	mgr.sendOutQuitAction(_quit_sync)
 }
 
@@ -323,7 +333,7 @@ func (mgr *GoTowerAoiCellManager) quitTower(enter_ *GoTowerAoiObj, quit_index_ u
 		}
 		_quit_sync[_obj_it][enter_.M_uid] = struct{}{}
 	}
-
+	
 	mgr.sendOutQuitAction(_quit_sync)
 }
 
