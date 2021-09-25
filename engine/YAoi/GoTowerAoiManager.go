@@ -420,3 +420,7 @@ func (mgr *GoTowerAoiCellManager) sendOutUpdateAction(map_ map[uint64]map[uint64
 		}
 	}
 }
+func (mgr *GoTowerAoiCellManager)Close(){
+	mgr.M_stop<- struct{}{}
+}
+

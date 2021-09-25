@@ -8,7 +8,7 @@ type PrototypeManager struct {
 
 func (mgr *PrototypeManager) RegisterEntity(type_str string, panel *attr.AttributePanel) {
 	_info := NewInfo()
-	_info.M_type_str = type_str
+	_info.M_entity_type = type_str
 	_info.AttributePanel = panel
 	mgr.m_proto_pool[type_str] = _info
 }
@@ -19,7 +19,7 @@ func (mgr *PrototypeManager) GetNew(type_str_ string) *Info {
 		return nil
 	}
 	_info := NewInfo()
-	_info.M_type_str = type_str_
+	_info.M_entity_type = type_str_
 	_info.AttributePanel = _prototype.Clone()
 	return _info
 }
