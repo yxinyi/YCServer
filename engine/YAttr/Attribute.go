@@ -1,28 +1,46 @@
-package attr
+package YAttr
 
-type Attribute struct {
-	M_name              string
-	M_attr_type         string
-	M_data              string
-	M_save              bool
-	M_SyncToGhost       bool
-	M_SyncToSelfClient  bool
-	M_SyncToOtherClient bool
+import (
+	"fmt"
+	"reflect"
+)
+
+type AttributeValue struct {
+	M_entity_name         string
+	M_attr_name           string
+	M_value_stream        []byte
+	M_value               reflect.Value
+	M_value_steam_convert bool
 }
 
-type AttributePanel struct {
+func (av *AttributeValue) GetTemplate() *Template {
+	return nil
+}
+
+func (av *AttributeValue) GetDebugString() string {
+	_ret_str := ""
+	_ret_str += fmt.Sprintf("[name:%v][value:%v]", av.M_attr_name,av.M_value.String())
+	return _ret_str
+}
+
+type AttributeValuePanel struct {
 	M_name      string
-	M_attr_list []Attribute
+	M_attr_list map[string]*AttributeValue
 }
 
-func Define(name_ string, attr_list_ ...Attribute) *AttributePanel {
-	_panel := &AttributePanel{}
-	_panel.M_name = name_
-	_panel.M_attr_list = attr_list_
+func NewAttributeValuePanel()*AttributeValuePanel{
+	_panel := &AttributeValuePanel{}
+	_panel.M_attr_list = make(map[string]*AttributeValue)
 	return _panel
 }
 
-func (panel *AttributePanel) Clone() *AttributePanel {
-	_panel := &AttributePanel{}
-	return _panel
+func (p *AttributeValuePanel) GetAttr(route_ string) interface{} {
+	_attr, _exists := p.M_attr_list[route_]
+	if !_exists {
+		return nil
+	}
+	if _attr.M_value.CanAddr(){
+		return _attr.M_value.Addr().Interface()
+	}
+	return _attr.M_value.Interface()
 }

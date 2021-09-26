@@ -2,6 +2,8 @@ package Map
 
 import (
 	aoi "github.com/yxinyi/YCServer/engine/YAoi"
+	"github.com/yxinyi/YCServer/engine/YAttr"
+	"github.com/yxinyi/YCServer/engine/YEntity"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
@@ -10,40 +12,70 @@ import (
 	"time"
 )
 
-type MapNotifyMsg struct {
-	m_update map[uint64]struct{}
-	m_add    map[uint64]struct{}
-	m_delete map[uint64]struct{}
+func init() {
+	YEntity.RegisterEntityAttr("User",
+		YAttr.Define("MapInfo",
+			YAttr.Tmpl("CurrentMap", uint64(0), true, true, true, true),
+			YAttr.Tmpl("SessionID", uint64(0), true, true, true, true),
+			YAttr.Tmpl("MapSwitchState", uint64(0), true, true, true, true),
+			YAttr.Tmpl("MoveControl", move.MoveControl{}, true, true, true, true),
+		),
+	)
 }
 
 type User struct {
+	*YEntity.Info
 	M_uid              uint64
 	M_current_map      uint64
 	M_session_id       uint64
 	M_map_swtich_state uint32
 	move.MoveControl
 }
+func (u *User) GetMoveControl() *move.MoveControl {
+	return &u.MoveControl
+}
+func (u *User) GetCurrentMap() uint64 {
+	return u.M_current_map
+}
+func (u *User) GetSessionID() uint64 {
+	return u.M_session_id
+}
+func (u *User) GetMapSwitchState() uint64 {
+	return u.GetMapSwitchState()
+}
+
+/*func (u *User) GetMoveControl() *move.MoveControl {
+	return u.GetAttr("MapInfo.MoveControl").(*move.MoveControl)
+}
+
+func (u *User) GetCurrentMap() uint64 {
+	return *u.GetAttr("MapInfo.CurrentMap").(*uint64)
+}
+func (u *User) GetSessionID() uint64 {
+	return *u.GetAttr("MapInfo.SessionID").(*uint64)
+}
+func (u *User) GetMapSwitchState() uint64 {
+	return *u.GetAttr("MapInfo.MapSwitchState").(*uint64)
+}*/
 
 func (u *User) MoveUpdate(time_ time.Time) bool {
-	return u.MoveControl.MoveUpdate(time_)
+	
+	return u.GetMoveControl().MoveUpdate(time_)
 }
 
-func (u *User) CanToNextPath() bool {
-	return u.MoveControl.CanToNextPath()
-}
 
 func (u *User) ToClientJson() Msg.UserData {
 	_user_msg := Msg.UserData{
 		M_uid:            u.M_uid,
-		M_current_map_id: u.M_current_map,
-		M_pos:            u.M_pos,
+		M_current_map_id: u.GetCurrentMap(),
+		M_pos:            u.GetMoveControl().M_pos,
 	}
 	return _user_msg
 }
 
 type Info struct {
 	YModule.BaseInter
-	m_aoi *aoi.GoTowerAoiCellManager
+	m_aoi          *aoi.GoTowerAoiCellManager
 	M_user_pool    map[uint64]*User
 	m_map_uid      uint64
 	m_go_astar     *YPathFinding.AStarManager

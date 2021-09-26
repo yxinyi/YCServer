@@ -57,7 +57,7 @@ func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) {
 			return
 		}
 	}
-	//ylog.Info("[Node:%v] dispatch Net [%v]", obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().M_name, msg_.M_net_msg.M_msg_name)
+	//ylog.Info("[Node:%v] dispatch Net [%v]", obj.M_module_pool[msg_.M_tar.M_entity_name][msg_.M_tar.M_uid].GetInfo().M_entity_name, msg_.M_net_msg.M_msg_name)
 	obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().PushNetMsg(msg_)
 }
 
@@ -76,7 +76,7 @@ func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) {
 			return
 		}
 	}
-	//ylog.Info("[Node:%v] dispatch RPC [%v]", obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().M_name, msg_.M_func_name)
+	//ylog.Info("[Node:%v] dispatch RPC [%v]", obj.M_module_pool[msg_.M_tar.M_entity_name][msg_.M_tar.M_uid].GetInfo().M_entity_name, msg_.M_func_name)
 	obj.M_module_pool[msg_.M_tar.M_name][msg_.M_tar.M_uid].GetInfo().PushRpcMsg(msg_)
 }
 

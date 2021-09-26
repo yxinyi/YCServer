@@ -117,8 +117,8 @@ func (m *Map) Init() {
 			}
 		})
 		YNet.Register(Msg.MsgID_S2CUserSuccessLogin, func(msg_ Msg.S2CUserSuccessLogin, _ YNet.Session) {
-			g_main_uid = msg_.M_data.M_module_uid
-			m.AddNewUser(msg_.M_data)
+			g_main_uid = msg_.M_defalut_value.M_module_uid
+			m.AddNewUser(msg_.M_defalut_value)
 		})
 		YNet.Register(Msg.MSG_S2C_MAP_ASTAR_NODE_UPDATE, func(msg_ Msg.S2C_MapAStarNodeUpdate, _ YNet.Session) {
 			g_main_path_node = msg_.M_path

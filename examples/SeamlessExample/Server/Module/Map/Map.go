@@ -49,16 +49,16 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 }
 
 func (m *Info) InitAoi() {
-	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500,m.m_origin_up_left_pos)
+	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500, m.m_origin_up_left_pos)
 	m.m_aoi.Init(func(aoi_msg_ map[uint64][]map[uint64]struct{}) {
 		ylog.Info("[AOI][%v]", aoi_msg_)
 		
-		for _recv_user_uid,_sync_info := range aoi_msg_{
+		for _recv_user_uid, _sync_info := range aoi_msg_ {
 			_recv_user := m.M_user_pool[_recv_user_uid]
-			if _recv_user == nil{
+			if _recv_user == nil {
 				continue
 			}
-			if m.isGhostUser(_recv_user_uid){
+			if m.isGhostUser(_recv_user_uid) {
 				continue
 			}
 			
@@ -66,9 +66,9 @@ func (m *Info) InitAoi() {
 				_add_msg := Msg.S2CMapAddUser{
 					M_user: make([]Msg.UserData, 0),
 				}
-				for _add_uid_it := range _sync_info[aoi.ENTER]{
+				for _add_uid_it := range _sync_info[aoi.ENTER] {
 					_add_user := m.M_user_pool[_add_uid_it]
-					if _add_user == nil{
+					if _add_user == nil {
 						continue
 					}
 					_add_msg.M_user = append(_add_msg.M_user, _add_user.ToClientJson())
@@ -80,9 +80,9 @@ func (m *Info) InitAoi() {
 				_update_msg := Msg.S2CMapUpdateUser{
 					M_user: make([]Msg.UserData, 0),
 				}
-				for _add_uid_it := range _sync_info[aoi.MOVE]{
+				for _add_uid_it := range _sync_info[aoi.MOVE] {
 					_add_user := m.M_user_pool[_add_uid_it]
-					if _add_user == nil{
+					if _add_user == nil {
 						continue
 					}
 					_update_msg.M_user = append(_update_msg.M_user, _add_user.ToClientJson())
@@ -94,9 +94,9 @@ func (m *Info) InitAoi() {
 				_quit_msg := Msg.S2CMapDeleteUser{
 					M_user: make([]Msg.UserData, 0),
 				}
-				for _add_uid_it := range _sync_info[aoi.QUIT]{
+				for _add_uid_it := range _sync_info[aoi.QUIT] {
 					_add_user := m.M_user_pool[_add_uid_it]
-					if _add_user == nil{
+					if _add_user == nil {
 						continue
 					}
 					_quit_msg.M_user = append(_quit_msg.M_user, _add_user.ToClientJson())
@@ -361,13 +361,13 @@ func (m *Info) Loop_100(time_ time.Time) {
 					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
 				}
 			}
-/*			{
-				_update_msg := Msg.S2CMapUpdateUser{
-					M_user: make([]Msg.UserData, 0),
-				}
-				_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson())
-				m.SendNetMsgJson(_it.M_session_id, _update_msg)
-			}*/
+			/*			{
+						_update_msg := Msg.S2CMapUpdateUser{
+							M_user: make([]Msg.UserData, 0),
+						}
+						_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson())
+						m.SendNetMsgJson(_it.M_session_id, _update_msg)
+					}*/
 		}
 	}
 	

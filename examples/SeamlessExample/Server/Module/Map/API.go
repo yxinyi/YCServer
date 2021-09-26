@@ -20,13 +20,13 @@ func (m *Info) RPC_UserEnterMap(user_ UserManager.User) {
 	_user.M_view_range = 1000
 
 	m.randPos(_user)
-	m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_FirstEnterMap{
+	m.Info.SendNetMsgJson(_user.GetSessionID(), Msg.S2C_FirstEnterMap{
 		_user.ToClientJson(),
 	})
 
-	m.RPC_SyncMapInfoToClient(_user.M_session_id)
+	m.RPC_SyncMapInfoToClient(_user.GetSessionID())
 
-	m.m_aoi.Enter(_user.M_uid, _user.M_view_range, _user.M_pos)
+	m.m_aoi.Enter(_user.M_uid, _user.GetMoveControl().M_view_range, _user.GetMoveControl().M_pos)
 	//负载均衡同步
 	m.NotifyMapLoad()
 }
@@ -104,8 +104,8 @@ func (m *Info) RPC_UserMove(user_uid_ uint64, move_msg_ Msg.C2S_UserMove) {
 			_path_pos = append(_path_pos, m.MapIdxConvertMapPos(_it))
 		}
 
-		_user.MoveQueue(_path_idx)
-		m.Info.SendNetMsgJson(_user.M_session_id, Msg.S2C_MapAStarNodeUpdate{
+		_user.GetMoveControl().MoveQueue(_path_idx)
+		m.Info.SendNetMsgJson(_user.GetSessionID(), Msg.S2C_MapAStarNodeUpdate{
 			_user.M_uid,
 			_path_pos,
 		})

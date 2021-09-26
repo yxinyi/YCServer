@@ -89,7 +89,7 @@ func (m *Map) Init() {
 	})
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2C_Login) {
 		g_main_uid = msg_.M_main_uid
-		//m.AddNewUser(msg_.M_data)
+		//m.AddNewUser(msg_.M_defalut_value)
 	})
 	YNet.Register(func(_ YNet.Session, msg_ Msg.S2C_MapAStarNodeUpdate) {
 		g_main_path_node = msg_.M_path
