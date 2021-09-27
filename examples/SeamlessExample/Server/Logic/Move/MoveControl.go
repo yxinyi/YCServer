@@ -12,9 +12,8 @@ type MoveControl struct {
 	M_speed          float64
 	M_last_move_time time.Time
 	M_view_range     float64
-	
-	M_path_cur_idx int
-	M_path         []YTool.PositionXY
+	M_path_cur_idx   int
+	M_path           []YTool.PositionXY
 }
 
 func (c *MoveControl) CanToNextPath() bool {

@@ -13,6 +13,7 @@ type AttributeValue struct {
 	M_value_steam_convert bool
 }
 
+
 func (av *AttributeValue) GetTemplate() *Template {
 	return nil
 }

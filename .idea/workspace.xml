@@ -4,14 +4,7 @@
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YAttr/Attribute.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YAttr/Attribute.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YEntity/Entity.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YEntity/Entity.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YEntity/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YEntity/Info.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YEntity/PrototypeEntity.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Client/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Client/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Client/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Client/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Msg/msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Msg/msg.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" afterDir="false" />
     </list>

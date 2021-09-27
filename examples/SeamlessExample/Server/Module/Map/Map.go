@@ -356,18 +356,10 @@ func (m *Info) Loop_100(time_ time.Time) {
 				_, exists := m.m_neighbor_uid[_neighbor_it]
 				if exists {
 					m.Info.RPCCall("Map", _neighbor_it, "SyncGhostUser", *_it)
-					
 				} else {
 					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
 				}
 			}
-			/*			{
-						_update_msg := Msg.S2CMapUpdateUser{
-							M_user: make([]Msg.UserData, 0),
-						}
-						_update_msg.M_user = append(_update_msg.M_user, _it.ToClientJson())
-						m.SendNetMsgJson(_it.M_session_id, _update_msg)
-					}*/
 		}
 	}
 	

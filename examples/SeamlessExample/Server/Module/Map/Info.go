@@ -4,6 +4,8 @@ import (
 	aoi "github.com/yxinyi/YCServer/engine/YAoi"
 	"github.com/yxinyi/YCServer/engine/YAttr"
 	"github.com/yxinyi/YCServer/engine/YEntity"
+	"github.com/yxinyi/YCServer/engine/YJson"
+	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
@@ -24,13 +26,14 @@ func init() {
 }
 
 type User struct {
-	*YEntity.Info
-	M_uid              uint64
-	M_current_map      uint64
-	M_session_id       uint64
-	M_map_swtich_state uint32
-	move.MoveControl
+	//*YEntity.Info
+	M_uid              uint64 `SA:""SG:""SC:"-"C:""`
+	M_current_map      uint64 `SA:""SG:""SC:""C:"-"`
+	M_session_id       uint64 `SA:""SC:""C:"-"`
+	M_map_swtich_state uint32 `SA:""SG:""SC:"-"C:""`
+	move.MoveControl    `SG:"move"`
 }
+
 func (u *User) GetMoveControl() *move.MoveControl {
 	return &u.MoveControl
 }
@@ -42,6 +45,16 @@ func (u *User) GetSessionID() uint64 {
 }
 func (u *User) GetMapSwitchState() uint64 {
 	return u.GetMapSwitchState()
+}
+
+func (u *User) ToGhost() User {
+	_ghost_u := User{}
+	_ghost_user_str, _err := YJson.GhostMarshal(*u)
+	if _err!= nil {
+		ylog.Erro("[%v]",_err.Error())
+	}
+	YJson.UnMarshal(_ghost_user_str, &_ghost_u)
+	return _ghost_u
 }
 
 /*func (u *User) GetMoveControl() *move.MoveControl {
@@ -62,7 +75,6 @@ func (u *User) MoveUpdate(time_ time.Time) bool {
 	
 	return u.GetMoveControl().MoveUpdate(time_)
 }
-
 
 func (u *User) ToClientJson() Msg.UserData {
 	_user_msg := Msg.UserData{
