@@ -11,7 +11,7 @@ type Info struct {
 	M_user_pool map[uint64]*User
 }
 
-func NewInfo(node_ *YNode.Info) *Info {
+func NewInfo(node_ *YNode.Info, uid uint64) YModule.Inter {
 	_info := &Info{
 		M_user_pool: make(map[uint64]*User),
 	}

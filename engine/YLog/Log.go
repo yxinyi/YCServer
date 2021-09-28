@@ -16,6 +16,8 @@ var Erro func(template string, args ...interface{})
 var Info func(template string, args ...interface{})
 var Warn func(template string, args ...interface{})
 
+
+
 /*func Erro(template string, args ...interface{}){
 	Logger.Errorf(template,args...)
 }
@@ -25,9 +27,9 @@ func Info(template string, args ...interface{}){
 func Warn(template string, args ...interface{}){
 	Logger.Warnf(template,args...)
 }*/
-func init(){
+func init() {
 	initLogger()
-
+	
 }
 func initLogger() {
 	logPath := "./server"
@@ -39,9 +41,9 @@ func initLogger() {
 			return
 		}
 	}
-
+	
 	encoder := initEncoder()
-
+	
 	// 想要将日常文件区分开来，可以实现多个日志等级接口
 	/*infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 		return lvl < zapcore.WarnLevel
@@ -49,10 +51,10 @@ func initLogger() {
 	debugLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
 		return lvl >= zapcore.DebugLevel
 	})
-
+	
 	// 获取 info、warn日志文件的io.Writer
 	warnIoWriter := getWriter(logPath)
-
+	
 	// 创建Logger
 	core := zapcore.NewTee(
 		zapcore.NewCore(encoder, zapcore.AddSync(warnIoWriter), debugLevel),
@@ -60,11 +62,11 @@ func initLogger() {
 	)
 	logger := zap.New(core, zap.AddCaller()) // 需要传入 zap.AddCaller() 才会显示打日志点的文件名和行数
 	Logger = logger.Sugar()
-
+	
 	Erro = Logger.Errorf
 	Info = Logger.Infof
 	Warn = Logger.Warnf
-
+	
 }
 
 //初始化Encoder
@@ -94,7 +96,7 @@ func getWriter(filename string) io.Writer {
 		rotatelogs.WithMaxAge(time.Hour*24*30),
 		rotatelogs.WithRotationTime(time.Hour*24),
 	)
-
+	
 	if err != nil {
 		panic(err)
 	}

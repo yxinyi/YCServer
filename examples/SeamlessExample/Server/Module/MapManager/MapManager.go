@@ -4,7 +4,6 @@ import (
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
-	_ "github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/Map"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Util"
 	"math"
@@ -15,7 +14,7 @@ type Info struct {
 	M_map_pool map[uint64]Msg.MapLoad
 }
 
-func NewInfo(node_ *YNode.Info) *Info {
+func NewInfo(node_ *YNode.Info, uid uint64) YModule.Inter {
 	_info := &Info{
 		M_map_pool: make(map[uint64]Msg.MapLoad),
 	}

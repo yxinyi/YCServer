@@ -20,7 +20,7 @@ const (
 )
 
 func init() {
-	YNode.RegisterToFactory("NewMap", NewInfo)
+	YNode.ModuleCreateFuncRegister("NewMap", NewInfo)
 }
 
 type MapNotifyMsg struct {

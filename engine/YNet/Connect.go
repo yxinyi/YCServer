@@ -20,10 +20,10 @@ func NewConnect() *Connect {
 	return &Connect{}
 }
 
-func (c *Connect) Connect(ip_, port_ string) bool {
+func (c *Connect) Connect(ip_port_ string) bool {
 	var _conn net.Conn
 	for {
-		_tmp_conn, _err := net.Dial("tcp4", ip_+":"+port_)
+		_tmp_conn, _err := net.Dial("tcp4", ip_port_)
 		if _err != nil {
 			time.Sleep(1 * time.Second)
 			continue
@@ -54,7 +54,9 @@ func (c *Connect) SendJson(msg_ interface{}) {
 	}
 	c.m_session.SendJson(msg_)
 }
-
+func (c *Connect) GetSession() *Session {
+	return c.m_session
+}
 func (c *Connect) Start() bool {
 	c.m_session.StartLoop()
 	return true

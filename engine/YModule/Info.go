@@ -50,7 +50,7 @@ type RemoteNodeER interface {
 
 type Info struct {
 	RemoteNodeER
-	M_node_id    uint64
+	M_node_id    uint32
 	M_name       string
 	M_module_uid uint64
 	

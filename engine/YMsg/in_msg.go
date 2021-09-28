@@ -8,7 +8,7 @@ import (
 type Agent struct {
 	M_name    string
 	M_uid     uint64
-	M_node_id uint64
+	M_node_id uint32
 }
 
 type S2S_rpc_msg struct {

@@ -37,11 +37,7 @@ const (
 	MAZE_GRID_SIZE   float64 = 10
 )
 
-func init() {
-	YNode.RegisterToFactory("NewMap", NewInfo)
-}
-
-func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
+func NewInfo(node_ *YNode.Info, uid uint64) YModule.Inter {
 	_info := newMazeMap(uid)
 	_info.Info = YModule.NewInfo(node_)
 	_info.M_module_uid = uid
@@ -51,7 +47,7 @@ func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
 func (m *Info) InitAoi() {
 	m.m_aoi = aoi.NewGoTowerAoiCellManager(m.m_total_width, m.m_total_height, 500, m.m_origin_up_left_pos)
 	m.m_aoi.Init(func(aoi_msg_ map[uint64][]map[uint64]struct{}) {
-		ylog.Info("[AOI][%v]", aoi_msg_)
+		//ylog.Info("[AOI][%v]", aoi_msg_)
 		
 		for _recv_user_uid, _sync_info := range aoi_msg_ {
 			_recv_user := m.M_user_pool[_recv_user_uid]

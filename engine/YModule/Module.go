@@ -245,5 +245,5 @@ func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, pa
 }
 
 func (i *Info) RegisterModule(module_name_ string, id_ uint64) {
-	i.RPCCall("YNode", i.M_node_id, "ModuleRegister", module_name_, id_)
+	i.RPCCall("YNode", uint64(i.M_node_id), "NewModule", module_name_, id_)
 }
