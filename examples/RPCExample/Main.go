@@ -19,7 +19,7 @@ func main() {
 	{
 		msg := &YMsg.S2S_rpc_msg{}
 		msg.M_func_name = "Test_3"
-		msg.M_tar.M_name = "TestModule"
+		msg.M_tar.M_module_name = "TestModule"
 		msg.M_func_parameter = make([][]byte, 0)
 		{
 			_bytes, _ := jsoniter.Marshal(1)

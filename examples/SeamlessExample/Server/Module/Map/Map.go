@@ -4,6 +4,7 @@ import (
 	aoi "github.com/yxinyi/YCServer/engine/YAoi"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
@@ -37,10 +38,9 @@ const (
 	MAZE_GRID_SIZE   float64 = 10
 )
 
-func NewInfo(node_ *YNode.Info, uid uint64) YModule.Inter {
-	_info := newMazeMap(uid)
+func NewInfo(node_ *YNode.Info, uid_ uint64) YModule.Inter {
+	_info := newMazeMap(uid_)
 	_info.Info = YModule.NewInfo(node_)
-	_info.M_module_uid = uid
 	return _info
 }
 
@@ -304,8 +304,8 @@ func (m *Info) UserSwitchMap(user_ *User, tar_map_ uint64) {
 	}
 	user_.M_map_swtich_state = UserManager.CONST_MAP_SWITCHING
 	user_.M_current_map = tar_map_
-	m.Info.RPCCall("UserManager", 0, "UserStartSwitchMap", user_.M_uid,
-	).AfterRPC("Map", tar_map_, "UserConvertToThisMap", user_.M_uid)
+	m.Info.RPCCall(YMsg.ToAgent("UserManager"), "UserStartSwitchMap", user_.M_uid,
+	).AfterRPC(YMsg.ToAgent("Map", tar_map_), "UserConvertToThisMap", user_.M_uid)
 }
 
 func (m *Info) Loop_100(time_ time.Time) {
@@ -351,9 +351,9 @@ func (m *Info) Loop_100(time_ time.Time) {
 			for _, _neighbor_it := range _neighbor_list {
 				_, exists := m.m_neighbor_uid[_neighbor_it]
 				if exists {
-					m.Info.RPCCall("Map", _neighbor_it, "SyncGhostUser", *_it)
+					m.Info.RPCCall(YMsg.ToAgent("Map", _neighbor_it), "SyncGhostUser", *_it)
 				} else {
-					m.Info.RPCCall("MapManager", 0, "CreateMap", _neighbor_it)
+					m.Info.RPCCall(YMsg.ToAgent("MapManager"), "CreateMap", _neighbor_it)
 				}
 			}
 		}
@@ -364,8 +364,8 @@ func (m *Info) Loop_100(time_ time.Time) {
 }
 
 func (m *Info) NotifyMapLoad() {
-	m.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
-		m.M_module_uid,
+	m.Info.RPCCall(YMsg.ToAgent("MapManager"), "MapRegister", Msg.MapLoad{
+		m.GetAgent().M_module_uid,
 		uint32(len(m.M_user_pool)),
 	})
 }

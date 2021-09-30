@@ -82,7 +82,7 @@ func (i *Info) Init(core Inter) {
 		for _k_it := range i.M_net_func_map {
 			_msg_name_list = append(_msg_name_list, _k_it)
 		}
-		i.RPCCall("NetModule", 0, "NetMsgRegister", _msg_name_list, i.GetAgent())
+		i.RPCCall(YMsg.ToAgent("NetModule"), "NetMsgRegister", _msg_name_list, i.GetAgent())
 	}
 }
 
@@ -112,12 +112,12 @@ func (i *Info) paramUnmarshalWithTypeSlice(bytes_list_ [][]byte, type_list_ []re
 func (i *Info) msgUnmarshalParamList(msg *YMsg.S2S_rpc_msg) []reflect.Value {
 	_func, _exists := i.M_rpc_func_map[msg.M_func_name]
 	if !_exists {
-		ylog.Erro("[%v] RPC param miss method [%v]", msg.M_tar.M_name, msg.M_func_name)
+		ylog.Erro("[%v] RPC param miss method [%v]", msg.M_tar.M_module_name, msg.M_func_name)
 		return nil
 	}
 	
 	if len(_func.M_param) != len(msg.M_func_parameter) {
-		ylog.Erro("[%v]RPC [%v]param count err right [%v] err [%v]", msg.M_tar.M_name, msg.M_func_name, len(_func.M_param), len(msg.M_func_parameter))
+		ylog.Erro("[%v]RPC [%v]param count err right [%v] err [%v]", msg.M_tar.M_module_name, msg.M_func_name, len(_func.M_param), len(msg.M_func_parameter))
 		return nil
 	}
 	return i.paramUnmarshalWithTypeSlice(msg.M_func_parameter, _func.M_param)
@@ -154,6 +154,7 @@ func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 			delete(i.M_back_fun, msg_.M_uid)
 		}
 		_rpc_msg.M_source = i.GetAgent()
+		_rpc_msg.M_tar = msg_.M_tar
 		i.RPCToOther(_rpc_msg)
 		return
 	}
@@ -168,16 +169,40 @@ func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 		for _, _it := range _back_param {
 			_back_param_inter_list = append(_back_param_inter_list, _it.Interface())
 		}
-		_rpc_cmd := NewRPCCommand(msg_.M_source.M_name, msg_.M_source.M_uid, msg_.M_func_name, _back_param_inter_list...)
+		_rpc_cmd := NewRPCCommand(msg_.M_source, msg_.M_func_name, _back_param_inter_list...)
 		_rpc_msg := _rpc_cmd.ToRPCMsg()
 		_rpc_msg.M_is_back = true
 		_rpc_msg.M_uid = msg_.M_uid
 		i.RPCToOther(_rpc_msg)
 	}
 }
+func (i *Info) DonNetMsg(msg_ *YMsg.C2S_net_msg) {
+	_net_func_obj := i.M_net_func_map[msg_.M_net_msg.M_msg_name]
+	if _net_func_obj == nil {
+		return
+	}
+	
+	_json_data := reflect.New(_net_func_obj.m_msg_data).Interface()
+	err := jsoniter.Unmarshal(msg_.M_net_msg.M_msg_data, _json_data)
+	if err != nil {
+		ylog.Erro("[%v] decode err [%v]", msg_.M_net_msg.M_msg_data, err.Error())
+		return
+	}
+	
+	_net_func_obj.M_fn.Call([]reflect.Value{
+		reflect.ValueOf(msg_.M_session_id),
+		reflect.ValueOf(_json_data).Elem(),
+	})
+}
 
 func (i *Info) Loop_Msg() {
-	
+	for {
+		if i.M_net_queue.Len() == 0 {
+			break
+		}
+		_msg := i.M_net_queue.Pop().(*YMsg.C2S_net_msg)
+		i.DonNetMsg(_msg)
+	}
 	for {
 		if i.M_rpc_queue.Len() == 0 {
 			break
@@ -185,56 +210,28 @@ func (i *Info) Loop_Msg() {
 		_msg := i.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 		i.DoRPCMsg(_msg)
 	}
-	
-	for {
-		if i.M_net_queue.Len() == 0 {
-			break
-		}
-		_msg := i.M_net_queue.Pop().(*YMsg.C2S_net_msg)
-		
-		_net_func_obj := i.M_net_func_map[_msg.M_net_msg.M_msg_name]
-		if _net_func_obj == nil {
-			continue
-		}
-		
-		_json_data := reflect.New(_net_func_obj.m_msg_data).Interface()
-		err := jsoniter.Unmarshal(_msg.M_net_msg.M_msg_data, _json_data)
-		if err != nil {
-			ylog.Erro("[%v] decode err [%v]", _msg.M_net_msg.M_msg_data, err.Error())
-			continue
-		}
-		
-		_net_func_obj.M_fn.Call([]reflect.Value{
-			reflect.ValueOf(_msg.M_session_id),
-			reflect.ValueOf(_json_data).Elem(),
-		})
-	}
 }
 
 func (i *Info) GetAgent() YMsg.Agent {
-	_info := YMsg.Agent{}
-	_info.M_uid = i.M_module_uid
-	_info.M_node_id = i.M_node_id
-	_info.M_name = i.M_name
-	return _info
+	return i.M_agent
 }
 
 func (i *Info) DebugString() string {
-	return fmt.Sprintf("[%v:%v:%v]", i.M_name, i.M_module_uid, i.M_node_id)
+	return fmt.Sprintf("[%v]", i.GetAgent().DebugString())
 }
 
 func (i *Info) SendNetMsgJson(session_id_ uint64, json_msg_ interface{}) {
 	_msg := YNet.NewNetMsgPackWithJson(json_msg_)
 	if _msg == nil {
-		ylog.Erro("[%v:SendNetMsgJson] err [%v]", i.M_name, reflect.TypeOf(json_msg_).String())
+		ylog.Erro("[%v:SendNetMsgJson] err [%v]", i.GetAgent().GetKeyStr(), reflect.TypeOf(json_msg_).String())
 		return
 	}
-	i.RPCCall("NetModule", 0, "SendNetMsgJson", session_id_, _msg)
+	i.RPCCall(YMsg.ToAgent("NetModule"), "SendNetMsgJson", session_id_, _msg)
 }
 
-func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) *RPCCommandList {
+func (i *Info) RPCCall(tar_agent YMsg.Agent, func_ string, param_list_ ...interface{}) *RPCCommandList {
 	_rpc_command_list := NewRPCCommandList()
-	_rpc_command_list.AfterRPC(module_name_, module_uid_, func_, param_list_...)
+	_rpc_command_list.AfterRPC(tar_agent, func_, param_list_...)
 	_rpc_msg := _rpc_command_list.popMsg()
 	if _rpc_msg.M_need_back {
 		_rpc_msg.M_source = i.GetAgent()
@@ -245,5 +242,5 @@ func (i *Info) RPCCall(module_name_ string, module_uid_ uint64, func_ string, pa
 }
 
 func (i *Info) RegisterModule(module_name_ string, id_ uint64) {
-	i.RPCCall("YNode", uint64(i.M_node_id), "NewModule", module_name_, id_)
+	i.RPCCall(YMsg.ToAgent("YNode"), "NewModule", module_name_, id_)
 }

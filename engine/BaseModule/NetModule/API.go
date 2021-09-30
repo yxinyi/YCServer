@@ -24,7 +24,6 @@ func (m *NetModule) RPC_Listen(ip_port_ string) {
 }
 
 func (m *NetModule) RPC_Connect(ip_port_ string) {
-	//后续改成异步的,连接会阻塞当前模块
 	go func() {
 		_new_connect := YNet.NewConnect()
 		_new_connect.Connect(ip_port_)
@@ -43,7 +42,6 @@ func (m *NetModule) RPC_SendNetMsgJson(s_ uint64, msg_ *YNet.NetMsgPack) {
 	if _session == nil {
 		return
 	}
-	//ylog.Info("[NetModule:SendNetMsgJson] [%v]",msg_.M_msg_name)
 	_session.Send(msg_)
 }
 

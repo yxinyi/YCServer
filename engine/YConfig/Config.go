@@ -2,7 +2,7 @@ package YConfig
 
 import "github.com/spf13/viper"
 
-const DEFAULT_PATH = "./bin/config"
+const DEFAULT_PATH = "./config"
 
 
 func Load(name_ string, core_ interface{}) error {

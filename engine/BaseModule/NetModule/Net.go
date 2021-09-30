@@ -14,7 +14,7 @@ type NetModule struct {
 	m_net_msg_pool map[string][]YMsg.Agent
 }
 
-func NewInfo(node_ *YNode.Info) *NetModule {
+func NewInfo(node_ *YNode.Info, uid_ uint64) YModule.Inter {
 	_info := &NetModule{
 		m_session_pool: make(map[uint64]*YNet.Session),
 		m_net_msg_pool: make(map[string][]YMsg.Agent),
@@ -37,7 +37,8 @@ func (m *NetModule) Loop_100(time time.Time) {
 				m.m_session_pool[_msg.M_session.GetUID()] = _msg.M_session
 			case YNet.NET_SESSION_STATE_CONNECT_OTHER_SUCCESS:
 				_ip_port := _msg.M_net_msg.M_msg_name
-				m.Info.RPCCall("YNode", uint64(m.Info.M_node_id), "RegisterOtherNode", _ip_port, _msg.M_session.GetUID())
+				m.m_session_pool[_msg.M_session.GetUID()] = _msg.M_session
+				m.Info.RPCCall(YMsg.ToAgent("YNode"), "RegisterOtherNode", _ip_port, _msg.M_session.GetUID())
 			case YNet.NET_SESSION_STATE_MSG:
 				for _, _agent_it := range m.m_net_msg_pool[_msg.M_net_msg.M_msg_name] {
 					_net_msg := &YMsg.C2S_net_msg{

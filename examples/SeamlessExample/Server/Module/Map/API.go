@@ -2,6 +2,7 @@ package Map
 
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YTool"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
@@ -134,7 +135,7 @@ func (m *Info) RPC_RegisterNeighborMap(neighbor_map_list_ []uint64) {
 				_sync_map_info[_col_set_idx] = _row_line_info
 				_col_set_idx++
 			}
-			m.Info.RPCCall("Map", _map_id, "SyncOverlapBlock", _sync_map_info, m.m_map_uid, _sync_line_count)
+			m.Info.RPCCall(YMsg.ToAgent("Map", _map_id), "SyncOverlapBlock", _sync_map_info, m.m_map_uid, _sync_line_count)
 		}
 	}
 }
@@ -168,8 +169,8 @@ func (m *Info) RPC_UserConvertToThisMap(user_uid_ uint64) {
 		m.SendNetMsgJson(_user.M_session_id, _update_msg)
 	}
 	m.m_aoi.Move(_user.M_uid, _user.M_pos)
-	m.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_uid_, _user.M_current_map)
-	m.Info.RPCCall("UserManager", 0, "UserFinishSwitchMap", user_uid_)
+	m.Info.RPCCall(YMsg.ToAgent("UserManager"), "UserChangeCurrentMap", user_uid_, _user.M_current_map)
+	m.Info.RPCCall(YMsg.ToAgent("UserManager"), "UserFinishSwitchMap", user_uid_)
 
 }
 func (m *Info) RPC_SyncGhostUser(user_ User) {

@@ -1,7 +1,6 @@
 package YNode
 
 import (
-	"fmt"
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
 	"github.com/yxinyi/YCServer/engine/YMsg"
@@ -18,18 +17,21 @@ func init() {
 	obj.Info = YModule.NewInfo(obj)
 }
 
-func (n *Info) findNode(node_id_ uint32) uint64 {
-	return n.M_node_id_to_session[node_id_]
+func (n *Info) findNode(key_str_ string) uint64 {
+	_node_id, _exists := n.M_other_node_module_key_str_to_node_id[key_str_]
+	if !_exists {
+		return 0
+	}
+	
+	return n.M_node_id_to_session[_node_id]
 }
 
-func (n *Info) GetModuleName(module_name_ string, module_uid_ uint64) string {
+/*func (n *Info) GetModuleName(module_name_ string, module_uid_ uint64) string {
 	return fmt.Sprintf("%s:%d", module_name_, module_uid_)
-}
+}*/
 
 func (n *Info) register(info YModule.Inter) {
-	info.GetInfo().M_name = strings.Split(reflect.TypeOf(info).Elem().String(), ".")[0]
-	
-	obj.M_module_pool[n.GetModuleName(info.GetInfo().M_name, info.GetInfo().M_module_uid)] = info
+	obj.M_module_pool[info.GetInfo().GetAgent().GetKeyStr()] = info
 	info.Init()
 }
 
@@ -41,25 +43,22 @@ func (n *Info) NetToOther(msg *YMsg.C2S_net_msg) {
 }
 
 func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) bool {
-	_module_name_uid_str := n.GetModuleName(msg_.M_tar.M_name, msg_.M_tar.M_uid)
-	
-	_, exists := obj.M_module_pool[_module_name_uid_str]
+	_tar_key_st := msg_.M_tar.GetKeyStr()
+	_, exists := obj.M_module_pool[_tar_key_st]
 	if !exists {
-		ylog.Erro("[YNode:dispatchRpc] miss module uid [%v]", _module_name_uid_str)
+		ylog.Erro("[YNode:dispatchNet] miss module uid [%v]", _tar_key_st)
 		return false
 	}
-	obj.M_module_pool[_module_name_uid_str].GetInfo().PushNetMsg(msg_)
+	obj.M_module_pool[_tar_key_st].GetInfo().PushNetMsg(msg_)
 	return true
 }
 
 func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) bool {
-	_module_name_uid_str := n.GetModuleName(msg_.M_tar.M_name, msg_.M_tar.M_uid)
-	{
-		_, exists := obj.M_module_pool[_module_name_uid_str]
-		if !exists {
-			ylog.Erro("[YNode:dispatchRpc] miss module uid [%v]", _module_name_uid_str)
-			return false
-		}
+	_module_name_uid_str := msg_.M_tar.GetKeyStr()
+	_, exists := obj.M_module_pool[_module_name_uid_str]
+	if !exists {
+		ylog.Erro("[YNode:dispatchRpc] miss module uid [%v]", _module_name_uid_str)
+		return false
 	}
 	
 	//ylog.Info("[Node:%v] dispatch RPC [%v]", obj.M_module_pool[msg_.M_tar.M_entity_name][msg_.M_tar.M_node_id].GetInfo().M_entity_name, msg_.M_func_name)
@@ -104,7 +103,7 @@ func (n *Info) startModule(module_ YModule.Inter) {
 			if (_time.Unix() - _100_last_print_time) >= 60 {
 				_second_fps := _100_fps_count / int(_time.Unix()-_100_last_print_time)
 				if _second_fps < 80 {
-					ylog.Erro("[Module:%v] 100 fps [%v]", module_.GetInfo().M_name, _100_fps_count/int(_time.Unix()-_100_last_print_time))
+					ylog.Erro("[Module:%v] 100 fps [%v]", module_.GetInfo().GetAgent().DebugString(), _100_fps_count/int(_time.Unix()-_100_last_print_time))
 				}
 				_100_last_print_time = _time.Unix()
 				_100_fps_count = 0
@@ -115,7 +114,7 @@ func (n *Info) startModule(module_ YModule.Inter) {
 			if (_time.Unix() - _10_last_print_time) >= 60 {
 				_second_fps := _10_fps_count / int(_time.Unix()-_10_last_print_time)
 				if _second_fps < 8 {
-					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _10_fps_count/int(_time.Unix()-_10_last_print_time))
+					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().GetAgent().DebugString(), _10_fps_count/int(_time.Unix()-_10_last_print_time))
 				}
 				
 				_10_last_print_time = _time.Unix()
@@ -127,7 +126,7 @@ func (n *Info) startModule(module_ YModule.Inter) {
 			if (_time.Unix() - _1_last_print_time) >= 60 {
 				_second_fps := _1_fps_count / int(_time.Unix()-_1_last_print_time)
 				if _second_fps < 1 {
-					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().M_name, _1_fps_count/int(_time.Unix()-_1_last_print_time))
+					ylog.Info("[Module:%v] 10 fps [%v]", module_.GetInfo().GetAgent().DebugString(), _1_fps_count/int(_time.Unix()-_1_last_print_time))
 				}
 				
 				_1_last_print_time = _time.Unix()
@@ -160,14 +159,16 @@ func (n *Info) loop() {
 						break
 					}
 					_msg := obj.M_net_queue.Pop().(*YMsg.C2S_net_msg)
-					
+					if _msg.M_tar.M_module_name == "YNode" {
+						n.DonNetMsg(_msg)
+						continue
+					}
 					if n.dispatchNet(_msg) {
 						continue
 					}
-					
-					obj.Info.SendNetMsgJson(n.findNode(_msg.M_tar.M_node_id), *_msg)
 				}
 			}
+			
 			if obj.M_rpc_queue.Len() > 0 {
 				for {
 					if obj.M_rpc_queue.Len() == 0 {
@@ -175,14 +176,14 @@ func (n *Info) loop() {
 					}
 					//ylog.Info("[Node:RPC_QUEUE] [%v]", obj.M_rpc_queue.Len())
 					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
-					if _msg.M_tar.M_name == "YNode" {
+					if _msg.M_tar.M_module_name == "YNode" {
 						n.DoRPCMsg(_msg)
 						continue
 					}
 					if n.dispatchRpc(_msg) {
 						continue
 					}
-					obj.Info.SendNetMsgJson(n.findNode(_msg.M_tar.M_node_id), *_msg)
+					obj.Info.SendNetMsgJson(n.findNode(_msg.M_tar.GetKeyStr()), *_msg)
 				}
 			}
 		}
@@ -225,5 +226,12 @@ func RegisterNodeIpStr2NodeId(ip_port_ string, node_id_ uint32) {
 }
 
 func SetNodeID(node_id_ uint32) {
-	obj.GetInfo().M_node_id = node_id_
+	obj.M_node_id = node_id_
+	obj.GetInfo().M_agent = YMsg.ToAgent("YNode", uint64(0))
+}
+
+func NewModuleInfo(module_str_ string, module_uid_ uint64) YModule.Inter {
+	_new_module := obj.m_moduele_factory[module_str_](obj, module_uid_)
+	_new_module.GetInfo().M_agent = YMsg.ToAgent(strings.Split(reflect.TypeOf(_new_module).Elem().String(), ".")[0], module_uid_)
+	return _new_module
 }

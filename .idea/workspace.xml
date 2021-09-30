@@ -11,13 +11,17 @@
       <change beforePath="$PROJECT_DIR$/engine/YMsg/in_msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YMsg/in_msg.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNet/Connect.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/Connect.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNet/Message.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/Message.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/YNet/Session.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/Session.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNode/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/engine/YNode/NodeFunc.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Client/Client.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Client/Client.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Msg/msg.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Msg/msg.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Logic/Move/MoveControl.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/API.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Info.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Info.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/MapManager/MapManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/MapManager/MapManager.go" afterDir="false" />
@@ -53,9 +57,6 @@
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
   </component>
-  <component name="ProblemsViewState">
-    <option name="selectedIndex" value="1" />
-  </component>
   <component name="ProjectId" id="1rHV5RSSvrNnBbDhfsGe0A0blFb" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -87,7 +88,7 @@
       <recent name="F:\go\GoSnakeGame\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Compound.SeamlessAll">
+  <component name="RunManager" selected="Go Build.SeamLessServer">
     <configuration name="AOIAll" type="CompoundRunConfigurationType">
       <toRun name="AOIServer" type="GoApplicationRunConfiguration" />
       <toRun name="AOIClient" type="GoApplicationRunConfiguration" />
@@ -154,7 +155,7 @@
     </configuration>
     <configuration name="SeamLessServer" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="GoYCServer" />
-      <working_directory value="$PROJECT_DIR$" />
+      <working_directory value="$PROJECT_DIR$/bin" />
       <go_parameters value="-i" />
       <parameters value="--NodeID 1" />
       <kind value="DIRECTORY" />

@@ -2,6 +2,7 @@ package MapManager
 
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
 	"github.com/yxinyi/YCServer/examples/SeamlessExample/Server/Module/UserManager"
@@ -57,8 +58,8 @@ func (i *Info) RPC_FirstEnterMap(user_ UserManager.User) {
 		i.RegisterModule("NewMap", FirstMapUID)
 	}
 
-	i.Info.RPCCall("Map", FirstMapUID, "UserEnterMap", user_)
-	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
+	i.Info.RPCCall(YMsg.ToAgent("Map", FirstMapUID), "UserEnterMap", user_)
+	i.Info.RPCCall(YMsg.ToAgent("UserManager"), "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
 }
 
 func (i *Info) RPC_CreateMap(map_uid_ uint64) {
@@ -76,10 +77,10 @@ func (i *Info) RPC_CreateMap(map_uid_ uint64) {
 			_, exists := i.M_map_pool[_round_it]
 			if exists {
 				_exists_round = append(_exists_round, _round_it)
-				i.Info.RPCCall("Map", _round_it, "RegisterNeighborMap", []uint64{map_uid_})
+				i.Info.RPCCall(YMsg.ToAgent("Map", _round_it), "RegisterNeighborMap", []uint64{map_uid_})
 			}
 		}
-		i.Info.RPCCall("Map", map_uid_, "RegisterNeighborMap", _exists_round)
+		i.Info.RPCCall(YMsg.ToAgent("Map", map_uid_), "RegisterNeighborMap", _exists_round)
 	}
 
 	//RegisterNeighborMap

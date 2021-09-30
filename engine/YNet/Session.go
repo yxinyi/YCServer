@@ -62,6 +62,8 @@ func (s *Session) StartLoop() {
 	go func() {
 		for {
 			select {
+			case <-s.m_stop:
+				return
 			case pack, ok := <-s.m_send_msg_chan:
 				if !ok {
 					s.m_conn.Close()

@@ -76,3 +76,8 @@ type MapLoad struct {
 	M_map_uid uint64
 	M_load    uint32
 }
+
+type S2S_SyncOtherNodeRPC struct {
+	M_net_msg []string
+	M_node_id uint32
+}

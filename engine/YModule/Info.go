@@ -50,9 +50,9 @@ type RemoteNodeER interface {
 
 type Info struct {
 	RemoteNodeER
-	M_node_id    uint32
-	M_name       string
-	M_module_uid uint64
+	M_agent YMsg.Agent
+	/*M_name       string
+	M_module_uid uint64*/
 	
 	M_entity_pool map[uint64]YEntity.Info
 	M_rpc_queue   *YTool.SyncQueue
@@ -66,8 +66,7 @@ type Info struct {
 
 type RPCCommand struct {
 	M_uid                uint64
-	M_tar_module_name    string
-	M_tar_module_id      uint64
+	M_tar_agent          YMsg.Agent
 	M_tar_rpc_func_name  string
 	M_tar_rpc_param_list []interface{}
 	M_need_back          bool
@@ -75,15 +74,16 @@ type RPCCommand struct {
 	M_back_param         []reflect.Type
 }
 
-func NewRPCMsg(module_name_ string, module_uid_ uint64, tar_func_name_ string, param_list_ ...interface{}) *YMsg.S2S_rpc_msg {
-	return NewRPCCommand(module_name_, module_uid_, tar_func_name_, param_list_...).ToRPCMsg()
+func NewRPCMsg(tar_agent_ YMsg.Agent, tar_func_name_ string, param_list_ ...interface{}) *YMsg.S2S_rpc_msg {
+	return NewRPCCommand(tar_agent_, tar_func_name_, param_list_...).ToRPCMsg()
 }
 
-func NewRPCCommand(module_name_ string, module_uid_ uint64, tar_func_name_ string, param_list_ ...interface{}) *RPCCommand {
+
+
+func NewRPCCommand(tar_agent_ YMsg.Agent, tar_func_name_ string, param_list_ ...interface{}) *RPCCommand {
 	_rpc_cmd := &RPCCommand{}
 	_rpc_cmd.M_uid = YTool.BuildUIDUint64()
-	_rpc_cmd.M_tar_module_name = module_name_
-	_rpc_cmd.M_tar_module_id = module_uid_
+	_rpc_cmd.M_tar_agent = tar_agent_
 	_rpc_cmd.M_tar_rpc_func_name = tar_func_name_
 	
 	if len(param_list_) > 0 {
@@ -129,11 +129,8 @@ func NewInfo(node_ RemoteNodeER) *Info {
 
 func (cmd *RPCCommand) ToRPCMsg() *YMsg.S2S_rpc_msg {
 	_rpc_msg := &YMsg.S2S_rpc_msg{
-		M_uid: cmd.M_uid,
-		M_tar: YMsg.Agent{
-			M_uid:  cmd.M_tar_module_id,
-			M_name: cmd.M_tar_module_name,
-		},
+		M_uid:          cmd.M_uid,
+		M_tar:          cmd.M_tar_agent,
 		M_marshal_type: YDecode.DECODE_TYPE_JSON,
 		M_func_name:    cmd.M_tar_rpc_func_name,
 	}
@@ -142,7 +139,7 @@ func (cmd *RPCCommand) ToRPCMsg() *YMsg.S2S_rpc_msg {
 		for _, _param_it := range cmd.M_tar_rpc_param_list {
 			_param_byte, _err := YDecode.Marshal(_rpc_msg.M_marshal_type, _param_it)
 			if _err != nil {
-				ylog.Erro("[RPCToOther] tar [%v:%v] [%v]", cmd.M_tar_module_id, cmd.M_tar_module_name, _err.Error())
+				ylog.Erro("[RPCToOther] tar [%v:%v] [%v]", cmd.M_tar_agent.DebugString(), _err.Error())
 				return nil
 			}
 			_rpc_msg.M_func_parameter = append(_rpc_msg.M_func_parameter, _param_byte)
@@ -160,8 +157,8 @@ func (list *RPCCommandList) AppendCmdObj(cmd *RPCCommand) *RPCCommandList {
 	return list
 }
 
-func (list *RPCCommandList) AfterRPC(module_name_ string, module_uid_ uint64, func_ string, param_list_ ...interface{}) *RPCCommandList {
-	return list.AppendCmdObj(NewRPCCommand(module_name_, module_uid_, func_, param_list_...))
+func (list *RPCCommandList) AfterRPC(tar_agent_ YMsg.Agent, func_ string, param_list_ ...interface{}) *RPCCommandList {
+	return list.AppendCmdObj(NewRPCCommand(tar_agent_, func_, param_list_...))
 }
 
 func (list *RPCCommandList) getCurCmd() *RPCCommand {
