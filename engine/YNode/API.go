@@ -9,9 +9,9 @@ import (
 
 func (n *Info) RPC_NewModule(create_func_name string, uid_ uint64) {
 	_new_module := NewModuleInfo(create_func_name, uid_)
-	obj.register(_new_module)
-	n.SyncModulesKey()
-	go obj.startModule(_new_module)
+	G_node_obj.register(_new_module)
+	//n.SyncModulesKey()
+	go G_node_obj.startModule(_new_module)
 }
 
 func (n *Info) SyncModulesKey(session_ uint64) {

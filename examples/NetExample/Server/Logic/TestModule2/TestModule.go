@@ -22,7 +22,7 @@ func (m *Info) Init() {
 }
 
 func (m *Info) Loop() {
-	m.Info.Loop()
+	m.Info.Loop_Msg()
 }
 func (m *Info) Close() {
 }

@@ -2,6 +2,7 @@ package UserManager
 
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
 )
@@ -11,7 +12,7 @@ type Info struct {
 	M_user_pool map[uint64]*User
 }
 
-func NewInfo(node_ *YNode.Info) *Info {
+func NewInfo(node_ *YNode.Info, uid_ uint64) YModule.Inter {
 	_info := &Info{
 		M_user_pool: make(map[uint64]*User),
 	}
@@ -43,17 +44,17 @@ func (i *Info) RPC_UserChangeCurrentMap(s_, map_uid_ uint64) {
 }
 
 func (i *Info) MSG_C2S_FirstEnterMap(s_ uint64, msg_ Msg.C2S_FirstEnterMap) {
-	
+
 	_user := i.M_user_pool[s_]
 	if _user != nil {
-		i.Info.RPCCall("MapManager", 0, "FirstEnterMap", *_user)
-		if len(i.M_user_pool) == 1{
-			for idx := uint64(10); idx < 101 ; idx ++{
+		i.Info.RPCCall(YMsg.ToAgent("MapManager"), "FirstEnterMap", *_user)
+		if len(i.M_user_pool) == 1 {
+			for idx := uint64(10); idx < 101; idx++ {
 				_robot_user := NewUser(idx, idx)
 				_robot_user.M_is_rotbot = true
 				i.M_user_pool[idx] = _robot_user
-				
-				i.Info.RPCCall("MapManager", 0, "FirstEnterMap", *_robot_user)
+
+				i.Info.RPCCall(YMsg.ToAgent("MapManager"), "FirstEnterMap", *_robot_user)
 			}
 		}
 	}
@@ -64,6 +65,6 @@ func (i *Info) MSG_C2S_UserMove(s_ uint64, msg_ Msg.C2S_UserMove) {
 	if _user == nil {
 		return
 	}
-	
-	i.Info.RPCCall("Map", _user.M_current_map, "UserMove", _user.M_uid, msg_.M_pos)
+
+	i.Info.RPCCall(YMsg.ToAgent("Map", _user.M_current_map), "UserMove", _user.M_uid, msg_.M_pos)
 }

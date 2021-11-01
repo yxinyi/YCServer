@@ -14,7 +14,7 @@ var g_sync_queue = YTool.NewSyncQueue()
 
 func main() {
 	fmt.Println("Client start")
-	g_client_cnn.Connect("127.0.0.1", "20000")
+	g_client_cnn.Connect("127.0.0.1:20000")
 	g_client_cnn.Start()
 	g_client_cnn.SendJson(Msg.C2S_Login{})
 	g_client_cnn.SendJson(Msg.C2S_FirstEnterMap{})

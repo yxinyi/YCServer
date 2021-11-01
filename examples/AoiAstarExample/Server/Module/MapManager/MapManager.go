@@ -2,6 +2,7 @@ package MapManager
 
 import (
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/examples/AoiAstarExample/Msg"
 	_ "github.com/yxinyi/YCServer/examples/AoiAstarExample/Server/Module/Map"
@@ -14,7 +15,7 @@ type Info struct {
 	M_map_pool map[uint64]Msg.MapLoad
 }
 
-func NewInfo(node_ *YNode.Info) *Info {
+func NewInfo(node_ *YNode.Info, uid_ uint64) YModule.Inter {
 	_info := &Info{
 		M_map_pool: make(map[uint64]Msg.MapLoad),
 	}
@@ -54,6 +55,6 @@ const (
 
 
 func (i *Info) RPC_FirstEnterMap(user_ UserManager.User) {
-	i.Info.RPCCall("Map", FirstMapUID, "UserEnterMap", user_)
-	i.Info.RPCCall("UserManager", 0, "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
+	i.Info.RPCCall(YMsg.ToAgent("Map", FirstMapUID), "UserEnterMap", user_)
+	i.Info.RPCCall(YMsg.ToAgent("UserManager"), "UserChangeCurrentMap", user_.M_uid, FirstMapUID)
 }

@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-var obj = newInfo()
+var G_node_obj = newInfo()
 var g_stop = make(chan struct{})
 
 func init() {
-	obj.Info = YModule.NewInfo(obj)
+	G_node_obj.Info = YModule.NewInfo(G_node_obj)
 }
 
 func (n *Info) findNode(key_str_ string) uint64 {
@@ -31,43 +31,43 @@ func (n *Info) findNode(key_str_ string) uint64 {
 }*/
 
 func (n *Info) register(info YModule.Inter) {
-	obj.M_module_pool[info.GetInfo().GetAgent().GetKeyStr()] = info
+	G_node_obj.M_module_pool[info.GetInfo().GetAgent().GetKeyStr()] = info
 	info.Init()
 }
 
 func (n *Info) RPCToOther(msg *YMsg.S2S_rpc_msg) {
-	obj.PushRpcMsg(msg)
+	G_node_obj.PushRpcMsg(msg)
 }
 func (n *Info) NetToOther(msg *YMsg.C2S_net_msg) {
-	obj.PushNetMsg(msg)
+	G_node_obj.PushNetMsg(msg)
 }
 
 func (n *Info) dispatchNet(msg_ *YMsg.C2S_net_msg) bool {
 	_tar_key_st := msg_.M_tar.GetKeyStr()
-	_, exists := obj.M_module_pool[_tar_key_st]
+	_, exists := G_node_obj.M_module_pool[_tar_key_st]
 	if !exists {
 		ylog.Erro("[YNode:dispatchNet] miss module uid [%v]", _tar_key_st)
 		return false
 	}
-	obj.M_module_pool[_tar_key_st].GetInfo().PushNetMsg(msg_)
+	G_node_obj.M_module_pool[_tar_key_st].GetInfo().PushNetMsg(msg_)
 	return true
 }
 
 func (n *Info) dispatchRpc(msg_ *YMsg.S2S_rpc_msg) bool {
 	_module_name_uid_str := msg_.M_tar.GetKeyStr()
-	_, exists := obj.M_module_pool[_module_name_uid_str]
+	_, exists := G_node_obj.M_module_pool[_module_name_uid_str]
 	if !exists {
-		ylog.Erro("[YNode:dispatchRpc] miss module uid [%v]", _module_name_uid_str)
+		ylog.Erro("[YNode:dispatchRpc] miss module uid [%v][%v]", G_node_obj.M_module_pool,_module_name_uid_str)
 		return false
 	}
 	
-	//ylog.Info("[Node:%v] dispatch RPC [%v]", obj.M_module_pool[msg_.M_tar.M_entity_name][msg_.M_tar.M_node_id].GetInfo().M_entity_name, msg_.M_func_name)
-	obj.M_module_pool[_module_name_uid_str].GetInfo().PushRpcMsg(msg_)
+	//ylog.Info("[Node:%v] dispatch RPC [%v]", G_node_obj.M_module_pool[msg_.M_tar.M_entity_name][msg_.M_tar.M_node_id].GetInfo().M_entity_name, msg_.M_func_name)
+	G_node_obj.M_module_pool[_module_name_uid_str].GetInfo().PushRpcMsg(msg_)
 	return true
 }
 
 func (n *Info) close() {
-	for _, _module_it := range obj.M_module_pool {
+	for _, _module_it := range G_node_obj.M_module_pool {
 		_module_it.Close()
 	}
 }
@@ -137,12 +137,12 @@ func (n *Info) startModule(module_ YModule.Inter) {
 	}
 }
 func (n *Info) start() {
-	for _, _module_it := range obj.M_module_pool {
+	for _, _module_it := range G_node_obj.M_module_pool {
 		go n.startModule(_module_it)
 	}
 	//主逻辑
-	obj.register(obj)
-	obj.GetInfo().Init(obj)
+	G_node_obj.register(G_node_obj)
+	G_node_obj.GetInfo().Init(G_node_obj)
 	n.loop()
 }
 
@@ -153,12 +153,12 @@ func (n *Info) loop() {
 			return
 		default:
 			
-			if obj.M_net_queue.Len() > 0 {
+			if G_node_obj.M_net_queue.Len() > 0 {
 				for {
-					if obj.M_net_queue.Len() == 0 {
+					if G_node_obj.M_net_queue.Len() == 0 {
 						break
 					}
-					_msg := obj.M_net_queue.Pop().(*YMsg.C2S_net_msg)
+					_msg := G_node_obj.M_net_queue.Pop().(*YMsg.C2S_net_msg)
 					if _msg.M_tar.M_module_name == "YNode" {
 						n.DonNetMsg(_msg)
 						continue
@@ -169,13 +169,13 @@ func (n *Info) loop() {
 				}
 			}
 			
-			if obj.M_rpc_queue.Len() > 0 {
+			if G_node_obj.M_rpc_queue.Len() > 0 {
 				for {
-					if obj.M_rpc_queue.Len() == 0 {
+					if G_node_obj.M_rpc_queue.Len() == 0 {
 						break
 					}
-					//ylog.Info("[Node:RPC_QUEUE] [%v]", obj.M_rpc_queue.Len())
-					_msg := obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
+					ylog.Info("[Node:RPC_QUEUE] [%v]", G_node_obj.M_rpc_queue.Len())
+					_msg := G_node_obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_module_name == "YNode" {
 						n.DoRPCMsg(_msg)
 						continue
@@ -183,7 +183,7 @@ func (n *Info) loop() {
 					if n.dispatchRpc(_msg) {
 						continue
 					}
-					obj.Info.SendNetMsgJson(n.findNode(_msg.M_tar.GetKeyStr()), *_msg)
+					G_node_obj.Info.SendNetMsgJson(n.findNode(_msg.M_tar.GetKeyStr()), *_msg)
 				}
 			}
 		}
@@ -192,29 +192,29 @@ func (n *Info) loop() {
 
 func Register(info_list_ ...YModule.Inter) {
 	for _, _it := range info_list_ {
-		obj.register(_it)
+		G_node_obj.register(_it)
 	}
 }
 
 func RPCCall(msg_ *YMsg.S2S_rpc_msg) {
 	
-	obj.RPCToOther(msg_)
+	G_node_obj.RPCToOther(msg_)
 }
 
 func Obj() *Info {
-	return obj
+	return G_node_obj
 }
 
 func Close() {
-	obj.close()
+	G_node_obj.close()
 }
 
 func Start() {
-	obj.start()
+	G_node_obj.start()
 }
 
 func ModuleCreateFuncRegister(name_ string, func_ func(node_ *Info, uid uint64) YModule.Inter) {
-	obj.registerToFactory(name_, func_)
+	G_node_obj.registerToFactory(name_, func_)
 }
 
 func (n *Info) registerToFactory(name_ string, func_ func(node_ *Info, uid uint64) YModule.Inter) {
@@ -222,16 +222,16 @@ func (n *Info) registerToFactory(name_ string, func_ func(node_ *Info, uid uint6
 }
 
 func RegisterNodeIpStr2NodeId(ip_port_ string, node_id_ uint32) {
-	obj.M_node_ip_to_id[ip_port_] = node_id_
+	G_node_obj.M_node_ip_to_id[ip_port_] = node_id_
 }
 
 func SetNodeID(node_id_ uint32) {
-	obj.M_node_id = node_id_
-	obj.GetInfo().M_agent = YMsg.ToAgent("YNode", uint64(0))
+	G_node_obj.M_node_id = node_id_
+	G_node_obj.GetInfo().M_agent = YMsg.ToAgent("YNode", uint64(0))
 }
 
 func NewModuleInfo(module_str_ string, module_uid_ uint64) YModule.Inter {
-	_new_module := obj.m_moduele_factory[module_str_](obj, module_uid_)
+	_new_module := G_node_obj.m_moduele_factory[module_str_](G_node_obj, module_uid_)
 	_new_module.GetInfo().M_agent = YMsg.ToAgent(strings.Split(reflect.TypeOf(_new_module).Elem().String(), ".")[0], module_uid_)
 	return _new_module
 }

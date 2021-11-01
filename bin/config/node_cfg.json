@@ -1,0 +1,19 @@
+{
+    "CfgList": [
+        {
+            "NodeID": 1,
+            "Port": 20000,
+			"PprofPort": 8000,
+			"Modules":[
+				"MapManager",
+				"UserManager"
+			]
+        },
+        {
+            "NodeID": 2,
+            "Port": 20012,
+			"PprofPort": 8012,
+			"Modules":[]
+        }
+    ]
+}

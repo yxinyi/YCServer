@@ -10,7 +10,7 @@ import (
 func main() {
 	flag.Parse()
 	_client := YNet.NewConnect()
-	_client.Connect("127.0.0.1", "20000")
+	_client.Connect("127.0.0.1:20000")
 	_client.Start()
 	_cnt := 1
 	for {

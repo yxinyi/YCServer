@@ -3,6 +3,7 @@ package Map
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/engine/YPathFinding"
 	"github.com/yxinyi/YCServer/engine/YTool"
@@ -42,10 +43,10 @@ type Info struct {
 	m_go_astar     *YPathFinding.AStarManager
 }
 
-func NewInfo(node_ YModule.RemoteNodeER, uid uint64) YModule.Inter {
+func NewInfo(node_ *YNode.Info, uid uint64) YModule.Inter {
 	_info := newMazeMap(uid)
 	_info.Info = YModule.NewInfo(node_)
-	_info.M_module_uid = uid
+	_info.m_uid = uid
 	return _info
 }
 
@@ -319,8 +320,8 @@ func (i *Info) Close() {
 }
 
 func (i *Info) NotifyMapLoad() {
-	i.Info.RPCCall("MapManager", 0, "MapRegister", Msg.MapLoad{
-		i.M_module_uid,
+	i.Info.RPCCall(YMsg.ToAgent("MapManager"),  "MapRegister", Msg.MapLoad{
+		i.m_uid,
 		uint32(len(i.M_user_pool)),
 	})
 }
