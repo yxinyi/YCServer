@@ -3,6 +3,7 @@ package TestModule2
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 )
 
@@ -37,6 +38,6 @@ func (m *TestInfo) RPC_Test_2(val_ uint32) {
 
 func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) float64 {
 	ylog.Info("TestModule2 RPC_Test_3 [%v] [%v]", val_, str_)
-	m.Info.RPCCall("TestModule", 0, "Test_3", val_+1, "从 Module2 发出")
+	m.Info.RPCCall(YMsg.ToAgent("TestModule"), "Test_3", val_+1, "从 Module2 发出")
 	return 0.1241423523452342
 }

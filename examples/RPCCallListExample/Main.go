@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 	"github.com/yxinyi/YCServer/examples/RPCCallListExample/Logic/TestModule"
 	"github.com/yxinyi/YCServer/examples/RPCCallListExample/Logic/TestModule2"
@@ -16,7 +17,7 @@ func main() {
 		TestModule2.NewInfo(YNode.Obj()),
 	)
 	{
-		YNode.RPCCall(YModule.NewRPCMsg("TestModule",0,"Test"))
+		YNode.RPCCall(YModule.NewRPCMsg(YMsg.ToAgent("TestModule"),"Test"))
 	}
 	YNode.Start()
 }

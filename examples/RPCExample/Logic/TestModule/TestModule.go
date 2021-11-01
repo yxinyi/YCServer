@@ -3,6 +3,7 @@ package TestModule
 import (
 	ylog "github.com/yxinyi/YCServer/engine/YLog"
 	"github.com/yxinyi/YCServer/engine/YModule"
+	"github.com/yxinyi/YCServer/engine/YMsg"
 	"github.com/yxinyi/YCServer/engine/YNode"
 )
 
@@ -41,7 +42,7 @@ func (m *TestInfo) RPC_Test_3(val_ uint32, str_ string) {
 	ylog.Info("TestModule RPC_Test_3 [%v] [%v]", val_, str_)
 	var _func func()
 	_func = func() {
-		m.Info.RPCCall("TestModule2", 0, "Test", func() {
+		m.Info.RPCCall(YMsg.ToAgent("TestModule2"), "Test", func() {
 			ylog.Info("Test 回调")
 			_func()
 		})

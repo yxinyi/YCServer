@@ -3,17 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/API.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/API.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Client/Client.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Client/Client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/Map/Map.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/MapManager/MapManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/MapManager/MapManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/UserManager/UserManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/AoiAstarExample/Server/Module/UserManager/UserManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Client/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Client/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule2/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Server/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/YAoi/AoiManager_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YAoi/AoiManager_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +67,7 @@
       <recent name="F:\go\GoSnakeGame\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Compound.SeamlessAll">
+  <component name="RunManager" selected="Compound.NetAll">
     <configuration name="AOIAll" type="CompoundRunConfigurationType">
       <toRun name="AOIServer" type="GoApplicationRunConfiguration" />
       <toRun name="AOIClient" type="GoApplicationRunConfiguration" />

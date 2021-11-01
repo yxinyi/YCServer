@@ -1,7 +1,7 @@
 package aoi
 
 import (
-	"github.com/yxinyi/YCServer/examples/SeamlessExample/Msg"
+	"github.com/yxinyi/YCServer/engine/YTool"
 	"testing"
 )
 
@@ -73,7 +73,7 @@ func TestAoiGetRoundIndex10(t *testing.T) {
 
 func CalcIndexHelp(x_, y_ float64, tar_idx_ uint32) bool {
 	_mgr := NewAoiManager(1280, 720, float64(10))
-	_cal_idx := _mgr.CalcIndex(Msg.PositionXY{x_, y_})
+	_cal_idx := _mgr.CalcIndex(YTool.PositionXY{x_, y_})
 	return _cal_idx == tar_idx_
 }
 func TestCalcIndex(t *testing.T) {
