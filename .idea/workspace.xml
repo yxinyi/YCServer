@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" afterDir="false" />
-    </list>
+    <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -268,17 +264,6 @@
           <url>file://$PROJECT_DIR$/engine/YAoi/GoTowerAoi.go</url>
           <line>52</line>
           <option name="timeStamp" value="101" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/engine/YModule/Module.go</url>
-          <line>151</line>
-          <option name="timeStamp" value="128" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <condition expression="func_ == &quot;UserConvertToThisMap&quot;" language="go" />
-          <url>file://$PROJECT_DIR$/engine/YModule/Info.go</url>
-          <line>160</line>
-          <option name="timeStamp" value="129" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

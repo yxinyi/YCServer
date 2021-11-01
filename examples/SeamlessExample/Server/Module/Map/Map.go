@@ -317,7 +317,6 @@ func (m *Info) Loop_100(time_ time.Time) {
 			continue
 		}
 		if _it.MoveUpdate(time_) {
-			ylog.Info("speed [%v]", _it.M_speed)
 			m.m_aoi.Move(_it.M_uid, _it.M_pos)
 			_switch_tar_map_offset := m.InOverlapRange(_it)
 			if _switch_tar_map_offset[0] || _switch_tar_map_offset[1] || _switch_tar_map_offset[2] || _switch_tar_map_offset[3] {
