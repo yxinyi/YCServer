@@ -11,7 +11,7 @@ type Info struct {
 	YModule.BaseInter
 }
 
-func NewInfo(node_ *YNode.Info) *Info {
+func NewInfo(node_ *YNode.Info, uid_ uint64) YModule.Inter {
 	_info := &Info{}
 	_info.Info = YModule.NewInfo(node_)
 	return _info

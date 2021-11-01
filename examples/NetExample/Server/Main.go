@@ -12,12 +12,14 @@ import (
 
 
 func main() {
-
+	YNode.ModuleCreateFuncRegister("NetModule", NetModule.NewInfo)
+	YNode.ModuleCreateFuncRegister("TestModule", TestModule.NewInfo)
+	YNode.ModuleCreateFuncRegister("TestModule2", TestModule2.NewInfo)
 	YNode.SetNodeID(0)
 	YNode.Register(
-		NetModule.NewInfo(YNode.Obj(),0),
-		TestModule.NewInfo(YNode.Obj()),
-		TestModule2.NewInfo(YNode.Obj()),
+		YNode.NewModuleInfo("NetModule",0),
+		YNode.NewModuleInfo("TestModule",0),
+		YNode.NewModuleInfo("TestModule2",0),
 	)
 	YNode.RPCCall(YModule.NewRPCMsg(YMsg.ToAgent("NetModule"), "Listen", "0.0.0.0:20000"))
 	YNode.Start()
