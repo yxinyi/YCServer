@@ -3,12 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule2/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,15 +62,10 @@
       <recent name="F:\go\GoSnakeGame\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build github.com/yxinyi/YCServer/examples/RPCCallListExample">
+  <component name="RunManager" selected="Go Build.RPCCallListExample">
     <configuration name="AOIAll" type="CompoundRunConfigurationType">
       <toRun name="AOIServer" type="GoApplicationRunConfiguration" />
       <toRun name="AOIClient" type="GoApplicationRunConfiguration" />
-      <method v="2" />
-    </configuration>
-    <configuration name="AllBuild" type="CompoundRunConfigurationType">
-      <toRun name="go build Server" type="GoApplicationRunConfiguration" />
-      <toRun name="go build Client" type="GoApplicationRunConfiguration" />
       <method v="2" />
     </configuration>
     <configuration name="NetAll" type="CompoundRunConfigurationType">
@@ -133,6 +122,16 @@
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
+    <configuration name="RPCCallListExample" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="GoYCServer" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <filePath value="$PROJECT_DIR$" />
+      <directory value="$PROJECT_DIR$/examples/RPCCallListExample" />
+      <output_directory value="$PROJECT_DIR$/bin" />
+      <method v="2" />
+    </configuration>
     <configuration name="SeamLessServer" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$/bin" />
@@ -164,36 +163,6 @@
       <output_directory value="$PROJECT_DIR$/bin" />
       <method v="2" />
     </configuration>
-    <configuration name="go build Client" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
-      <module name="GoYCServer" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="DIRECTORY" />
-      <filePath value="$PROJECT_DIR$/src/Client" />
-      <directory value="$PROJECT_DIR$/src/Client" />
-      <output_directory value="$PROJECT_DIR$/bin" />
-      <method v="2" />
-    </configuration>
-    <configuration name="go build Server" type="GoApplicationRunConfiguration" factoryName="Go Application">
-      <module name="GoYCServer" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="DIRECTORY" />
-      <filePath value="$PROJECT_DIR$/examples/Server/Main.go" />
-      <directory value="$PROJECT_DIR$/examples/RPCExamples" />
-      <output_directory value="$PROJECT_DIR$/bin" />
-      <method v="2" />
-    </configuration>
-    <configuration name="go build github.com/yxinyi/YCServer/examples/RPCCallListExample" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
-      <module name="GoYCServer" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <kind value="DIRECTORY" />
-      <filePath value="$PROJECT_DIR$" />
-      <directory value="$PROJECT_DIR$/examples/RPCCallListExample" />
-      <output_directory value="$PROJECT_DIR$/bin" />
-      <method v="2" />
-    </configuration>
     <configuration name="AStarTest" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="GoYCServer" />
       <working_directory value="$PROJECT_DIR$" />
@@ -201,7 +170,7 @@
       <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/src/Server/Logic/PathFinding/AStar_test.go" />
+      <filePath value="$PROJECT_DIR$/engine/YPathFinding/AStar_test.go" />
       <method v="2" />
     </configuration>
     <configuration name="AoiManager_test.go" type="GoTestRunConfiguration" factoryName="Go Test" nameIsGenerated="true">
@@ -211,7 +180,7 @@
       <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$/src/Base/YEventBus" />
-      <filePath value="$PROJECT_DIR$/src/Server/Logic/Aoi/AoiManager_test.go" />
+      <filePath value="$PROJECT_DIR$/engine/YAoi/AoiManager_test.go" />
       <method v="2" />
     </configuration>
     <configuration name="EntityTest" type="GoTestRunConfiguration" factoryName="Go Test">
@@ -231,7 +200,7 @@
       <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/src/Base/YTimer/timer_test.go" />
+      <filePath value="$PROJECT_DIR$/engine/YTimer/timer_test.go" />
       <method v="2" />
     </configuration>
     <configuration name="test tools " type="GoTestRunConfiguration" factoryName="Go Test">
@@ -241,27 +210,24 @@
       <framework value="gotest" />
       <kind value="FILE" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/src/Server/Logic/Tool/tools_test.go" />
+      <filePath value="$PROJECT_DIR$/engine/YTool/tools_test.go" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Compound.SeamlessAll" />
       <item itemvalue="Compound.AOIAll" />
       <item itemvalue="Compound.NetAll" />
-      <item itemvalue="Compound.AllBuild" />
-      <item itemvalue="Go Build.go build github.com/yxinyi/YCServer/examples/RPCCallListExample" />
+      <item itemvalue="Go Build.RPCCallListExample" />
       <item itemvalue="Go Build.SeamlessClient" />
       <item itemvalue="Go Build.SeamLessServer" />
       <item itemvalue="Go Build.AOIClient" />
       <item itemvalue="Go Build.AOIServer" />
       <item itemvalue="Go Build.NetClient" />
-      <item itemvalue="Go Build.go build Client" />
-      <item itemvalue="Go Build.go build Server" />
       <item itemvalue="Go Build.NetServer" />
       <item itemvalue="Go Test.EntityTest" />
       <item itemvalue="Go Test.TimerTest.go" />
-      <item itemvalue="Go Test.test tools " />
       <item itemvalue="Go Test.AoiManager_test.go" />
+      <item itemvalue="Go Test.test tools " />
       <item itemvalue="Go Test.AStarTest" />
     </list>
   </component>
