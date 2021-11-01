@@ -3,9 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNet/NetMsgManager.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Server/Logic/TestModule/TestModule.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/examples/NetExample/Server/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/NetExample/Server/Main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Logic/TestModule2/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCCallListExample/Main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Logic/TestModule2/TestModule.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/RPCExample/Main.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/RPCExample/Main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +68,7 @@
       <recent name="F:\go\GoSnakeGame\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Compound.NetAll">
+  <component name="RunManager" selected="Go Build.go build github.com/yxinyi/YCServer/examples/RPCCallListExample">
     <configuration name="AOIAll" type="CompoundRunConfigurationType">
       <toRun name="AOIServer" type="GoApplicationRunConfiguration" />
       <toRun name="AOIClient" type="GoApplicationRunConfiguration" />
@@ -297,11 +300,6 @@
           <url>file://$PROJECT_DIR$/engine/YAoi/GoTowerAoi.go</url>
           <line>52</line>
           <option name="timeStamp" value="101" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/engine/YNode/Node.go</url>
-          <line>59</line>
-          <option name="timeStamp" value="141" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
