@@ -154,7 +154,7 @@ func (i *Info) DoRPCMsg(msg_ *YMsg.S2S_rpc_msg) {
 			delete(i.M_back_fun, msg_.M_uid)
 		}
 		_rpc_msg.M_source = i.GetAgent()
-		_rpc_msg.M_tar = msg_.M_tar
+		//_rpc_msg.M_tar = msg_.M_tar
 		i.RPCToOther(_rpc_msg)
 		return
 	}

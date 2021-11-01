@@ -174,7 +174,7 @@ func (n *Info) loop() {
 					if G_node_obj.M_rpc_queue.Len() == 0 {
 						break
 					}
-					ylog.Info("[Node:RPC_QUEUE] [%v]", G_node_obj.M_rpc_queue.Len())
+					//ylog.Info("[Node:RPC_QUEUE] [%v]", G_node_obj.M_rpc_queue.Len())
 					_msg := G_node_obj.M_rpc_queue.Pop().(*YMsg.S2S_rpc_msg)
 					if _msg.M_tar.M_module_name == "YNode" {
 						n.DoRPCMsg(_msg)

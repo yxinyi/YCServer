@@ -3,6 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5f83cd09-003e-4e10-858a-2908623229f9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/engine/YNode/Node.go" beforeDir="false" afterPath="$PROJECT_DIR$/engine/YNode/Node.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" beforeDir="false" afterPath="$PROJECT_DIR$/examples/SeamlessExample/Server/Module/Map/Map.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +64,7 @@
       <recent name="F:\go\GoSnakeGame\src" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.RPCCallListExample">
+  <component name="RunManager" selected="Compound.SeamlessAll">
     <configuration name="AOIAll" type="CompoundRunConfigurationType">
       <toRun name="AOIServer" type="GoApplicationRunConfiguration" />
       <toRun name="AOIClient" type="GoApplicationRunConfiguration" />
@@ -74,8 +76,8 @@
       <method v="2" />
     </configuration>
     <configuration name="SeamlessAll" type="CompoundRunConfigurationType">
-      <toRun name="SeamLessServer" type="GoApplicationRunConfiguration" />
       <toRun name="SeamlessClient" type="GoApplicationRunConfiguration" />
+      <toRun name="SeamLessServer" type="GoApplicationRunConfiguration" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="CompoundRunConfigurationType">
@@ -266,6 +268,17 @@
           <url>file://$PROJECT_DIR$/engine/YAoi/GoTowerAoi.go</url>
           <line>52</line>
           <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/engine/YModule/Module.go</url>
+          <line>151</line>
+          <option name="timeStamp" value="128" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <condition expression="func_ == &quot;UserConvertToThisMap&quot;" language="go" />
+          <url>file://$PROJECT_DIR$/engine/YModule/Info.go</url>
+          <line>160</line>
+          <option name="timeStamp" value="129" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
